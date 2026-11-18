@@ -155,6 +155,44 @@
   .empty h2 { font: 600 20px var(--display); margin: 0 0 6px; }
   .empty p { color: var(--muted); margin: 0 0 16px; }
 
+
+  /* ---------- buy-boxes ---------- */
+  .boxes { margin: 0 0 22px; padding-bottom: 18px; border-bottom: 1px solid var(--line); }
+  .boxes h2 { font: 600 15px var(--display); margin: 0 0 8px; }
+  .boxlist { display: grid; gap: 4px; margin-bottom: 10px; }
+  .box {
+    all: unset; box-sizing: border-box; cursor: pointer; display: grid; grid-template-columns: 1fr auto;
+    gap: 2px 8px; padding: 7px 10px; border-radius: var(--radius-s); border: 1px solid transparent;
+  }
+  .box:hover { background: #EBF0EC; }
+  .box:focus-visible { outline: 2px solid var(--pine); outline-offset: 1px; }
+  .box[aria-pressed="true"] { background: var(--panel); border-color: var(--pine); }
+  .box .nm { font-weight: 600; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .box .ct { font-size: 13px; color: var(--muted); text-align: right; }
+  .box .nw { grid-column: 1 / -1; font-size: 12px; color: #7A5612; }
+  .boxtools { display: flex; flex-wrap: wrap; gap: 6px 12px; font-size: 13px; }
+  .boxtools .linkish { font-size: 13px; }
+  .privacy { font-size: 12px; color: var(--muted); margin: 8px 0 0; }
+  .activebox { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin: -4px 0 14px; font-size: 14px; color: var(--muted); }
+  .activebox strong { color: var(--ink); }
+  .dec { display: inline-block; font-size: 11px; font-weight: 600; padding: 1px 6px; border-radius: 3px; margin-left: 6px; vertical-align: 2px; }
+  .dec.fast { background: var(--pine); color: #fff; }
+  .dec.pursue { background: var(--pine-soft); color: var(--pine); }
+  .dec.cond { background: #F3E8CF; color: #7A5612; }
+  .dec.tbd { background: #ECEFED; color: var(--muted); }
+  .why { color: var(--muted); font-size: 12px; margin-top: 3px; }
+
+  dialog { border: 1px solid var(--line); border-radius: var(--radius-m); padding: 0; width: min(560px, 94vw); color: var(--ink); }
+  dialog::backdrop { background: rgba(27, 36, 32, .35); }
+  dialog form { padding: 22px 24px; }
+  dialog h2 { font: 700 22px var(--display); margin: 0 0 16px; }
+  dialog .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 14px; }
+  dialog textarea { width: 100%; min-height: 56px; font: inherit; font-size: 14px; padding: 7px 9px; border: 1px solid var(--line); border-radius: var(--radius-s); resize: vertical; }
+  dialog .actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 8px; }
+  dialog .actions .danger { margin-right: auto; border-color: var(--rust); color: var(--rust); }
+  dialog .err { color: var(--rust); font-size: 13px; min-height: 1em; margin: 0 0 6px; }
+  @media (max-width: 600px) { dialog .grid2 { grid-template-columns: 1fr; } }
+
   /* ---------- small screens ---------- */
   @media (max-width: 900px) {
     .top { padding: 20px 16px 14px; }
@@ -188,6 +226,17 @@
 <div class="wrap">
   <details class="filters" id="filtersBox" open>
     <summary>Filters</summary>
+    <section class="boxes" aria-labelledby="boxesTitle">
+      <h2 id="boxesTitle">Buy-boxes</h2>
+      <div class="boxlist" id="boxlist"></div>
+      <div class="boxtools">
+        <button type="button" class="linkish" id="boxAdd">Add buy-box</button>
+        <button type="button" class="linkish" id="boxImport">Import buybox.json</button>
+        <button type="button" class="linkish" id="boxBackup">Back up</button>
+        <input type="file" id="boxFile" accept=".json,application/json" hidden>
+      </div>
+      <p class="privacy">Saved in this browser only, never uploaded. Use Back up to move them to another device.</p>
+    </section>
     <form id="filters" autocomplete="off" onsubmit="return false">
       <div class="field">
         <label for="q">Search</label>
@@ -268,10 +317,43 @@
       </select>
       <button type="button" id="export">Export CSV</button>
     </div>
+    <div class="activebox" id="activebox" hidden></div>
     <div id="out"></div>
     <div class="more"><button type="button" class="primary" id="moreBtn" hidden>Show 100 more</button></div>
   </main>
 </div>
+
+<dialog id="boxDlg" aria-labelledby="boxDlgTitle">
+  <form method="dialog" id="boxForm" autocomplete="off">
+    <h2 id="boxDlgTitle">Buy-box</h2>
+    <div class="field"><label for="bxName">Name</label><input type="text" id="bxName" required></div>
+    <div class="field"><label for="bxStates">States</label><input type="text" id="bxStates" placeholder="FL, TN, Louisiana">
+      <p class="hint">Codes or full names, separated by commas. Leave empty for anywhere.</p></div>
+    <div class="field"><label for="bxPlaces">Also match these places</label><textarea id="bxPlaces" placeholder="Tampa, Pinellas, Nashville, Online, Remote"></textarea>
+      <p class="hint">Cities, counties, or Online / Remote / Relocatable. A listing matches if it's in one of the states or names one of these places.</p></div>
+    <div class="field"><label for="bxInd">Industry keywords</label><textarea id="bxInd" placeholder="hvac, plumb, clean, saas"></textarea>
+      <p class="hint">Matched against the listing title. Words of 4+ letters also match longer words: plumb matches plumbing. Leave empty for any industry.</p></div>
+    <div class="field"><label for="bxEx">Skip listings mentioning</label><input type="text" id="bxEx" placeholder="franchise, startup"></div>
+    <div class="grid2">
+      <div class="field"><label for="bxMinE">Minimum cash flow</label><input type="text" id="bxMinE" placeholder="300k">
+        <p class="hint">After the manager salary below.</p></div>
+      <div class="field"><label for="bxMaxP">Maximum asking price</label><input type="text" id="bxMaxP" placeholder="1.2m"></div>
+      <div class="field"><label for="bxFree">Cash left after debt</label><input type="text" id="bxFree" placeholder="150k">
+        <p class="hint">Yearly, after SBA + seller note payments.</p></div>
+      <div class="field"><label for="bxMgr">Manager salary to deduct</label><input type="text" id="bxMgr" placeholder="100k">
+        <p class="hint">Taken off seller's cash flow figures.</p></div>
+      <div class="field"><label for="bxMult">Highest multiple</label><input type="text" id="bxMult" placeholder="Any"></div>
+    </div>
+    <div class="field"><label class="check"><input type="checkbox" id="bxTbd"> Include listings with missing figures</label></div>
+    <div class="field"><label class="check"><input type="checkbox" id="bxFood" checked> Skip restaurants, food and law firms</label></div>
+    <p class="err" id="bxErr" role="alert"></p>
+    <div class="actions">
+      <button type="button" class="danger" id="bxDelete">Delete buy-box</button>
+      <button type="button" id="bxCancel">Cancel</button>
+      <button type="submit" class="primary" id="bxSave">Save buy-box</button>
+    </div>
+  </form>
+</dialog>
 
 <script>
 (() => {
@@ -325,7 +407,9 @@
     const mmax = f.multmax ? +f.multmax : null;
     const sinceDays = f.since && f.since !== "new" ? +f.since : null;
 
+    const boxRes = activeBox ? results.get(activeBox) : null;
     filtered = rows.filter(r => {
+      if (boxRes && !boxRes.has(r.path)) return false;
       if (f.kind !== "all" && String(r.kind) !== f.kind) return false;
       if (f.state && r.state !== f.state) return false;
       if (q && !(r.title.toLowerCase().includes(q) || r.location.toLowerCase().includes(q) || r.teaser.toLowerCase().includes(q))) return false;
@@ -356,6 +440,250 @@
     render();
   }
 
+
+  /* ================= buy-boxes ================= */
+  // Same rules as the desktop app's matcher.py: geography, keywords, exclusions,
+  // then SBA underwriting (80% SBA 10.5%/10y + 10% seller note 8%/5y, 2.4x DSCR screen)
+  // and a stress-test confidence score that decides Fast-track / Pursue / Conditional.
+  const STATE_NAMES = { alabama:"AL",alaska:"AK",arizona:"AZ",arkansas:"AR",california:"CA",colorado:"CO",connecticut:"CT",delaware:"DE","district of columbia":"DC",florida:"FL",georgia:"GA",hawaii:"HI",idaho:"ID",illinois:"IL",indiana:"IN",iowa:"IA",kansas:"KS",kentucky:"KY",louisiana:"LA",maine:"ME",maryland:"MD",massachusetts:"MA",michigan:"MI",minnesota:"MN",mississippi:"MS",missouri:"MO",montana:"MT",nebraska:"NE",nevada:"NV","new hampshire":"NH","new jersey":"NJ","new mexico":"NM","new york":"NY","north carolina":"NC","north dakota":"ND",ohio:"OH",oklahoma:"OK",oregon:"OR",pennsylvania:"PA","rhode island":"RI","south carolina":"SC","south dakota":"SD",tennessee:"TN",texas:"TX",utah:"UT",vermont:"VT",virginia:"VA",washington:"WA","west virginia":"WV",wisconsin:"WI",wyoming:"WY","puerto rico":"PR" };
+  const CODES = new Set(Object.values(STATE_NAMES));
+  const toCode = s => { const t = String(s || "").trim(); const u = t.toUpperCase(); return CODES.has(u) ? u : STATE_NAMES[t.toLowerCase()] || ""; };
+  const pmt = (rate, years) => { const r = rate / 12, n = years * 12; return (r / (1 - (1 + r) ** -n)) * 12; };
+  const DS_FACTOR = 0.80 * pmt(0.105, 10) + 0.10 * pmt(0.08, 5);
+  const LENDER_FLOOR = 1.5, MIN_DSCR = 1.5 * 1.6;
+  const REMOTE = ["RELOCATABLE", "ONLINE", "REMOTE"];
+  const reEsc = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const FOOD_LEGAL = new RegExp("\\b(?:RESTAURANTS?|FOOD|CAFES?|BAKER(?:Y|IES)|DELIS?|PIZZAS?|PIZZERIAS?|GRILLS?|PUBS?|BAR\\s*&|EATER(?:Y|IES)|DINERS?|CATER(?:ER|ING)|COFFEE\\s+(?:SHOP|BAR)|LIQUOR|TAVERNS?|BISTROS?|BREWER(?:Y|IES)|LAW\\s+FIRMS?|LAWYERS?|ATTORNEYS?|LAW\\s+PRACTICES?)\\b");
+  function kwRe(k) {
+    const K = k.trim().toUpperCase();
+    if (K.endsWith("*") && K.length > 1) return new RegExp("\\b" + reEsc(K.slice(0, -1)) + "\\w*");
+    if (/^[A-Z]+$/.test(K) && K.length >= 4) return new RegExp("\\b" + reEsc(K) + "\\w*");
+    return new RegExp("\\b" + reEsc(K) + (/[A-Z0-9]$/.test(K) ? "\\b" : ""));
+  }
+  const placeRe = k => { const K = k.trim().toUpperCase(); return new RegExp("\\b" + reEsc(K) + (/[A-Z0-9]$/.test(K) ? "\\b" : "")); };
+  function triSurvival(h, low = 0, high = 0.35, mode = 0.10) {
+    if (!isFinite(h) || h <= low) return 0;
+    if (h >= high) return 100;
+    const span = high - low;
+    const cdf = h <= mode ? (h - low) ** 2 / (span * (mode - low)) : 1 - (high - h) ** 2 / (span * (high - mode));
+    return Math.max(0, Math.min(100, cdf * 100));
+  }
+
+  function compileBox(b) {
+    const places = (b.places || []).filter(Boolean);
+    return {
+      ...b,
+      stateSet: new Set(b.states || []),
+      placeRes: places.map(placeRe),
+      indRes: (b.industry || []).filter(Boolean).map(k => [k, kwRe(k)]),
+      exRes: (b.exclude || []).filter(Boolean).map(kwRe),
+      remote: places.some(p => REMOTE.includes(p.trim().toUpperCase())),
+      hasGeo: (b.states || []).length > 0 || places.length > 0,
+    };
+  }
+
+  function evaluate(r, c) {
+    const text = (r.title + " " + r.teaser).toUpperCase();
+    const loc = (r.location || "").toUpperCase();
+    if (c.skipFoodLegal && FOOD_LEGAL.test(r.title.toUpperCase())) return null;
+    if (c.exRes.some(re => re.test(text))) return null;
+    // geography
+    let geo = !c.hasGeo || (r.state && c.stateSet.has(r.state));
+    if (!geo && c.remote && REMOTE.some(m => loc.includes(m) || text.includes(m))) geo = true;
+    if (!geo && c.placeRes.some(re => re.test(loc))) geo = true;
+    if (!geo) return null;
+    // industry
+    let kw = "";
+    if (c.indRes.length) {
+      const hit = c.indRes.find(([, re]) => re.test(text));
+      if (!hit) return null;
+      kw = hit[0];
+    }
+    const minE = c.minEbitda || 0, maxP = c.maxPrice || Infinity, free = c.freeCash || 0;
+    const maxMult = c.maxMultiple || Infinity;
+    const price = r.price || 0;
+    // which profit figure: EBITDA as-is, otherwise seller's cash flow (SDE) minus a manager salary
+    let profit = 0, mgr = 0;
+    if (r.ebitda) profit = r.ebitda;
+    else if (r.cash_flow) { profit = r.cash_flow; mgr = c.managerSalary ?? 100000; }
+    if (!profit) {
+      if (!c.allowTbd) return null;
+      if (r.revenue && minE && r.revenue < minE) return null;
+      if (price && (price < minE * 2 || price > maxP)) return null;
+      return { decision: "Figures missing", cls: "tbd", kw };
+    }
+    const def = profit - mgr;
+    if (def < minE) return null;
+    const maxSupport = Math.min(maxP, def / (MIN_DSCR * DS_FACTOR), (def - free) / DS_FACTOR, isFinite(maxMult) ? def * maxMult : Infinity);
+    if (!price) {
+      if (maxSupport <= 0) return null;
+      return { decision: "Price not listed", cls: "tbd", kw, maxSupport };
+    }
+    const ds = price * DS_FACTOR;
+    if (price > maxP) return null;
+    if (def / ds < MIN_DSCR) return null;
+    if (def - ds < free) return null;
+    if (isFinite(maxMult) && price / def > maxMult) return null;
+    const req = Math.max(minE, LENDER_FLOOR * ds, ds + free, isFinite(maxMult) && maxMult > 0 ? price / maxMult : 0);
+    const conf = triSurvival(1 - (req + mgr) / profit);
+    if (conf < 40) return null;
+    const decision = conf >= 85 ? "Fast-track" : conf >= 70 ? "Pursue" : "Conditional";
+    return { decision, cls: conf >= 85 ? "fast" : conf >= 70 ? "pursue" : "cond", kw, conf, maxSupport: isFinite(maxSupport) ? maxSupport : price, dscr: def / ds, after: def - ds };
+  }
+
+  const boxStore = {
+    get() { try { return JSON.parse(localStorage.getItem("dealscreen-buyboxes") || "[]"); } catch { return []; } },
+    set(v) { try { localStorage.setItem("dealscreen-buyboxes", JSON.stringify(v)); } catch {} },
+    getActive() { try { return localStorage.getItem("dealscreen-active-box") || ""; } catch { return ""; } },
+    setActive(id) { try { localStorage.setItem("dealscreen-active-box", id || ""); } catch {} },
+  };
+  let boxes = boxStore.get(), activeBox = boxStore.getActive(), results = new Map(); // boxId -> Map(path -> result)
+
+  function runBoxes() {
+    results = new Map();
+    for (const b of boxes) {
+      const c = compileBox(b), m = new Map();
+      for (const r of rows) { const res = evaluate(r, c); if (res) m.set(r.path, res); }
+      results.set(b.id, m);
+    }
+    if (activeBox && !results.has(activeBox)) activeBox = "";
+    renderBoxes();
+  }
+
+  function renderBoxes() {
+    const items = [`<button type="button" class="box" data-box="" aria-pressed="${!activeBox}"><span class="nm">All listings</span><span class="ct">${rows.length.toLocaleString()}</span></button>`];
+    for (const b of boxes) {
+      const m = results.get(b.id) || new Map();
+      let nw = 0; for (const p of m.keys()) { const r = byPath.get(p); if (r && r.isNew) nw++; }
+      items.push(`<button type="button" class="box" data-box="${esc(b.id)}" aria-pressed="${activeBox === b.id}"><span class="nm">${esc(b.name)}</span><span class="ct">${m.size.toLocaleString()}</span>${nw ? `<span class="nw">${nw} new</span>` : ""}</button>`);
+    }
+    $("boxlist").innerHTML = items.join("");
+    const ab = boxes.find(b => b.id === activeBox);
+    $("activebox").hidden = !ab;
+    if (ab) $("activebox").innerHTML = `<span>Showing matches for <strong>${esc(ab.name)}</strong></span><button type="button" class="linkish" id="boxEdit">Edit buy-box</button><button type="button" class="linkish" id="boxClear">Show all listings</button>`;
+  }
+
+  // ---- editor ----
+  const list = s => String(s || "").split(/[,\n]/).map(x => x.trim()).filter(Boolean);
+  const fmtAmt = n => n == null || n === "" || !isFinite(n) ? "" : n >= 1e6 ? (n / 1e6) + "m" : n >= 1e3 ? (n / 1e3) + "k" : String(n);
+  let editing = null;
+  function openEditor(b) {
+    editing = b || null;
+    const v = b || { managerSalary: 100000, skipFoodLegal: true };
+    $("boxDlgTitle").textContent = b ? "Edit buy-box" : "New buy-box";
+    $("bxName").value = v.name || "";
+    $("bxStates").value = (v.states || []).join(", ");
+    $("bxPlaces").value = (v.places || []).join(", ");
+    $("bxInd").value = (v.industry || []).join(", ");
+    $("bxEx").value = (v.exclude || []).join(", ");
+    $("bxMinE").value = fmtAmt(v.minEbitda);
+    $("bxMaxP").value = fmtAmt(v.maxPrice);
+    $("bxFree").value = fmtAmt(v.freeCash);
+    $("bxMgr").value = fmtAmt(v.managerSalary ?? 100000);
+    $("bxMult").value = v.maxMultiple || "";
+    $("bxTbd").checked = !!v.allowTbd;
+    $("bxFood").checked = v.skipFoodLegal !== false;
+    $("bxDelete").hidden = !b;
+    $("bxErr").textContent = "";
+    $("boxDlg").showModal();
+    $("bxName").focus();
+  }
+  function readEditor() {
+    const bad = [];
+    const states = list($("bxStates").value).map(x => { const c = toCode(x); if (!c) bad.push(x); return c; }).filter(Boolean);
+    if (bad.length) throw new Error(`Not a US state: ${bad.join(", ")}`);
+    const amt = (id, label) => { const v = $(id).value.trim(); if (!v) return null; const n = parseAmt(v); if (n == null) throw new Error(`${label}: type an amount like 300k or 1.2m`); return n; };
+    const name = $("bxName").value.trim();
+    if (!name) throw new Error("Give the buy-box a name");
+    const mult = $("bxMult").value.trim();
+    if (mult && !(+mult > 0)) throw new Error("Highest multiple: type a number like 4");
+    return {
+      id: editing ? editing.id : "bx" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+      name, states,
+      places: list($("bxPlaces").value), industry: list($("bxInd").value), exclude: list($("bxEx").value),
+      minEbitda: amt("bxMinE", "Minimum cash flow") || 0,
+      maxPrice: amt("bxMaxP", "Maximum asking price"),
+      freeCash: amt("bxFree", "Cash left after debt") || 0,
+      managerSalary: amt("bxMgr", "Manager salary") ?? 0,
+      maxMultiple: mult ? +mult : null,
+      allowTbd: $("bxTbd").checked, skipFoodLegal: $("bxFood").checked,
+    };
+  }
+  function saveBoxes() { boxStore.set(boxes); runBoxes(); apply(); }
+
+  // ---- import from the desktop app's buybox.json ----
+  function fromDesktop(c) {
+    const places = [...(c.location_keywords || [])];
+    for (const city of c.target_cities || []) {
+      const nm = String(city).split(",")[0].trim();
+      if (nm && !places.some(p => p.toUpperCase() === nm.toUpperCase())) places.push(nm);
+    }
+    return {
+      id: "bx" + Math.random().toString(36).slice(2, 10),
+      name: c.name || "Imported buy-box",
+      states: (c.target_states || []).map(toCode).filter(Boolean),
+      places, industry: c.industry_keywords || [], exclude: c.exclude_keywords || [],
+      minEbitda: +c.min_ebitda || 0, maxPrice: +c.max_price || null, freeCash: +c.target_free_cash || 0,
+      managerSalary: c.manager_salary == null ? 100000 : +c.manager_salary,
+      maxMultiple: +c.max_multiple || null, allowTbd: !!c.allow_tbd_financials, skipFoodLegal: true,
+    };
+  }
+  async function importFile(file) {
+    let data;
+    try { data = JSON.parse(await file.text()); } catch { alertMsg("That file isn't valid JSON. Pick buybox.json from the desktop app folder."); return; }
+    let incoming = [];
+    if (Array.isArray(data)) incoming = data.map(x => x.places ? { ...x, id: x.id || "bx" + Math.random().toString(36).slice(2, 10) } : fromDesktop(x));
+    else if (Array.isArray(data.clients)) incoming = data.clients.map(fromDesktop);
+    else if (Array.isArray(data.buyboxes)) incoming = data.buyboxes;
+    if (!incoming.length) { alertMsg("No buy-boxes found in that file."); return; }
+    const names = new Set(boxes.map(b => b.name.toLowerCase()));
+    let added = 0, replaced = 0;
+    for (const b of incoming) {
+      if (names.has(b.name.toLowerCase())) { boxes = boxes.map(x => x.name.toLowerCase() === b.name.toLowerCase() ? { ...b, id: x.id } : x); replaced++; }
+      else { boxes.push(b); added++; }
+    }
+    saveBoxes();
+    alertMsg(`Imported ${added} buy-box${added === 1 ? "" : "es"}${replaced ? `, updated ${replaced}` : ""}.`);
+  }
+  function alertMsg(t) { $("status").textContent = t; setTimeout(statusLine, 6000); }
+  function backup() {
+    const blob = new Blob([JSON.stringify({ buyboxes: boxes }, null, 2)], { type: "application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `buyboxes-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click(); URL.revokeObjectURL(a.href);
+  }
+
+  $("boxlist").addEventListener("click", e => {
+    const b = e.target.closest("button.box"); if (!b) return;
+    activeBox = b.dataset.box; boxStore.setActive(activeBox); renderBoxes(); apply();
+  });
+  $("activebox").addEventListener("click", e => {
+    if (e.target.id === "boxEdit") openEditor(boxes.find(b => b.id === activeBox));
+    if (e.target.id === "boxClear") { activeBox = ""; boxStore.setActive(""); renderBoxes(); apply(); }
+  });
+  $("boxAdd").addEventListener("click", () => openEditor(null));
+  $("boxImport").addEventListener("click", () => $("boxFile").click());
+  $("boxFile").addEventListener("change", e => { const f = e.target.files[0]; if (f) importFile(f); e.target.value = ""; });
+  $("boxBackup").addEventListener("click", backup);
+  $("bxCancel").addEventListener("click", () => $("boxDlg").close());
+  $("boxForm").addEventListener("submit", e => {
+    e.preventDefault();
+    try {
+      const b = readEditor();
+      boxes = editing ? boxes.map(x => x.id === b.id ? b : x) : boxes.concat(b);
+      if (!editing) { activeBox = b.id; boxStore.setActive(b.id); }
+      $("boxDlg").close(); saveBoxes();
+    } catch (err) { $("bxErr").textContent = err.message; }
+  });
+  $("bxDelete").addEventListener("click", () => {
+    if (!editing || !confirm(`Delete the buy-box "${editing.name}"? This can't be undone unless you have a backup.`)) return;
+    boxes = boxes.filter(b => b.id !== editing.id);
+    if (activeBox === editing.id) { activeBox = ""; boxStore.setActive(""); }
+    $("boxDlg").close(); saveBoxes();
+  });
+  let byPath = new Map();
+
   const COLS = [
     ["title", "Business"], ["price", "Asking"], ["revenue", "Revenue"],
     ["cash_flow", "Cash flow"], ["mult", "Multiple", "Asking price ÷ cash flow"], ["first_seen", "First seen"],
@@ -375,6 +703,13 @@
     const total = rows.length;
     $("count").innerHTML = `${filtered.length.toLocaleString()} businesses<span>of ${total.toLocaleString()} tracked</span>`;
     if (!filtered.length) {
+      const ab = boxes.find(b => b.id === activeBox);
+      if (ab && total && !(results.get(ab.id) || new Map()).size) {
+        $("out").innerHTML = `<div class="empty"><h2>No listings pass ${esc(ab.name)} yet</h2><p>The SBA screen subtracts the manager salary (${money(ab.managerSalary ?? 100000) || "$0"}) from the seller's cash flow, then needs the rest to cover loan payments 2.4 times. That usually means asking prices under about 2.7× the adjusted cash flow. Try a lower manager salary or minimum, a higher maximum price, more states, or include listings with missing figures.</p><button type="button" class="primary" id="boxEdit2">Edit buy-box</button></div>`;
+        $("boxEdit2").addEventListener("click", () => openEditor(ab));
+        $("moreBtn").hidden = true;
+        return;
+      }
       $("out").innerHTML = total
         ? `<div class="empty"><h2>No listings match these filters</h2><p>Widen the price or cash flow range, or clear the filters to see everything.</p><button type="button" class="primary" onclick="document.getElementById('reset').click()">Clear filters</button></div>`
         : `<div class="empty"><h2>No listings yet</h2><p>The first crawl hasn't finished. Check back once the sweep has run.</p></div>`;
@@ -384,8 +719,9 @@
     const body = filtered.slice(0, shown).map(r => `
       <tr>
         <td class="biz">
-          <a href="${BASE}${esc(r.path)}" target="_blank" rel="noopener">${esc(r.title)}</a>${r.kind ? '<span class="tag vault">M&amp;A Vault</span>' : ""}${r.isNew ? '<span class="tag new">New</span>' : ""}
+          <a href="${BASE}${esc(r.path)}" target="_blank" rel="noopener">${esc(r.title)}</a>${r.kind ? '<span class="tag vault">M&amp;A Vault</span>' : ""}${r.isNew ? '<span class="tag new">New</span>' : ""}${(() => { const m = activeBox && results.get(activeBox)?.get(r.path); return m ? `<span class="dec ${m.cls}" title="${m.conf != null ? `Stress-test confidence ${m.conf.toFixed(0)}%` : "Check the listing for the missing figures"}">${m.decision}</span>` : ""; })()}
           <div class="where">${esc(r.location || "Location not listed")}</div>
+          ${(() => { const m = activeBox && results.get(activeBox)?.get(r.path); if (!m) return ""; const bits = []; if (m.kw) bits.push(`Matched “${esc(m.kw)}”`); if (m.maxSupport && isFinite(m.maxSupport)) bits.push(`supports up to ${money(m.maxSupport)}`); if (m.after != null) bits.push(`${money(Math.max(0, m.after))} left after debt`); return bits.length ? `<div class="why">${bits.join(", ")}</div>` : ""; })()}
           ${r.teaser ? `<div class="teaser">${esc(r.teaser)}</div>` : ""}
         </td>
         ${cell(r.price, "Asking")}${cell(r.revenue, "Revenue")}${r.cfSuspect ? `<td data-k="Cash flow"><span class="suspect" title="Looks like a typo on the listing (higher than revenue or the asking price). Left out of sorting and the multiple.">${money(r.cfRaw)} ?</span></td>` : cell(r.cash_flow, "Cash flow")}${multCell(r.mult)}
@@ -405,16 +741,17 @@
   }
 
   function exportCsv() {
-    const head = ["Title", "Type", "Location", "State", "Asking price", "Revenue", "Cash flow", "Cash flow looks wrong", "EBITDA", "Multiple", "First seen", "Last seen", "Link"];
+    const ab = boxes.find(b => b.id === activeBox), bm = ab ? results.get(ab.id) : null;
+    const head = ["Title", "Type", "Location", "State", "Asking price", "Revenue", "Cash flow", "Cash flow looks wrong", "EBITDA", "Multiple", "First seen", "Last seen", "Link"].concat(ab ? ["Buy-box", "Decision", "Max supportable price", "Cash left after debt", "Matched keyword"] : []);
     const q = v => v == null ? "" : /[",\n]/.test(String(v)) ? `"${String(v).replace(/"/g, '""')}"` : v;
     const lines = [head.join(",")].concat(filtered.map(r => [
       r.title, r.kind ? "M&A Vault" : "Listing", r.location, r.state, r.price, r.revenue, r.cfRaw, r.cfSuspect ? "yes" : "", r.ebitda,
       r.mult != null ? r.mult.toFixed(2) : "", r.first_seen, r.last_seen, BASE + r.path
-    ].map(q).join(",")));
+    ].concat(ab ? (m => [ab.name, m?.decision || "", m?.maxSupport && isFinite(m.maxSupport) ? Math.round(m.maxSupport) : "", m?.after != null ? Math.round(m.after) : "", m?.kw || ""])(bm.get(r.path)) : []).map(q).join(",")));
     const blob = new Blob([lines.join("\n")], { type: "text/csv" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = `bfs-deals-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.download = `${ab ? ab.name.replace(/[^\w-]+/g, "-") + "-" : ""}bfs-deals-${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(a.href);
   }
@@ -481,6 +818,8 @@
     const saved = store.get();
     if (saved.sort && !saved.sort.includes(":")) delete saved.sort;   // older saved format
     writeFilters(saved);
+    byPath = new Map(rows.map(r => [r.path, r]));
+    runBoxes();
     if (rows.length) statusLine();
     apply();
   }
