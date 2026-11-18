@@ -55,6 +55,7 @@ LABELS = {
     "ebitda": r"ebitda",
     "revenue": r"(?:revenue|sales\s+revenue|turnover|gross\s+revenue)",
 }
+LOCATION_RX = re.compile(r"Location:\s*(.+?)\s+(?:Details:|Asking|Revenue|Cash Flow|$)", re.I)
 TOTAL_RX = re.compile(r"of\s+([0-9][0-9,]*)", re.I)
 BLOCK_MARKERS = ("just a moment", "cf-chl", "attention required", "challenge-platform", "access denied")
 
@@ -106,17 +107,22 @@ def parse_listings(html: str, page_no: int) -> tuple[list[dict], int | None]:
     if m:
         total = int(m.group(1).replace(",", ""))
 
-    rows = []
-    for card in soup.select("article.result"):
-        a = card.select_one("h2 a[href]") or card.select_one(".result-header a[href]")
+    rows, seen = [], set()
+    for header in soup.select("div.result-header"):
+        a = header.select_one("h2 a[href]")
         if not a:
             continue
+        # the card is the nearest <article>, else the header's parent block
+        card = header.find_parent("article") or header.parent
         href = urljoin(BASE, a["href"].split("#")[0])
+        if href in seen:
+            continue
+        seen.add(href)
         kind = classify(href)
         if kind in ("franchise_ad", "other"):
             continue
         text = card.get_text(" ", strip=True)
-        loc_el = card.find(class_=re.compile("location|region|area", re.I))
+        loc_m = LOCATION_RX.search(text)
         rows.append({
             "source": "BusinessesForSale",
             "kind": kind,
@@ -126,7 +132,7 @@ def parse_listings(html: str, page_no: int) -> tuple[list[dict], int | None]:
             "cash_flow": labeled_amount(text, LABELS["cash_flow"]),
             "ebitda": labeled_amount(text, LABELS["ebitda"]),
             "revenue": labeled_amount(text, LABELS["revenue"]),
-            "location": loc_el.get_text(" ", strip=True)[:120] if loc_el else "",
+            "location": loc_m.group(1).strip()[:120] if loc_m else "",
             "card_text": text[:600],
             "page": page_no,
         })
