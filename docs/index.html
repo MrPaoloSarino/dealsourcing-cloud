@@ -403,9 +403,21 @@
 
   async function load() {
     try {
-      const res = await fetch("data/bfs.json", { cache: "no-cache" });
-      if (!res.ok) throw new Error(res.status);
-      const blob = await res.json();
+      // Data lives in the GitHub repo; read it straight from there so the
+      // page shows each sweep without the host having to republish.
+      // Falls back to the copy deployed next to this page.
+      const sources = [
+        "https://raw.githubusercontent.com/MrPaoloSarino/dealsourcing-cloud/main/docs/data/bfs.json",
+        "data/bfs.json",
+      ];
+      let blob = null;
+      for (const url of sources) {
+        try {
+          const res = await fetch(url, { cache: "no-cache" });
+          if (res.ok) { blob = await res.json(); break; }
+        } catch (_) { /* try the next source */ }
+      }
+      if (!blob) throw new Error("no data");
       meta = blob.meta || {};
       const idx = Object.fromEntries(blob.fields.map((f, i) => [f, i]));
       rows = blob.rows.map(a => {
