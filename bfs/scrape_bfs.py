@@ -47,7 +47,6 @@ HEADERS = {
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
     "Accept-Language": "en-US,en;q=0.9",
 }
-SKIP_LINK_WORDS = ("emailalerts", "contact", "login", "register", "members", "advertise", "franchise")
 
 MONEY = r"\$\s*([0-9][0-9,]*(?:\.[0-9]+)?)\s*(m|mm|million|k|thousand)?\b"
 LABELS = {
@@ -88,49 +87,41 @@ def is_blocked(status: int, html: str) -> bool:
     return status in (403, 429, 503) or any(mk in head for mk in BLOCK_MARKERS)
 
 
-def card_for(a) -> object:
-    """Climb from the listing link to the smallest ancestor that holds the price text."""
-    node = a
-    for _ in range(8):
-        parent = node.parent
-        if parent is None or parent.name in ("body", "html"):
-            break
-        node = parent
-        txt = node.get_text(" ", strip=True)
-        if re.search(r"asking\s+price|cash\s*flow|revenue", txt, re.I):
-            # stop before swallowing several listings
-            links = {x.get("href") for x in node.find_all("a", href=True) if ".aspx" in x["href"]}
-            if len(links) <= 3:
-                return node
-            return a.parent or a
-    return a.parent or a
+def classify(url: str) -> str:
+    u = url.lower()
+    if "/franchises/" in u:
+        return "franchise_ad"
+    if "/m-and-a-vault/" in u:
+        return "mna_vault"
+    if u.endswith(".aspx"):
+        return "listing"
+    return "other"
 
 
 def parse_listings(html: str, page_no: int) -> tuple[list[dict], int | None]:
+    """Each result is an <article class="result"> card; title link sits in its h2."""
     soup = BeautifulSoup(html, "lxml")
     total = None
     m = TOTAL_RX.search(soup.get_text(" ", strip=True)[:20000])
     if m:
         total = int(m.group(1).replace(",", ""))
 
-    seen, rows = set(), []
-    for a in soup.find_all("a", href=True):
+    rows = []
+    for card in soup.select("article.result"):
+        a = card.select_one("h2 a[href]") or card.select_one(".result-header a[href]")
+        if not a:
+            continue
         href = urljoin(BASE, a["href"].split("#")[0])
-        if not href.endswith(".aspx") or "/us/" not in href:
+        kind = classify(href)
+        if kind in ("franchise_ad", "other"):
             continue
-        if any(w in href.lower() for w in SKIP_LINK_WORDS) or href in seen:
-            continue
-        title = a.get_text(" ", strip=True)
-        if len(title) < 6:  # image / "more" links — keep looking for the titled link
-            continue
-        seen.add(href)
-        card = card_for(a)
         text = card.get_text(" ", strip=True)
-        loc_el = card.find(class_=re.compile("location|region|area", re.I)) if hasattr(card, "find") else None
+        loc_el = card.find(class_=re.compile("location|region|area", re.I))
         rows.append({
             "source": "BusinessesForSale",
+            "kind": kind,
             "url": href,
-            "title": title,
+            "title": a.get_text(" ", strip=True),
             "asking_price": labeled_amount(text, LABELS["asking_price"]),
             "cash_flow": labeled_amount(text, LABELS["cash_flow"]),
             "ebitda": labeled_amount(text, LABELS["ebitda"]),
@@ -209,7 +200,7 @@ def main() -> int:
         "with_price": sum(1 for r in rows if r["asking_price"]),
         "with_cash_flow": sum(1 for r in rows if r["cash_flow"]),
     })
-    fields = ["source", "url", "title", "asking_price", "cash_flow", "ebitda", "revenue",
+    fields = ["source", "kind", "url", "title", "asking_price", "cash_flow", "ebitda", "revenue",
               "location", "page", "card_text"]
     with open(os.path.join(args.out, "bfs_listings.csv"), "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=fields)

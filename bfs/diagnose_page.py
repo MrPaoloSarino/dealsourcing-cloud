@@ -1,35 +1,19 @@
-"""One-off: print the structure of every listing-ish link on a saved results page."""
-import re
-import sys
-from collections import Counter
+"""One-off: show sample card texts per kind, and probe the RSS feed."""
+import csv, sys
+from collections import defaultdict
+from curl_cffi import requests
 
-from bs4 import BeautifulSoup
+rows = list(csv.DictReader(open(sys.argv[1], encoding="utf-8")))
+by = defaultdict(list)
+for r in rows:
+    by[r["kind"]].append(r)
+for kind, rs in by.items():
+    print(f"== {kind}: {len(rs)} rows, price {sum(1 for r in rs if r['asking_price'])}, "
+          f"cash flow {sum(1 for r in rs if r['cash_flow'])}, location {sum(1 for r in rs if r['location'])}")
+    for r in rs[:3]:
+        print("   ", r["title"][:60], "|", r["card_text"][:420])
 
-html = open(sys.argv[1], encoding="utf-8").read()
-soup = BeautifulSoup(html, "lxml")
-print("html_len", len(html))
-hrefs = Counter()
-for a in soup.find_all("a", href=True):
-    h = a["href"]
-    if "aspx" in h or "/us/" in h:
-        hrefs[h] += 1
-print("distinct candidate hrefs:", len(hrefs))
-for h, c in hrefs.most_common(200):
-    a = soup.find("a", href=h)
-    txt = a.get_text(" ", strip=True)[:50]
-    chain = []
-    node = a
-    for _ in range(4):
-        node = node.parent
-        if node is None:
-            break
-        chain.append(f"{node.name}.{'.'.join(node.get('class', []))[:30]}")
-    print(f"{c}x | {h[:110]} | text={txt!r} | {' < '.join(chain)}")
-
-# containers that look like result cards
-cls = Counter()
-for el in soup.find_all(class_=True):
-    for c in el.get("class", []):
-        if re.search(r"result|listing|card|item", c, re.I):
-            cls[f"{el.name}.{c}"] += 1
-print("card-like classes:", cls.most_common(25))
+r = requests.get("https://us.businessesforsale.com/us/search/businesses-for-sale.rss", impersonate="chrome", timeout=40)
+print("RSS status", r.status_code, "len", len(r.text), "items", r.text.count("<item>"))
+i = r.text.find("<item>")
+print(r.text[i:i+1200] if i >= 0 else r.text[:600])
