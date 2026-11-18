@@ -12,7 +12,7 @@ on:
         default: "20"
   push:
     branches: [main]
-    paths: ["bfs/**", ".github/workflows/**"]
+    paths: ["bfs/**", "scripts/**", ".github/workflows/**"]
 
 permissions:
   contents: write
@@ -51,20 +51,17 @@ jobs:
           echo "pages=$P" >> "$GITHUB_OUTPUT"
           echo "Fetching pages: $P (0 = all)"
 
-      - name: Scrape BusinessesForSale (plain HTTP, no browser)
-        run: python bfs/scrape_bfs.py --pages "${{ steps.plan.outputs.pages }}"
+      - name: Scrape BusinessesForSale (saves progress every 50 pages)
+        run: >
+          python bfs/scrape_bfs.py --pages "${{ steps.plan.outputs.pages }}"
+          --checkpoint-every 50
+          --checkpoint-cmd "bash scripts/save_data.sh 'BusinessesForSale data (crawl in progress)'"
 
-      - name: Publish to the deal screen
-        run: python bfs/publish.py out/bfs_listings.csv
-
-      - name: Save updated data
+      - name: Save final data to the deal screen
+        if: always()
         run: |
-          git config user.name "dealsourcing-bot"
-          git config user.email "dealsourcing-bot@users.noreply.github.com"
-          git add docs/data/bfs.json
-          if git diff --cached --quiet; then echo "No changes"; exit 0; fi
-          git commit -m "Update BusinessesForSale data"
-          for i in 1 2 3; do git pull --rebase -q && git push && break; sleep 5; done
+          [ -f out/bfs_listings.csv ] || { echo "No results file"; exit 0; }
+          bash scripts/save_data.sh "Update BusinessesForSale data"
 
       - name: Upload run files
         if: always()

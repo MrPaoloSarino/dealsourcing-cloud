@@ -23,6 +23,7 @@ import json
 import os
 import random
 import re
+import subprocess
 import sys
 import time
 from datetime import datetime, timezone
@@ -155,11 +156,33 @@ def fetch(session, url: str, tries: int = 3) -> tuple[int, str]:
     return last
 
 
+def write_outputs(out_dir: str, all_rows: dict, summary: dict) -> None:
+    rows = list(all_rows.values())
+    summary.update({
+        "finished_utc": datetime.now(timezone.utc).isoformat(),
+        "listings": len(rows),
+        "with_price": sum(1 for r in rows if r["asking_price"]),
+        "with_cash_flow": sum(1 for r in rows if r["cash_flow"]),
+    })
+    fields = ["source", "kind", "url", "title", "asking_price", "cash_flow", "ebitda", "revenue",
+              "location", "page", "card_text"]
+    with open(os.path.join(out_dir, "bfs_listings.csv"), "w", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=fields)
+        w.writeheader()
+        w.writerows(rows)
+    with open(os.path.join(out_dir, "bfs_run.json"), "w", encoding="utf-8") as f:
+        json.dump(summary, f, indent=2)
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--pages", type=int, default=5, help="pages to fetch; 0 = all")
     ap.add_argument("--delay", type=float, default=2.5, help="base seconds between pages")
     ap.add_argument("--out", default="out")
+    ap.add_argument("--checkpoint-every", type=int, default=0,
+                    help="every N pages, save results and run --checkpoint-cmd (0 = off)")
+    ap.add_argument("--checkpoint-cmd", default="",
+                    help="shell command run after each checkpoint, e.g. publish + git push")
     args = ap.parse_args()
     os.makedirs(args.out, exist_ok=True)
 
@@ -197,24 +220,14 @@ def main() -> int:
         if empty_streak >= 2:
             print("No new listings on 2 pages in a row — end of results.", flush=True)
             break
+        if args.checkpoint_every and n % args.checkpoint_every == 0 and all_rows:
+            write_outputs(args.out, all_rows, summary)
+            if args.checkpoint_cmd:
+                print(f"-- checkpoint at page {n}: {len(all_rows)} listings so far", flush=True)
+                subprocess.run(args.checkpoint_cmd, shell=True)
         time.sleep(args.delay + random.uniform(0, 1.5))
 
-    rows = list(all_rows.values())
-    summary.update({
-        "finished_utc": datetime.now(timezone.utc).isoformat(),
-        "listings": len(rows),
-        "with_price": sum(1 for r in rows if r["asking_price"]),
-        "with_cash_flow": sum(1 for r in rows if r["cash_flow"]),
-    })
-    fields = ["source", "kind", "url", "title", "asking_price", "cash_flow", "ebitda", "revenue",
-              "location", "page", "card_text"]
-    with open(os.path.join(args.out, "bfs_listings.csv"), "w", newline="", encoding="utf-8") as f:
-        w = csv.DictWriter(f, fieldnames=fields)
-        w.writeheader()
-        w.writerows(rows)
-    with open(os.path.join(args.out, "bfs_run.json"), "w", encoding="utf-8") as f:
-        json.dump(summary, f, indent=2)
-
+    write_outputs(args.out, all_rows, summary)
     print(json.dumps({k: v for k, v in summary.items() if k != "pages"}, indent=2))
     step = os.environ.get("GITHUB_STEP_SUMMARY")
     if step:
@@ -225,7 +238,7 @@ def main() -> int:
             f.write(f"- Pages fetched: **{len(summary['pages'])}**\n")
             f.write(f"- Listings parsed: **{summary['listings']}** "
                     f"(price: {summary['with_price']}, cash flow: {summary['with_cash_flow']})\n")
-    return 1 if summary["blocked"] or not rows else 0
+    return 1 if summary["blocked"] or not all_rows else 0
 
 
 if __name__ == "__main__":
