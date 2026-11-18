@@ -108,9 +108,16 @@ def main() -> int:
         existing[path] = rec
 
     cutoff = (date.today() - timedelta(days=DROP_AFTER_DAYS)).isoformat()
-    kept = [r for r in existing.values() if r["last_seen"] >= cutoff]
+    # Order = the site's own order (newest first): listings from this run in the order the
+    # site showed them, then everything else in its previous order. The screen uses this
+    # order to break ties, so "Newest first" matches the site.
+    run_paths = [row["url"].replace(PREFIX, "") for row in scraped]
+    seen_now = set(run_paths)
+    ordered = [existing[p] for p in dict.fromkeys(run_paths)] + \
+              [r for p, r in existing.items() if p not in seen_now]
+    kept = [r for r in ordered if r["last_seen"] >= cutoff]
     dropped = len(existing) - len(kept)
-    kept.sort(key=lambda r: (r["first_seen"], r["last_seen"]), reverse=True)
+    kept.sort(key=lambda r: r["first_seen"], reverse=True)   # stable: keeps site order within a day
 
     full = len(run.get("pages", [])) > 100
     # Everything in the very first crawl is "already on the market", not new.

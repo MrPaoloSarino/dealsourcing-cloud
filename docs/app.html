@@ -204,13 +204,16 @@
     .results { padding: 16px; }
     thead { display: none; }
     table, tbody, tr, td { display: block; width: 100%; }
-    tbody tr { padding: 12px 14px; border-bottom: 1px solid var(--line); }
+    tbody tr { padding: 12px 14px; border-bottom: 1px solid var(--line); display: grid; grid-template-columns: 1fr 1fr; gap: 2px 12px; }
+    td.biz { grid-column: 1 / -1; }
+    .bar { gap: 10px; }
+    .count { flex-basis: 100%; }
+    .bar select { flex: 1; min-width: 0; }
     tbody td { border: 0; padding: 2px 0; text-align: left; }
     td.biz { width: auto; margin-bottom: 6px; }
     td[data-k]::before { content: attr(data-k) "  "; color: var(--muted); font-size: 12px; }
     .mult { display: inline-grid; justify-content: start; vertical-align: middle; }
   }
-  @media (min-width: 901px) { .filters summary + * { display: block; } }
   @media (prefers-reduced-motion: no-preference) {
     tbody tr { transition: background-color .12s; }
   }
@@ -225,7 +228,7 @@
 
 <div class="wrap">
   <details class="filters" id="filtersBox" open>
-    <summary>Filters</summary>
+    <summary>Buy-boxes and filters</summary>
     <section class="boxes" aria-labelledby="boxesTitle">
       <h2 id="boxesTitle">Buy-boxes</h2>
       <div class="boxlist" id="boxlist"></div>
@@ -430,9 +433,9 @@
     const by = (a, b) => {
       const x = a[key], y = b[key];
       const xe = x == null || x === "", ye = y == null || y === "";
-      if (xe || ye) return xe === ye ? 0 : xe ? 1 : -1;
+      if (xe || ye) return xe === ye ? a.ord - b.ord : xe ? 1 : -1;
       const c = typeof x === "string" ? x.localeCompare(y) : x - y;
-      return c * sign || (b.cash_flow || 0) - (a.cash_flow || 0);
+      return c * sign || a.ord - b.ord;
     };
     sortState = { key, dir };
     filtered.sort(by);
@@ -787,8 +790,8 @@
       if (!blob) throw new Error("no data");
       meta = blob.meta || {};
       const idx = Object.fromEntries(blob.fields.map((f, i) => [f, i]));
-      rows = blob.rows.map(a => {
-        const r = {};
+      rows = blob.rows.map((a, i) => {
+        const r = { ord: i };   // file order = the site's order, newest first
         for (const k in idx) r[k] = a[idx[k]];
         r.title = r.title || ""; r.location = r.location || ""; r.teaser = r.teaser || "";
         // Seller-typed cash flow is sometimes impossible (above revenue, copied from
@@ -839,7 +842,12 @@
     document.querySelector(`button.sorter[data-key="${k}"]`)?.focus();
   });
   $("export").addEventListener("click", exportCsv);
-  if (matchMedia("(max-width: 900px)").matches) $("filtersBox").open = false;
+  // Wide screens: the side panel is always open. Narrow screens: it starts collapsed.
+  const narrow = matchMedia("(max-width: 900px)");
+  const syncPanel = () => { $("filtersBox").open = !narrow.matches; };
+  syncPanel();
+  narrow.addEventListener("change", syncPanel);
+  $("filtersBox").addEventListener("toggle", () => { if (!narrow.matches && !$("filtersBox").open) $("filtersBox").open = true; });
   load();
 })();
 </script>

@@ -80,7 +80,7 @@ file; the `refs/heads/main/...` form worked immediately. The loader uses `refs/h
 | Path | What it is |
 |---|---|
 | `bfs/scrape_bfs.py` | Scraper. Walks `/us/search/businesses-for-sale`, `-2`, `-3`… (25 cards/page). Parses each `div.result-header` card: title, URL, kind, location, asking price, revenue, cash flow, EBITDA. Skips franchise ads. Stops on Cloudflare block, or after 2 pages with no new listings / 404. `--pages N` (0 = all), `--checkpoint-every 50 --checkpoint-cmd "..."` saves progress mid-crawl. Writes `out/bfs_listings.csv`, `out/bfs_run.json`, `out/page1.html`. |
-| `bfs/publish.py` | Merges a run into `docs/data/bfs.json`: keeps `first_seen` from earlier runs, sets `last_seen` to today, derives US state code from location, keeps a short teaser for M&A Vault cards, **drops listings not seen for 21 days**. Sets `meta.baseline_date` on first ever run (listings first seen after it are "New"). |
+| `bfs/publish.py` | Merges a run into `docs/data/bfs.json`: keeps `first_seen` from earlier runs, sets `last_seen` to today, derives US state code from location, keeps a short teaser for M&A Vault cards, **drops listings not seen for 21 days**. Row order in the file = the site's order (newest first): this run's listings in site order, then the rest in their previous order, stable-sorted by `first_seen` desc. Sets `meta.baseline_date` on first ever run (listings first seen after it are "New"). |
 | `scripts/save_data.sh` | Runs publish, then commits and pushes `docs/data/bfs.json` as `dealsourcing-bot` (retries with `git pull --rebase`). |
 | `.github/workflows/bfs_sweep.yml` | Schedule + manual + push triggers (below). `permissions: contents: write`, `concurrency: bfs-sweep`. |
 | `docs/index.html` | Loader page that hosts serve. |
@@ -119,7 +119,7 @@ site's RSS feed `/us/search/businesses-for-sale.rss`, 25 newest items with pubDa
   min/max, cash flow min/max (type `500k`, `2.5m`), highest multiple, first seen (new / 24h / 7d / 30d),
   only with cash flow. Filters persist in localStorage (`bfs-filters`).
 - **Sorting:** click column headers (▲/▼, `aria-sort`) or the Sort menu; every column both ways;
-  empty values always last. First click direction: asking ↑, revenue ↓, cash flow ↓, multiple ↑,
+  empty values always last; ties keep the site's order (file order), so "Newest first" matches the site. First click direction: asking ↑, revenue ↓, cash flow ↓, multiple ↑,
   first seen ↓, name ↑.
 - **Multiple** = asking ÷ cash flow, drawn as a gauge (≤3× green, 3–5× gold, >5× red).
 - **Data-quality flag:** seller-typed cash flow is shown greyed with "?" and excluded from sorting and
@@ -127,7 +127,7 @@ site's RSS feed `/us/search/businesses-for-sale.rss`, 25 newest items with pubDa
   Listings under ~$15K asking are mostly space/lease listings, not businesses (not filtered by default).
 - **New tag:** `first_seen > meta.baseline_date` (baseline 2026-11-18, so the first crawl isn't "new").
 - **Export CSV** of the current filtered view (adds buy-box columns when a buy-box is active).
-- Responsive (table stacks on mobile), keyboard focus visible.
+- Responsive: below 900px the side panel collapses into "Buy-boxes and filters" and rows become two-column cards; above 900px the panel is always open (also when a narrow window is widened). Keyboard focus visible.
 - Design tokens: paper `#F4F6F3`, ink `#1B2420`, pine `#23513F`, brass `#A87A1E`, rust `#A2513C`,
   line `#D6DED8`; fonts Bricolage Grotesque (headings) + Public Sans (body, tabular numbers).
 
