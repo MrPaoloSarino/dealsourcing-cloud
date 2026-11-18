@@ -11,239 +11,283 @@
   :root {
     --paper: #F4F6F3;
     --panel: #FFFFFF;
+    --wash: #FAFBFA;
     --ink: #1B2420;
-    --muted: #5E6B64;
-    --line: #D6DED8;
+    --ink-2: #3A4640;
+    --muted: #66736C;
+    --faint: #A3ADA7;
+    --line: #DDE4DF;
+    --line-2: #E9EEEA;
     --pine: #23513F;
-    --pine-soft: #DCE8E1;
+    --pine-2: #2E6B53;
+    --pine-soft: #E3EDE7;
     --brass: #A87A1E;
+    --brass-soft: #F5ECD7;
     --rust: #A2513C;
-    --radius-s: 4px;
-    --radius-m: 8px;
+    --r-s: 6px;
+    --r-m: 10px;
     --display: "Bricolage Grotesque", "Segoe UI", sans-serif;
     --body: "Public Sans", "Segoe UI", sans-serif;
+    --bar-h: 56px;
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; }
   body {
     background: var(--paper);
     color: var(--ink);
-    font: 15px/1.5 var(--body);
+    font: 14px/1.5 var(--body);
     font-variant-numeric: tabular-nums;
+    -webkit-font-smoothing: antialiased;
   }
   a { color: inherit; }
   :focus-visible { outline: 2px solid var(--pine); outline-offset: 2px; }
+  [hidden] { display: none !important; }
 
-  /* ---------- top ---------- */
-  .top {
-    display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 24px;
-    padding: 28px 32px 20px;
+  /* ---------- app bar ---------- */
+  .appbar {
+    position: sticky; top: 0; z-index: 20;
+    height: var(--bar-h);
+    display: flex; align-items: center; gap: 16px;
+    padding: 0 24px;
+    background: var(--panel);
     border-bottom: 1px solid var(--line);
   }
-  .top h1 {
-    margin: 0;
-    font: 700 34px/1.05 var(--display);
-    letter-spacing: -0.02em;
-  }
-  .top h1 small {
-    font: 500 18px/1 var(--display);
-    color: var(--muted);
-    letter-spacing: 0;
-    margin-left: 10px;
-  }
-  .status { color: var(--muted); font-size: 14px; }
-  .status strong { color: var(--ink); font-weight: 600; }
+  .brand { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
+  .brand .name { font: 700 19px/1 var(--display); letter-spacing: -0.01em; white-space: nowrap; }
+  .brand .src { color: var(--muted); font-size: 13px; white-space: nowrap; }
+  .status { margin: 0 0 0 auto; display: flex; align-items: center; gap: 14px; color: var(--muted); font-size: 13px; white-space: nowrap; }
+  .status .fresh { display: inline-flex; align-items: center; gap: 6px; }
+  .status .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--pine-2); }
+  .status .dot.stale { background: var(--brass); }
+  .status strong { color: var(--ink-2); font-weight: 600; }
 
   /* ---------- layout ---------- */
-  .wrap {
-    display: grid;
-    grid-template-columns: 272px minmax(0, 1fr);
-    align-items: start;
-  }
+  .wrap { display: grid; grid-template-columns: 288px minmax(0, 1fr); align-items: start; }
   .filters {
-    position: sticky; top: 0;
-    max-height: 100vh; overflow-y: auto;
-    padding: 20px 24px 32px 32px;
+    position: sticky; top: var(--bar-h);
+    height: calc(100vh - var(--bar-h)); overflow-y: auto;
+    background: var(--panel);
     border-right: 1px solid var(--line);
+    padding: 18px 20px 28px;
   }
   .filters summary { display: none; }
-  .field { margin-bottom: 18px; }
-  .field > label, .field > .label {
-    display: block; font-weight: 600; font-size: 13px; margin-bottom: 6px;
-  }
+  .side-h { display: flex; align-items: center; justify-content: space-between; margin: 0 0 8px; }
+  .side-h h2 { margin: 0; font: 600 13px/1.2 var(--body); color: var(--ink); }
+  .side-sec + .side-sec { margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--line-2); }
+
+  .field { margin-bottom: 14px; }
+  .field > label, .field > .label { display: block; font-weight: 500; font-size: 12px; color: var(--ink-2); margin-bottom: 5px; }
   .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  input[type=text], input[type=search], select {
-    width: 100%;
-    font: inherit; font-size: 14px;
-    padding: 7px 9px;
+  input[type=text], input[type=search], select, textarea {
+    width: 100%; height: 34px;
+    font: inherit; font-size: 13px;
+    padding: 0 10px;
     color: var(--ink);
     background: var(--panel);
     border: 1px solid var(--line);
-    border-radius: var(--radius-s);
+    border-radius: var(--r-s);
+    transition: border-color .12s;
   }
-  input::placeholder { color: #8C9891; }
-  .seg { display: flex; border: 1px solid var(--line); border-radius: var(--radius-s); overflow: hidden; background: var(--panel); }
-  .seg label { flex: 1; text-align: center; font-size: 13px; padding: 6px 4px; cursor: pointer; border-right: 1px solid var(--line); }
-  .seg label:last-child { border-right: 0; }
+  textarea { height: auto; padding: 8px 10px; }
+  input:hover, select:hover, textarea:hover { border-color: #C6D0CA; }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--pine); box-shadow: 0 0 0 3px rgba(35, 81, 63, .12); }
+  input::placeholder, textarea::placeholder { color: var(--faint); }
+  .search { position: relative; }
+  .search input { padding-right: 28px; }
+  .search kbd { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); font: 500 11px var(--body); color: var(--faint); border: 1px solid var(--line); border-radius: 4px; padding: 0 5px; line-height: 16px; pointer-events: none; }
+  .seg { display: grid; grid-template-columns: repeat(3, 1fr); padding: 2px; gap: 2px; background: var(--paper); border: 1px solid var(--line); border-radius: var(--r-s); }
+  .seg label { text-align: center; font-size: 12px; font-weight: 500; padding: 5px 4px; cursor: pointer; border-radius: 4px; color: var(--ink-2); white-space: nowrap; }
   .seg input { position: absolute; opacity: 0; pointer-events: none; }
-  .seg label:has(input:checked) { background: var(--pine); color: #fff; }
+  .seg label:has(input:checked) { background: var(--panel); color: var(--ink); box-shadow: 0 1px 2px rgba(27, 36, 32, .12); }
   .seg label:has(input:focus-visible) { outline: 2px solid var(--pine); outline-offset: -2px; }
-  .check { display: flex; gap: 8px; align-items: center; font-size: 14px; }
-  .check input { accent-color: var(--pine); width: 16px; height: 16px; }
-  .hint { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .check { display: flex; gap: 8px; align-items: center; font-size: 13px; color: var(--ink-2); cursor: pointer; }
+  .check input { accent-color: var(--pine); width: 15px; height: 15px; margin: 0; }
+  .hint { font-size: 11.5px; color: var(--muted); margin: 4px 0 0; line-height: 1.4; }
+
   button {
-    font: 600 14px var(--body);
-    padding: 8px 14px;
-    border-radius: var(--radius-s);
-    border: 1px solid var(--pine);
-    background: var(--panel); color: var(--pine);
+    font: 500 13px var(--body);
+    height: 34px; padding: 0 14px;
+    border-radius: var(--r-s);
+    border: 1px solid var(--line);
+    background: var(--panel); color: var(--ink);
     cursor: pointer;
+    transition: background-color .12s, border-color .12s;
   }
-  button.primary { background: var(--pine); color: #fff; }
-  button:hover { filter: brightness(0.95); }
-  .linkish { border: 0; background: none; padding: 0; color: var(--muted); font-weight: 500; text-decoration: underline; }
+  button:hover { background: var(--wash); border-color: #C6D0CA; }
+  button.primary { background: var(--pine); border-color: var(--pine); color: #fff; }
+  button.primary:hover { background: var(--pine-2); }
+  .linkish { height: auto; border: 0; background: none; padding: 0; color: var(--muted); font-weight: 500; font-size: 12px; }
+  .linkish:hover { background: none; color: var(--pine); text-decoration: underline; }
+  .mini { height: 28px; padding: 0 10px; font-size: 12px; }
+
+  /* ---------- buy-boxes ---------- */
+  .boxlist { display: grid; gap: 2px; margin: 0 -8px 10px; }
+  .box {
+    all: unset; box-sizing: border-box; cursor: pointer;
+    display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 0 8px;
+    padding: 6px 8px 6px 10px; border-radius: var(--r-s); position: relative;
+  }
+  .box:hover { background: var(--paper); }
+  .box:focus-visible { outline: 2px solid var(--pine); outline-offset: -2px; }
+  .box[aria-pressed="true"] { background: var(--pine-soft); }
+  .box[aria-pressed="true"]::before { content: ""; position: absolute; left: 0; top: 6px; bottom: 6px; width: 3px; border-radius: 2px; background: var(--pine); }
+  .box .nm { font-weight: 500; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .box[aria-pressed="true"] .nm { font-weight: 600; color: var(--pine); }
+  .box .ct { font-size: 12px; color: var(--muted); }
+  .box .nw { grid-column: 1 / -1; font-size: 11px; color: #7A5612; }
+  .boxtools { display: flex; flex-wrap: wrap; gap: 6px; }
+  .privacy { font-size: 11.5px; color: var(--muted); margin: 10px 0 0; line-height: 1.4; }
 
   /* ---------- results ---------- */
-  .results { padding: 20px 32px 48px; min-width: 0; }
-  .bar {
-    display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px;
-    margin-bottom: 14px;
-  }
-  .count { font: 500 20px/1.2 var(--display); margin-right: auto; }
-  .count span { color: var(--muted); font: 400 14px var(--body); margin-left: 6px; }
-  .bar select { width: auto; }
+  .results { padding: 20px 28px 32px; min-width: 0; }
+  .bar { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px 16px; margin-bottom: 12px; }
+  .headline { margin-right: auto; min-width: 0; }
+  .count { margin: 0; font: 600 20px/1.2 var(--display); letter-spacing: -0.01em; }
+  .count span { color: var(--muted); font: 400 13px var(--body); margin-left: 6px; letter-spacing: 0; }
+  .summary { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
+  .summary b { color: var(--ink-2); font-weight: 600; }
+  .sortbox { display: flex; align-items: center; gap: 8px; }
+  .sortbox label { font-size: 12px; color: var(--muted); }
+  .bar select { width: auto; min-width: 200px; }
 
-  table { width: 100%; border-collapse: collapse; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius-m); overflow: hidden; }
+  .context { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 12px; min-height: 0; }
+  #activebox, #chips { display: contents; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    height: 26px; padding: 0 4px 0 10px;
+    font: 500 12px var(--body); color: var(--ink-2);
+    background: var(--panel); border: 1px solid var(--line); border-radius: 13px;
+  }
+  .chip button { all: unset; cursor: pointer; width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center; color: var(--muted); font-size: 14px; line-height: 1; }
+  .chip button:hover { background: var(--paper); color: var(--ink); }
+  .chip button:focus-visible { outline: 2px solid var(--pine); }
+  .chip.box-chip { background: var(--pine-soft); border-color: transparent; color: var(--pine); padding-right: 4px; }
+  .chip.box-chip .act { all: unset; cursor: pointer; font-size: 12px; text-decoration: underline; text-underline-offset: 2px; width: auto; height: auto; padding: 0 4px; border-radius: 0; }
+  .chip.box-chip .act:hover { background: none; color: var(--ink); }
+  .clear-all { margin-left: 4px; }
+
+  .tablewrap { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-m); }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; }
   thead th {
-    text-align: right; font-size: 12px; font-weight: 600; color: var(--muted);
-    padding: 10px 14px; border-bottom: 1px solid var(--line); background: #FAFBFA; white-space: nowrap;
+    position: sticky; top: var(--bar-h); z-index: 5;
+    text-align: right; font-size: 12px; font-weight: 500; color: var(--muted);
+    padding: 0 16px; height: 40px; background: var(--wash); border-bottom: 1px solid var(--line); white-space: nowrap;
   }
-  thead th:first-child { text-align: left; }
-  .sorter {
-    all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;
-    font: inherit; color: inherit; border-radius: 3px; padding: 2px 0;
-  }
+  thead th:first-child { text-align: left; border-top-left-radius: var(--r-m); }
+  thead th:last-child { border-top-right-radius: var(--r-m); }
+  .sorter { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; font: inherit; color: inherit; }
   .sorter:hover { color: var(--ink); }
-  .sorter.on { color: var(--pine); }
-  .sorter:focus-visible { outline: 2px solid var(--pine); outline-offset: 2px; }
+  .sorter.on { color: var(--pine); font-weight: 600; }
+  .sorter:focus-visible { outline: 2px solid var(--pine); outline-offset: 2px; border-radius: 3px; }
   .arrow { font-size: 9px; min-width: 9px; }
-  tbody td { padding: 12px 14px; border-bottom: 1px solid var(--line); text-align: right; vertical-align: top; white-space: nowrap; }
+  tbody td { padding: 12px 16px; border-bottom: 1px solid var(--line-2); text-align: right; vertical-align: top; white-space: nowrap; font-size: 14px; }
   tbody tr:last-child td { border-bottom: 0; }
-  tbody tr:hover { background: #F8FAF8; }
-  td.biz { text-align: left; white-space: normal; width: 44%; }
-  .biz a { font-weight: 600; text-decoration: none; }
-  .biz a:hover { text-decoration: underline; }
-  .where { color: var(--muted); font-size: 13px; margin-top: 2px; }
-  .tag { display: inline-block; font-size: 11px; font-weight: 600; padding: 1px 6px; border-radius: 3px; margin-left: 6px; vertical-align: 2px; }
+  tbody tr { cursor: pointer; }
+  tbody tr:hover td { background: #F8FAF8; }
+  td.biz { text-align: left; white-space: normal; width: 46%; }
+  .biz .t { display: flex; align-items: flex-start; gap: 8px; }
+  .biz a {
+    font-weight: 600; text-decoration: none; color: var(--ink);
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .biz a:hover { color: var(--pine); text-decoration: underline; text-underline-offset: 2px; }
+  .meta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; margin-top: 3px; color: var(--muted); font-size: 12.5px; }
+  .tag { display: inline-block; font-size: 11px; font-weight: 600; padding: 0 6px; line-height: 18px; border-radius: 4px; }
   .tag.vault { background: var(--pine-soft); color: var(--pine); }
-  .tag.new { background: #F3E8CF; color: #7A5612; }
-  .teaser { color: var(--muted); font-size: 13px; margin-top: 4px; max-width: 62ch; }
-  .nil { color: #A9B3AD; }
-  .suspect { color: #A9B3AD; text-decoration: line-through dotted; cursor: help; }
-  .seen { color: var(--muted); font-size: 13px; }
+  .tag.new { background: var(--brass-soft); color: #7A5612; }
+  .dec { flex: none; font-size: 11px; font-weight: 600; padding: 0 7px; line-height: 20px; border-radius: 4px; margin-top: 1px; }
+  .dec.fast { background: var(--pine); color: #fff; }
+  .dec.pursue { background: var(--pine-soft); color: var(--pine); }
+  .dec.cond { background: var(--brass-soft); color: #7A5612; }
+  .dec.tbd { background: var(--paper); color: var(--muted); border: 1px solid var(--line); }
+  .why { color: var(--ink-2); font-size: 12px; margin-top: 4px; }
+  .teaser { color: var(--muted); font-size: 12.5px; margin-top: 4px; max-width: 70ch; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .nil { color: var(--faint); }
+  .suspect { color: var(--faint); text-decoration: line-through dotted; cursor: help; }
+  .seen { color: var(--muted); font-size: 12.5px; }
 
   /* the multiple gauge: asking price ÷ cash flow, scaled 0–8× */
-  .mult { display: grid; grid-template-columns: 44px 84px; align-items: center; gap: 8px; justify-content: end; }
-  .gauge { height: 8px; background: #EDF1EE; border-radius: 4px; position: relative; overflow: hidden; }
-  .gauge i { position: absolute; inset: 0 auto 0 0; border-radius: 4px; background: var(--pine); }
+  .mult { display: inline-grid; grid-template-columns: 40px 64px; align-items: center; gap: 8px; }
+  .gauge { height: 6px; background: #EDF1EE; border-radius: 3px; position: relative; overflow: hidden; }
+  .gauge i { position: absolute; inset: 0 auto 0 0; border-radius: 3px; background: var(--pine); }
   .gauge i.mid { background: var(--brass); }
   .gauge i.high { background: var(--rust); }
   .gauge::after { content: ""; position: absolute; left: 37.5%; top: 0; bottom: 0; width: 1px; background: #fff; }
 
-  .more { display: flex; justify-content: center; margin-top: 18px; }
-  .empty { padding: 48px 24px; text-align: center; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius-m); }
-  .empty h2 { font: 600 20px var(--display); margin: 0 0 6px; }
-  .empty p { color: var(--muted); margin: 0 0 16px; }
+  .more { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 14px; color: var(--muted); font-size: 13px; }
+  .more:has(#moreBtn[hidden]) { justify-content: flex-start; }
+  .empty { padding: 56px 24px; text-align: center; }
+  .empty h2 { font: 600 18px var(--display); margin: 0 0 6px; }
+  .empty p { color: var(--muted); margin: 0 auto 16px; max-width: 56ch; }
+  .foot { margin: 24px 0 0; color: var(--faint); font-size: 12px; }
+  .loading { padding: 56px 24px; text-align: center; color: var(--muted); }
 
-
-  /* ---------- buy-boxes ---------- */
-  .boxes { margin: 0 0 22px; padding-bottom: 18px; border-bottom: 1px solid var(--line); }
-  .boxes h2 { font: 600 15px var(--display); margin: 0 0 8px; }
-  .boxlist { display: grid; gap: 4px; margin-bottom: 10px; }
-  .box {
-    all: unset; box-sizing: border-box; cursor: pointer; display: grid; grid-template-columns: 1fr auto;
-    gap: 2px 8px; padding: 7px 10px; border-radius: var(--radius-s); border: 1px solid transparent;
-  }
-  .box:hover { background: #EBF0EC; }
-  .box:focus-visible { outline: 2px solid var(--pine); outline-offset: 1px; }
-  .box[aria-pressed="true"] { background: var(--panel); border-color: var(--pine); }
-  .box .nm { font-weight: 600; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .box .ct { font-size: 13px; color: var(--muted); text-align: right; }
-  .box .nw { grid-column: 1 / -1; font-size: 12px; color: #7A5612; }
-  .boxtools { display: flex; flex-wrap: wrap; gap: 6px 12px; font-size: 13px; }
-  .boxtools .linkish { font-size: 13px; }
-  .privacy { font-size: 12px; color: var(--muted); margin: 8px 0 0; }
-  .activebox { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin: -4px 0 14px; font-size: 14px; color: var(--muted); }
-  .activebox strong { color: var(--ink); }
-  .dec { display: inline-block; font-size: 11px; font-weight: 600; padding: 1px 6px; border-radius: 3px; margin-left: 6px; vertical-align: 2px; }
-  .dec.fast { background: var(--pine); color: #fff; }
-  .dec.pursue { background: var(--pine-soft); color: var(--pine); }
-  .dec.cond { background: #F3E8CF; color: #7A5612; }
-  .dec.tbd { background: #ECEFED; color: var(--muted); }
-  .why { color: var(--muted); font-size: 12px; margin-top: 3px; }
-
-  dialog { border: 1px solid var(--line); border-radius: var(--radius-m); padding: 0; width: min(560px, 94vw); color: var(--ink); }
-  dialog::backdrop { background: rgba(27, 36, 32, .35); }
-  dialog form { padding: 22px 24px; }
-  dialog h2 { font: 700 22px var(--display); margin: 0 0 16px; }
+  /* ---------- dialog ---------- */
+  dialog { border: 1px solid var(--line); border-radius: 12px; padding: 0; width: min(580px, 94vw); color: var(--ink); box-shadow: 0 20px 50px rgba(27, 36, 32, .18); }
+  dialog::backdrop { background: rgba(27, 36, 32, .4); }
+  dialog form { padding: 22px 24px 20px; max-height: 88vh; overflow-y: auto; }
+  dialog h2 { font: 700 20px var(--display); margin: 0 0 16px; }
   dialog .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 14px; }
-  dialog textarea { width: 100%; min-height: 56px; font: inherit; font-size: 14px; padding: 7px 9px; border: 1px solid var(--line); border-radius: var(--radius-s); resize: vertical; }
-  dialog .actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 8px; }
-  dialog .actions .danger { margin-right: auto; border-color: var(--rust); color: var(--rust); }
-  dialog .err { color: var(--rust); font-size: 13px; min-height: 1em; margin: 0 0 6px; }
-  @media (max-width: 600px) { dialog .grid2 { grid-template-columns: 1fr; } }
+  dialog textarea { min-height: 54px; resize: vertical; }
+  dialog .actions { display: flex; gap: 8px; justify-content: flex-end; margin: 10px -24px -20px; padding: 14px 24px 20px; border-top: 1px solid var(--line-2); position: sticky; bottom: -20px; background: var(--panel); }
+  dialog .actions .danger { margin-right: auto; color: var(--rust); border-color: transparent; background: none; padding: 0 6px; }
+  dialog .actions .danger:hover { background: #F7ECE8; }
+  dialog .err { color: var(--rust); font-size: 13px; min-height: 1em; margin: 0 0 4px; }
 
   /* ---------- small screens ---------- */
   @media (max-width: 900px) {
-    .top { padding: 20px 16px 14px; }
-    .top h1 { font-size: 28px; }
+    :root { --bar-h: 52px; }
+    .appbar { padding: 0 16px; }
+    .brand .src, .status .total { display: none; }
     .wrap { grid-template-columns: 1fr; }
-    .filters { position: static; max-height: none; border-right: 0; border-bottom: 1px solid var(--line); padding: 12px 16px; }
-    .filters summary { display: block; cursor: pointer; font-weight: 600; padding: 4px 0; }
-    .filters[open] summary { margin-bottom: 14px; }
+    .filters { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--line); padding: 0 16px; }
+    .filters summary { display: flex; align-items: center; justify-content: space-between; cursor: pointer; font-weight: 600; font-size: 13px; height: 44px; list-style: none; }
+    .filters summary::-webkit-details-marker { display: none; }
+    .filters summary::after { content: "Show"; font-weight: 500; color: var(--pine); font-size: 12px; }
+    .filters[open] summary::after { content: "Hide"; }
+    .filters[open] { padding-bottom: 16px; }
     .results { padding: 16px; }
+    .bar select { min-width: 0; flex: 1; }
+    .sortbox { flex: 1; }
     thead { display: none; }
+    .tablewrap { border-radius: var(--r-m); overflow: hidden; }
     table, tbody, tr, td { display: block; width: 100%; }
-    tbody tr { padding: 12px 14px; border-bottom: 1px solid var(--line); display: grid; grid-template-columns: 1fr 1fr; gap: 2px 12px; }
-    td.biz { grid-column: 1 / -1; }
-    .bar { gap: 10px; }
-    .count { flex-basis: 100%; }
-    .bar select { flex: 1; min-width: 0; }
-    tbody td { border: 0; padding: 2px 0; text-align: left; }
-    td.biz { width: auto; margin-bottom: 6px; }
-    td[data-k]::before { content: attr(data-k) "  "; color: var(--muted); font-size: 12px; }
-    .mult { display: inline-grid; justify-content: start; vertical-align: middle; }
+    tbody tr { padding: 12px 14px; border-bottom: 1px solid var(--line-2); display: grid; grid-template-columns: 1fr 1fr; gap: 2px 12px; }
+    tbody tr:last-child { border-bottom: 0; }
+    tbody td { border: 0; padding: 1px 0; text-align: left; font-size: 13px; }
+    td.biz { grid-column: 1 / -1; width: auto; margin-bottom: 6px; }
+    td[data-k]::before { content: attr(data-k) "  "; color: var(--muted); font-size: 11.5px; }
+    .mult { vertical-align: middle; grid-template-columns: 36px 56px; }
   }
-  @media (prefers-reduced-motion: no-preference) {
-    tbody tr { transition: background-color .12s; }
-  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 </head>
 <body>
 
-<header class="top">
-  <h1>Deal screen <small>BusinessesForSale, US</small></h1>
+<header class="appbar">
+  <div class="brand"><span class="name">Deal screen</span><span class="src">BusinessesForSale, US</span></div>
   <p class="status" id="status">Loading listings…</p>
 </header>
 
 <div class="wrap">
   <details class="filters" id="filtersBox" open>
     <summary>Buy-boxes and filters</summary>
-    <section class="boxes" aria-labelledby="boxesTitle">
-      <h2 id="boxesTitle">Buy-boxes</h2>
+    <section class="side-sec" aria-labelledby="boxesTitle">
+      <div class="side-h"><h2 id="boxesTitle">Buy-boxes</h2><button type="button" class="mini" id="boxAdd">New</button></div>
       <div class="boxlist" id="boxlist"></div>
       <div class="boxtools">
-        <button type="button" class="linkish" id="boxAdd">Add buy-box</button>
-        <button type="button" class="linkish" id="boxImport">Import buybox.json</button>
-        <button type="button" class="linkish" id="boxBackup">Back up</button>
+        <button type="button" class="mini" id="boxImport">Import buybox.json</button>
+        <button type="button" class="mini" id="boxBackup">Back up</button>
         <input type="file" id="boxFile" accept=".json,application/json" hidden>
       </div>
-      <p class="privacy">Saved in this browser only, never uploaded. Use Back up to move them to another device.</p>
+      <p class="privacy">Stored in this browser only, never uploaded. Back up to move them to another device.</p>
     </section>
+    <section class="side-sec" aria-labelledby="filtersTitle">
+    <div class="side-h"><h2 id="filtersTitle">Filters</h2><button type="button" class="linkish" id="reset">Clear all</button></div>
     <form id="filters" autocomplete="off" onsubmit="return false">
       <div class="field">
         <label for="q">Search</label>
-        <input type="search" id="q" placeholder="HVAC, dental, Austin…">
+        <div class="search"><input type="search" id="q" placeholder="HVAC, dental, Austin…" aria-keyshortcuts="/"><kbd aria-hidden="true">/</kbd></div>
       </div>
       <div class="field">
         <label for="state">State</label>
@@ -263,7 +307,7 @@
           <input type="text" id="pmin" placeholder="Min" aria-label="Minimum asking price">
           <input type="text" id="pmax" placeholder="Max" aria-label="Maximum asking price">
         </div>
-        <p class="hint">Type 500k or 2.5m</p>
+        <p class="hint">Type amounts like 500k or 2.5m</p>
       </div>
       <div class="field">
         <span class="label">Cash flow</span>
@@ -296,33 +340,39 @@
       <div class="field">
         <label class="check"><input type="checkbox" id="hascf"> Only listings with cash flow</label>
       </div>
-      <button type="button" class="linkish" id="reset">Clear filters</button>
     </form>
+    </section>
   </details>
 
   <main class="results">
     <div class="bar">
-      <p class="count" id="count" aria-live="polite"></p>
-      <label for="sort" class="hint" style="margin:0">Sort</label>
-      <select id="sort">
-        <option value="first_seen:desc">Newest first</option>
-        <option value="first_seen:asc">Oldest first</option>
-        <option value="price:asc">Asking price, low to high</option>
-        <option value="price:desc">Asking price, high to low</option>
-        <option value="revenue:desc">Revenue, high to low</option>
-        <option value="revenue:asc">Revenue, low to high</option>
-        <option value="cash_flow:desc">Cash flow, high to low</option>
-        <option value="cash_flow:asc">Cash flow, low to high</option>
-        <option value="mult:asc">Multiple, low to high</option>
-        <option value="mult:desc">Multiple, high to low</option>
-        <option value="title:asc">Name, A to Z</option>
-        <option value="title:desc">Name, Z to A</option>
-      </select>
+      <div class="headline">
+        <p class="count" id="count" aria-live="polite"></p>
+        <p class="summary" id="summary"></p>
+      </div>
+      <div class="sortbox">
+        <label for="sort">Sort</label>
+        <select id="sort">
+          <option value="first_seen:desc">Newest first</option>
+          <option value="first_seen:asc">Oldest first</option>
+          <option value="price:asc">Asking price, low to high</option>
+          <option value="price:desc">Asking price, high to low</option>
+          <option value="revenue:desc">Revenue, high to low</option>
+          <option value="revenue:asc">Revenue, low to high</option>
+          <option value="cash_flow:desc">Cash flow, high to low</option>
+          <option value="cash_flow:asc">Cash flow, low to high</option>
+          <option value="mult:asc">Multiple, low to high</option>
+          <option value="mult:desc">Multiple, high to low</option>
+          <option value="title:asc">Name, A to Z</option>
+          <option value="title:desc">Name, Z to A</option>
+        </select>
+      </div>
       <button type="button" id="export">Export CSV</button>
     </div>
-    <div class="activebox" id="activebox" hidden></div>
-    <div id="out"></div>
-    <div class="more"><button type="button" class="primary" id="moreBtn" hidden>Show 100 more</button></div>
+    <div class="context" id="context"><span id="activebox" hidden></span><span id="chips"></span></div>
+    <div class="tablewrap" id="out"><div class="loading">Loading listings…</div></div>
+    <div class="more"><span id="shownInfo"></span><button type="button" id="moreBtn" hidden>Show 100 more</button></div>
+    <p class="foot">Figures are what sellers entered on BusinessesForSale.com and aren't verified. Check the listing before relying on them.</p>
   </main>
 </div>
 
@@ -438,6 +488,7 @@
       return c * sign || a.ord - b.ord;
     };
     sortState = { key, dir };
+    renderChips(f);
     filtered.sort(by);
     shown = PAGE;
     render();
@@ -563,7 +614,7 @@
     $("boxlist").innerHTML = items.join("");
     const ab = boxes.find(b => b.id === activeBox);
     $("activebox").hidden = !ab;
-    if (ab) $("activebox").innerHTML = `<span>Showing matches for <strong>${esc(ab.name)}</strong></span><button type="button" class="linkish" id="boxEdit">Edit buy-box</button><button type="button" class="linkish" id="boxClear">Show all listings</button>`;
+    if (ab) $("activebox").innerHTML = `<span class="chip box-chip">Buy-box: <strong>${esc(ab.name)}</strong><button type="button" class="act" id="boxEdit">Edit</button><button type="button" id="boxClear" aria-label="Show all listings" title="Show all listings">×</button></span>`;
   }
 
   // ---- editor ----
@@ -648,7 +699,7 @@
     saveBoxes();
     alertMsg(`Imported ${added} buy-box${added === 1 ? "" : "es"}${replaced ? `, updated ${replaced}` : ""}.`);
   }
-  function alertMsg(t) { $("status").textContent = t; setTimeout(statusLine, 6000); }
+  function alertMsg(t) { $("status").innerHTML = `<span class="fresh">${esc(t)}</span>`; setTimeout(statusLine, 6000); }
   function backup() {
     const blob = new Blob([JSON.stringify({ buyboxes: boxes }, null, 2)], { type: "application/json" });
     const a = document.createElement("a");
@@ -687,6 +738,63 @@
   });
   let byPath = new Map();
 
+  /* ---- active filter chips ---- */
+  const SINCE_LABEL = { new: "New since tracking began", 1: "First seen in last 24 hours", 7: "First seen in last 7 days", 30: "First seen in last 30 days" };
+  const KIND_LABEL = { 0: "Listings only", 1: "M&A Vault only" };
+  function range(label, lo, hi) {
+    const a = parseAmt(lo), b = parseAmt(hi);
+    if (a != null && b != null) return `${label} ${money(a)} to ${money(b)}`;
+    if (a != null) return `${label} ${money(a)} or more`;
+    if (b != null) return `${label} up to ${money(b)}`;
+    return null;
+  }
+  function renderChips(f) {
+    const chips = [];
+    if (f.q.trim()) chips.push([`“${f.q.trim()}”`, ["q"]]);
+    if (f.state) chips.push([f.state, ["state"]]);
+    if (f.kind !== "all") chips.push([KIND_LABEL[f.kind], ["kind"]]);
+    const pr = range("Asking", f.pmin, f.pmax); if (pr) chips.push([pr, ["pmin", "pmax"]]);
+    const cr = range("Cash flow", f.cfmin, f.cfmax); if (cr) chips.push([cr, ["cfmin", "cfmax"]]);
+    if (f.multmax) chips.push([`Multiple ${f.multmax}× or less`, ["multmax"]]);
+    if (f.since) chips.push([SINCE_LABEL[f.since], ["since"]]);
+    if (f.hascf) chips.push(["Has cash flow", ["hascf"]]);
+    $("chips").innerHTML = chips.map(([label, ids]) =>
+      `<span class="chip">${esc(label)}<button type="button" data-clear="${ids.join(",")}" aria-label="Remove filter: ${esc(label)}">×</button></span>`).join("")
+      + (chips.length > 1 ? `<button type="button" class="linkish clear-all" data-clear="all">Clear all</button>` : "");
+    $("reset").hidden = !chips.length;
+    $("context").hidden = !chips.length && !activeBox;
+  }
+  $("chips").addEventListener("click", e => {
+    const b = e.target.closest("[data-clear]"); if (!b) return;
+    if (b.dataset.clear === "all") { $("reset").click(); return; }
+    for (const id of b.dataset.clear.split(",")) {
+      if (id === "kind") document.querySelector('input[name=kind][value="all"]').checked = true;
+      else if (id === "hascf") $("hascf").checked = false;
+      else $(id).value = "";
+    }
+    apply();
+  });
+
+  /* ---- summary of the current results ---- */
+  const median = a => { if (!a.length) return null; const v = a.slice().sort((x, y) => x - y), m = v.length >> 1; return v.length % 2 ? v[m] : (v[m - 1] + v[m]) / 2; };
+  function renderSummary() {
+    const price = [], cf = [], mult = []; let nw = 0;
+    for (const r of filtered) {
+      if (r.price) price.push(r.price);
+      if (r.cash_flow) cf.push(r.cash_flow);
+      if (r.mult != null) mult.push(r.mult);
+      if (r.isNew) nw++;
+    }
+    const bits = [];
+    const mp = median(price), mc = median(cf), mm = median(mult);
+    if (mp) bits.push(`median asking <b>${money(mp)}</b>`);
+    if (mc) bits.push(`cash flow <b>${money(mc)}</b>`);
+    if (mm) bits.push(`multiple <b>${mm.toFixed(1)}×</b>`);
+    if (nw) bits.push(`<b>${nw.toLocaleString()}</b> new`);
+    const txt = bits.join(", ");
+    $("summary").innerHTML = txt ? txt.charAt(0).toUpperCase() + txt.slice(1) : "";
+  }
+
   const COLS = [
     ["title", "Business"], ["price", "Asking"], ["revenue", "Revenue"],
     ["cash_flow", "Cash flow"], ["mult", "Multiple", "Asking price ÷ cash flow"], ["first_seen", "First seen"],
@@ -704,7 +812,9 @@
 
   function render() {
     const total = rows.length;
-    $("count").innerHTML = `${filtered.length.toLocaleString()} businesses<span>of ${total.toLocaleString()} tracked</span>`;
+    $("count").innerHTML = `${filtered.length.toLocaleString()} ${filtered.length === 1 ? "business" : "businesses"}${filtered.length !== total ? `<span>of ${total.toLocaleString()} tracked</span>` : ""}`;
+    renderSummary();
+    $("shownInfo").textContent = "";
     if (!filtered.length) {
       const ab = boxes.find(b => b.id === activeBox);
       if (ab && total && !(results.get(ab.id) || new Map()).size) {
@@ -719,17 +829,26 @@
       $("moreBtn").hidden = true;
       return;
     }
-    const body = filtered.slice(0, shown).map(r => `
-      <tr>
+    const res = activeBox ? results.get(activeBox) : null;
+    const body = filtered.slice(0, shown).map(r => {
+      const m = res && res.get(r.path);
+      const dec = m ? `<span class="dec ${m.cls}" title="${m.conf != null ? `Stress-test confidence ${m.conf.toFixed(0)}%` : "Check the listing for the missing figures"}">${m.decision}</span>` : "";
+      const why = m ? [m.kw && `Matched “${esc(m.kw)}”`, m.maxSupport && isFinite(m.maxSupport) && `supports up to ${money(m.maxSupport)}`, m.after != null && `${money(Math.max(0, m.after))} left after debt`].filter(Boolean).join(", ") : "";
+      const cfCell = r.cfSuspect
+        ? `<td data-k="Cash flow"><span class="suspect" title="Looks like a typo on the listing (higher than revenue or the asking price). Left out of sorting and the multiple.">${money(r.cfRaw)} ?</span></td>`
+        : cell(r.cash_flow, "Cash flow");
+      return `
+      <tr data-href="${BASE}${esc(r.path)}">
         <td class="biz">
-          <a href="${BASE}${esc(r.path)}" target="_blank" rel="noopener">${esc(r.title)}</a>${r.kind ? '<span class="tag vault">M&amp;A Vault</span>' : ""}${r.isNew ? '<span class="tag new">New</span>' : ""}${(() => { const m = activeBox && results.get(activeBox)?.get(r.path); return m ? `<span class="dec ${m.cls}" title="${m.conf != null ? `Stress-test confidence ${m.conf.toFixed(0)}%` : "Check the listing for the missing figures"}">${m.decision}</span>` : ""; })()}
-          <div class="where">${esc(r.location || "Location not listed")}</div>
-          ${(() => { const m = activeBox && results.get(activeBox)?.get(r.path); if (!m) return ""; const bits = []; if (m.kw) bits.push(`Matched “${esc(m.kw)}”`); if (m.maxSupport && isFinite(m.maxSupport)) bits.push(`supports up to ${money(m.maxSupport)}`); if (m.after != null) bits.push(`${money(Math.max(0, m.after))} left after debt`); return bits.length ? `<div class="why">${bits.join(", ")}</div>` : ""; })()}
+          <div class="t"><a href="${BASE}${esc(r.path)}" target="_blank" rel="noopener">${esc(r.title)}</a>${dec}</div>
+          <div class="meta"><span>${esc(r.location || "Location not listed")}</span>${r.kind ? '<span class="tag vault">M&amp;A Vault</span>' : ""}${r.isNew ? '<span class="tag new">New</span>' : ""}</div>
+          ${why ? `<div class="why">${why}</div>` : ""}
           ${r.teaser ? `<div class="teaser">${esc(r.teaser)}</div>` : ""}
         </td>
-        ${cell(r.price, "Asking")}${cell(r.revenue, "Revenue")}${r.cfSuspect ? `<td data-k="Cash flow"><span class="suspect" title="Looks like a typo on the listing (higher than revenue or the asking price). Left out of sorting and the multiple.">${money(r.cfRaw)} ?</span></td>` : cell(r.cash_flow, "Cash flow")}${multCell(r.mult)}
+        ${cell(r.price, "Asking")}${cell(r.revenue, "Revenue")}${cfCell}${multCell(r.mult)}
         <td data-k="First seen" class="seen">${ago(r.first_seen)}</td>
-      </tr>`).join("");
+      </tr>`;
+    }).join("");
     $("out").innerHTML = `<table>
       <thead><tr>${COLS.map(([k, label, tip]) => {
         const on = sortState.key === k;
@@ -741,6 +860,7 @@
     const left = filtered.length - shown;
     $("moreBtn").hidden = left <= 0;
     $("moreBtn").textContent = `Show ${Math.min(PAGE, left)} more`;
+    $("shownInfo").textContent = `Showing ${Math.min(shown, filtered.length).toLocaleString()} of ${filtered.length.toLocaleString()}`;
   }
 
   function exportCsv() {
@@ -760,15 +880,15 @@
   }
 
   function statusLine() {
-    const parts = [];
-    if (meta.site_total) parts.push(`<strong>${meta.site_total.toLocaleString()}</strong> listings on the site`);
+    let fresh = "";
     if (meta.updated_utc) {
       const mins = Math.round((Date.now() - new Date(meta.updated_utc)) / 6e4);
       const when = mins < 2 ? "just now" : mins < 60 ? `${mins} min ago` : mins < 1440 ? `${Math.round(mins / 60)} h ago` : `${Math.round(mins / 1440)} days ago`;
-      parts.push(`updated ${when}`);
+      const stale = mins > 8 * 60;   // sweeps run every 4 hours
+      fresh = `<span class="fresh" title="${stale ? "Older than expected: the last sweeps may have failed" : "Checked for new listings every 4 hours"}"><span class="dot${stale ? " stale" : ""}"></span>Updated ${when}</span>`;
     }
-    if (meta.last_run_new != null) parts.push(`${meta.last_run_new} new in the last sweep`);
-    $("status").innerHTML = parts.length ? parts.join(", ") + "." : "";
+    const total = meta.site_total ? `<span class="total"><strong>${meta.site_total.toLocaleString()}</strong> on the site</span>` : "";
+    $("status").innerHTML = fresh + total;
   }
 
   async function load() {
@@ -833,6 +953,8 @@
   $("reset").addEventListener("click", () => { $("filters").reset(); apply(); });
   $("moreBtn").addEventListener("click", () => { shown += PAGE; render(); });
   $("out").addEventListener("click", e => {
+    const tr = e.target.closest("tr[data-href]");
+    if (tr && !e.target.closest("a, button") && !String(getSelection())) { window.open(tr.dataset.href, "_blank", "noopener"); return; }
     const b = e.target.closest("button.sorter");
     if (!b) return;
     const k = b.dataset.key;
@@ -842,6 +964,13 @@
     document.querySelector(`button.sorter[data-key="${k}"]`)?.focus();
   });
   $("export").addEventListener("click", exportCsv);
+  document.addEventListener("keydown", e => {
+    if (e.key === "/" && !/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName) && !$("boxDlg").open) {
+      e.preventDefault();
+      if (narrow.matches) $("filtersBox").open = true;
+      $("q").focus();
+    }
+  });
   // Wide screens: the side panel is always open. Narrow screens: it starts collapsed.
   const narrow = matchMedia("(max-width: 900px)");
   const syncPanel = () => { $("filtersBox").open = !narrow.matches; };

@@ -115,6 +115,8 @@ site's RSS feed `/us/search/businesses-for-sale.rss`, 25 newest items with pubDa
 
 ## 5. The deal screen (`docs/app.html`)
 
+- **Layout (redesign 2026-11-19):** slim sticky app bar (name, source, freshness dot: green if updated within 8 h, gold if older, sites total); white side panel with Buy-boxes (New / Import / Back up) and Filters (Clear all appears when filters are active); results toolbar with count, a summary line of medians (asking, cash flow, multiple, new count) for the current results, Sort and Export; a row of removable chips for the active buy-box and each filter; table with sticky header, titles clamped to 2 lines, location + tags on one meta line, whole row clickable (opens the listing in a new tab); "Showing X of Y" + Show more; footer note that figures are seller-entered. `/` focuses search.
+
 - **Filters:** search (title, location, teaser), state, type (all / listings / M&A Vault), asking
   min/max, cash flow min/max (type `500k`, `2.5m`), highest multiple, first seen (new / 24h / 7d / 30d),
   only with cash flow. Filters persist in localStorage (`bfs-filters`).
