@@ -139,6 +139,7 @@
   .tag.new { background: #F3E8CF; color: #7A5612; }
   .teaser { color: var(--muted); font-size: 13px; margin-top: 4px; max-width: 62ch; }
   .nil { color: #A9B3AD; }
+  .suspect { color: #A9B3AD; text-decoration: line-through dotted; cursor: help; }
   .seen { color: var(--muted); font-size: 13px; }
 
   /* the multiple gauge: asking price ÷ cash flow, scaled 0–8× */
@@ -387,7 +388,7 @@
           <div class="where">${esc(r.location || "Location not listed")}</div>
           ${r.teaser ? `<div class="teaser">${esc(r.teaser)}</div>` : ""}
         </td>
-        ${cell(r.price, "Asking")}${cell(r.revenue, "Revenue")}${cell(r.cash_flow, "Cash flow")}${multCell(r.mult)}
+        ${cell(r.price, "Asking")}${cell(r.revenue, "Revenue")}${r.cfSuspect ? `<td data-k="Cash flow"><span class="suspect" title="Looks like a typo on the listing (higher than revenue or the asking price). Left out of sorting and the multiple.">${money(r.cfRaw)} ?</span></td>` : cell(r.cash_flow, "Cash flow")}${multCell(r.mult)}
         <td data-k="First seen" class="seen">${ago(r.first_seen)}</td>
       </tr>`).join("");
     $("out").innerHTML = `<table>
@@ -404,10 +405,10 @@
   }
 
   function exportCsv() {
-    const head = ["Title", "Type", "Location", "State", "Asking price", "Revenue", "Cash flow", "EBITDA", "Multiple", "First seen", "Last seen", "Link"];
+    const head = ["Title", "Type", "Location", "State", "Asking price", "Revenue", "Cash flow", "Cash flow looks wrong", "EBITDA", "Multiple", "First seen", "Last seen", "Link"];
     const q = v => v == null ? "" : /[",\n]/.test(String(v)) ? `"${String(v).replace(/"/g, '""')}"` : v;
     const lines = [head.join(",")].concat(filtered.map(r => [
-      r.title, r.kind ? "M&A Vault" : "Listing", r.location, r.state, r.price, r.revenue, r.cash_flow, r.ebitda,
+      r.title, r.kind ? "M&A Vault" : "Listing", r.location, r.state, r.price, r.revenue, r.cfRaw, r.cfSuspect ? "yes" : "", r.ebitda,
       r.mult != null ? r.mult.toFixed(2) : "", r.first_seen, r.last_seen, BASE + r.path
     ].map(q).join(",")));
     const blob = new Blob([lines.join("\n")], { type: "text/csv" });
@@ -453,6 +454,18 @@
         const r = {};
         for (const k in idx) r[k] = a[idx[k]];
         r.title = r.title || ""; r.location = r.location || ""; r.teaser = r.teaser || "";
+        // Seller-typed cash flow is sometimes impossible (above revenue, copied from
+        // revenue or price, or wildly above the asking price). Keep it visible but
+        // flag it, and leave it out of sorting and the multiple.
+        const cf = r.cash_flow;
+        r.cfSuspect = !!cf && (
+          (r.revenue && cf >= r.revenue) ||
+          (r.price && cf === r.price) ||
+          (r.price && cf > r.price * 2) ||
+          cf > 50e6
+        );
+        r.cfRaw = cf;
+        if (r.cfSuspect) r.cash_flow = null;
         r.mult = r.price && r.cash_flow ? r.price / r.cash_flow : null;
         r.isNew = meta.baseline_date ? r.first_seen > meta.baseline_date : false;
         return r;
