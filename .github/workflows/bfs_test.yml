@@ -6,7 +6,7 @@ on:
       pages:
         description: "Pages to fetch (25 listings each). 0 = all pages"
         required: false
-        default: "5"
+        default: "1"
   push:
     branches: [main]          # also runs once when you first upload the files
 
@@ -25,7 +25,11 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Scrape BusinessesForSale (plain HTTP, no browser)
-        run: python bfs/scrape_bfs.py --pages "${{ github.event.inputs.pages || '5' }}"
+        run: python bfs/scrape_bfs.py --pages "${{ github.event.inputs.pages || '1' }}"
+
+      - name: Diagnose page 1 structure
+        if: always()
+        run: python bfs/diagnose_page.py out/page1.html || true
 
       - name: Upload results
         if: always()
