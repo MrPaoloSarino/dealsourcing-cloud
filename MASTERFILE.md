@@ -14,7 +14,7 @@ Last updated: 2026-11-19.
 A **$0, fully cloud deal-sourcing screen** for an M&A / PE analyst (Paolo, Philippines-based
 freelancer) who sources small and lower-middle-market businesses for buy-side clients.
 
-- **Source today:** BusinessesForSale.com, US site only (`https://us.businessesforsale.com/us/`).
+- **Sources:** BusinessesForSale.com, US site (`https://us.businessesforsale.com/us/`), and **Tupelo** (`https://www.tupelosmb.com/marketplace/listings`, added 2026-11-19). Each source has its own scraper, schedule and data file; the screen merges them.
 - **What it does:** scrapes every listing on a schedule, publishes them to a web page where the
   user can search, filter, sort, export CSV, and see each client's matches ("buy-boxes") scored
   with the same SBA underwriting rules as the user's older desktop app.
@@ -80,22 +80,27 @@ file; the `refs/heads/main/...` form worked immediately. The loader uses `refs/h
 | Path | What it is |
 |---|---|
 | `bfs/scrape_bfs.py` | Scraper. Walks `/us/search/businesses-for-sale`, `-2`, `-3`… (25 cards/page). Parses each `div.result-header` card: title, URL, kind, location, asking price, revenue, cash flow, EBITDA. Skips franchise ads. Stops on Cloudflare block, or after 2 pages with no new listings / 404. `--pages N` (0 = all), `--checkpoint-every 50 --checkpoint-cmd "..."` saves progress mid-crawl. Writes `out/bfs_listings.csv`, `out/bfs_run.json`, `out/page1.html`. |
-| `bfs/publish.py` | Merges a run into `docs/data/bfs.json`: keeps `first_seen` from earlier runs, sets `last_seen` to today, derives US state code from location, keeps a short teaser for M&A Vault cards, **drops listings not seen for 21 days**. Row order in the file = the site's order (newest first): this run's listings in site order, then the rest in their previous order, stable-sorted by `first_seen` desc. Sets `meta.baseline_date` on first ever run (listings first seen after it are "New"). |
-| `scripts/save_data.sh` | Runs publish, then commits and pushes `docs/data/bfs.json` as `dealsourcing-bot` (retries with `git pull --rebase`). |
+| `tupelo/scrape_tupelo.py` | Tupelo scraper, plain HTTP. Walks `/marketplace/listings?page=1…N` (10 cards/page, ~175 pages; `page=0` and `page=1` are the same first page). Each card is an `<a href="/marketplace/listings/<cuid>">` with industry badges (`div.inline-flex`), `<h3>` title, two `span.line-clamp-1` location lines (long + short `City, County, ST, US`), a description `<p>`, and value/label span pairs (Asking Price, Revenue, Cash Flow; `-` = not given). robots.txt only disallows `/api/` and `/auth/`. Writes `out_tupelo/listings.csv` + `run.json`. |
+| `bfs/publish.py` | Generic publisher (default BusinessesForSale; Tupelo passes `--data docs/data/tupelo.json --prefix https://www.tupelosmb.com/marketplace/listings/ --label Tupelo`). Merges a run into the source's data file: keeps `first_seen` from earlier runs, sets `last_seen` to today, derives US state code from location, keeps a short teaser for M&A Vault cards, **drops listings not seen for 21 days**. Row order in the file = the site's order (newest first): this run's listings in site order, then the rest in their previous order, stable-sorted by `first_seen` desc. Sets `meta.baseline_date` on first ever run (listings first seen after it are "New"). |
+| `scripts/save_data.sh` | `save_data.sh "<commit msg>" [publish args…]`: runs publish, then commits and pushes `docs/data/*.json` as `dealsourcing-bot` (retries with `git pull --rebase`). |
+| `.github/workflows/tupelo_sweep.yml` | Tupelo schedule (below). |
+| `.github/workflows/render_deploy.yml` | Calls the Render Deploy Hook (secret `RENDER_DEPLOY_HOOK`) after `docs/**` pushes and after each sweep; no-op without the secret. Render's own auto-deploy didn't fire because the repo was added as a Public Git Repository; the fix is to give Render's GitHub app access to `dealsourcing-cloud` and select it as the source. |
 | `.github/workflows/bfs_sweep.yml` | Schedule + manual + push triggers (below). `permissions: contents: write`, `concurrency: bfs-sweep`. |
 | `docs/index.html` | Loader page that hosts serve. |
 | `docs/app.html` | The deal screen (single file: HTML + CSS + JS, no build step). |
-| `docs/data/bfs.json` | Published listings (compact: `{meta, fields, rows:[[...]]}`). |
+| `docs/data/bfs.json`, `docs/data/tupelo.json` | Published listings per source (compact: `{meta, fields, rows:[[...]]}`). |
 | `README.md` | Short user-facing summary. |
 | `MASTERFILE.md` | This file. |
 
-### `docs/data/bfs.json` format
+### Data file format (`docs/data/<source>.json`)
 
-- `fields`: `path, title, kind, location, state, price, revenue, cash_flow, ebitda, first_seen, last_seen, teaser`
-  - `path` = URL minus `https://us.businessesforsale.com/us/`
+- `fields`: `path, title, kind, location, state, price, revenue, cash_flow, ebitda, first_seen, last_seen, teaser, category`
+  - `category` = industry (Tupelo badges, e.g. "Heavy Construction / Other Building & Construction"); empty for BusinessesForSale
+  - `teaser` = M&A Vault pitch (BFS) or the card description (Tupelo, up to 240 chars)
+  - `path` = listing URL minus the source's base URL (`meta.base`)
   - `kind`: `0` regular listing, `1` M&A Vault
   - money fields are integers (USD) or `null`; dates `YYYY-MM-DD`
-- `meta`: `source, updated_utc, site_total, tracked, last_run_pages, last_run_new, last_run_dropped, baseline_date, last_full_crawl_utc`
+- `meta`: `source, base, updated_utc, site_total, tracked, last_run_pages, last_run_new, last_run_dropped, baseline_date, last_full_crawl_utc`
 
 ---
 
@@ -108,12 +113,16 @@ file; the `refs/heads/main/...` form worked immediately. The loader uses `refs/h
 | Manual: Actions → *BusinessesForSale sweep* → Run workflow | input `pages` (0 = all) | |
 | Push to `bfs/**`, `scripts/**`, `.github/workflows/**` | 3 pages, or all if the commit message contains `[full]` | |
 
+**Tupelo** (`tupelo_sweep.yml`): every 4 h at :37 (12:37am/4:37/8:37 am/pm Manila) newest 10 pages; daily 03:53 Manila full crawl (~175 pages, ~10 min); push to `tupelo/**` runs a full crawl; manual dispatch with `pages`.
+
 GitHub may start scheduled runs 5–30 min late. Listing order on the site is newest first (matches the
 site's RSS feed `/us/search/businesses-for-sale.rss`, 25 newest items with pubDate; not used yet).
 
 ---
 
 ## 5. The deal screen (`docs/app.html`)
+
+- **Sources:** `SOURCES` list in the script (key, label, data file, base URL). All files load in parallel from GitHub raw (fallback `data/<file>`); rows get `src`, `key` (`src:path`, used for buy-box results), `url`, and a search haystack (title + location + industry + teaser). Source filter + chip; each row shows the source name, and the industry on its own line. App bar shows the most recent update (tooltip lists each source; dot turns gold if any source is >8 h old) and the combined site totals. CSV export includes Source and Industry.
 
 - **Layout (redesign 2026-11-19):** slim sticky app bar (name, source, freshness dot: green if updated within 8 h, gold if older, sites total); white side panel with Buy-boxes (New / Import / Back up) and Filters (Clear all appears when filters are active); results toolbar with count, a summary line of medians (asking, cash flow, multiple, new count) for the current results, Sort and Export; a row of removable chips for the active buy-box and each filter; table with sticky header, titles clamped to 2 lines, location + tags on one meta line, whole row clickable (opens the listing in a new tab); "Showing X of Y" + Show more; footer note that figures are seller-entered. `/` focuses search.
 
@@ -151,7 +160,7 @@ Matching mirrors desktop `matcher.py`:
 2. Geography: state in `states`; or a `places` keyword (word-bounded) in the location; or, if places
    include Online/Remote/Relocatable, those words in the location or title. No geo constraints = anywhere.
    **Not implemented:** radius-from-city (`target_radius`); places are matched by name instead.
-3. Industry: any keyword in title + teaser. Alphabetic keywords of 4+ letters match as prefixes
+3. Industry: any keyword in title + industry (category) + teaser. Alphabetic keywords of 4+ letters match as prefixes
    (`plumb` → plumbing); `word*` forces prefix; short ones are exact words. Empty = any industry.
    **Limitation:** only title/teaser are available (no description or category yet).
 4. Profit: EBITDA if present (no deduction), else cash flow (treated as SDE) minus `managerSalary`.
@@ -203,7 +212,7 @@ Rows show the decision tag and "Matched "keyword", supports up to $X, $Y left af
    sometimes growth/leverage); derive estimated profit = revenue × margin. Vault deals require buyer
    verification/NDA on the site; usually no asking price.
 5. **Detail pages for new listings only** — fill missing cash flow (~26%) and descriptions.
-6. **More sources** — next by volume in the old app: Transworld, BBMS, BusinessBroker, Tupelo, Sunbelt.
+6. **More sources** — Tupelo done; next by volume in the old app: Transworld, BBMS, BusinessBroker, Sunbelt.
    Test each from Actions first; merge duplicates across sources (one listing, many sources).
 7. **Pipeline tracking** (Inquired → NDA → CIM → LOI) — needs private writable storage (Neon free
    Postgres or similar); can't live in this public repo.

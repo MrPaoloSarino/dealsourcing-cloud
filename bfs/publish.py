@@ -1,4 +1,9 @@
-"""Merge a scrape run (out/bfs_listings.csv) into the published data file docs/data/bfs.json.
+"""Merge a scrape run into a published data file (one per source).
+
+Defaults are BusinessesForSale: out/bfs_listings.csv -> docs/data/bfs.json.
+Other sources pass their own paths, e.g. Tupelo:
+    python bfs/publish.py out_tupelo/listings.csv --data docs/data/tupelo.json \
+        --prefix https://www.tupelosmb.com/marketplace/listings/ --label Tupelo
 
 Tracks first_seen / last_seen per listing so the screen can show what's new,
 and drops listings nobody has seen for DROP_AFTER_DAYS (sold or delisted).
@@ -19,7 +24,7 @@ PREFIX = "https://us.businessesforsale.com/us/"
 DATA = os.path.join("docs", "data", "bfs.json")
 DROP_AFTER_DAYS = 21
 FIELDS = ["path", "title", "kind", "location", "state", "price", "revenue",
-          "cash_flow", "ebitda", "first_seen", "last_seen", "teaser"]
+          "cash_flow", "ebitda", "first_seen", "last_seen", "teaser", "category"]
 
 STATES = {
     "alabama": "AL", "alaska": "AK", "arizona": "AZ", "arkansas": "AR", "california": "CA",
@@ -37,10 +42,13 @@ STATES = {
 }
 
 
+CODES = set(STATES.values())
+
+
 def state_of(location: str) -> str:
     parts = [p.strip() for p in (location or "").split(",") if p.strip()]
     for p in reversed(parts):
-        code = STATES.get(p.lower())
+        code = STATES.get(p.lower()) or (p.upper() if p.upper() in CODES and len(p) == 2 else None)
         if code:
             return code
     return ""
@@ -54,7 +62,10 @@ def to_int(v: str):
 
 
 def teaser_of(row: dict) -> str:
-    """M&A Vault cards carry no dollar figures; keep their one-line pitch instead."""
+    """M&A Vault cards carry no dollar figures; keep their one-line pitch instead.
+    Sources with a short description on every card (Tupelo) keep it for all rows."""
+    if row.get("source") == "Tupelo":
+        return " ".join((row.get("card_text") or "").split())[:240]
     if row.get("kind") != "mna_vault":
         return ""
     text = row.get("card_text", "")
@@ -67,18 +78,28 @@ def teaser_of(row: dict) -> str:
 
 
 def main() -> int:
-    run_csv = sys.argv[1] if len(sys.argv) > 1 else "out/bfs_listings.csv"
-    run_json = os.path.join(os.path.dirname(run_csv), "bfs_run.json")
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("run_csv", nargs="?", default="out/bfs_listings.csv")
+    ap.add_argument("--data", default=DATA)
+    ap.add_argument("--prefix", default=PREFIX)
+    ap.add_argument("--label", default="BusinessesForSale.com (US)")
+    a = ap.parse_args()
+    run_csv, data_path, prefix = a.run_csv, a.data, a.prefix
+    run_dir = os.path.dirname(run_csv)
+    run_json = next((os.path.join(run_dir, n) for n in ("bfs_run.json", "run.json")
+                     if os.path.exists(os.path.join(run_dir, n))), os.path.join(run_dir, "run.json"))
     today = date.today().isoformat()
 
     existing: dict[str, dict] = {}
     meta = {}
-    if os.path.exists(DATA):
-        with open(DATA, encoding="utf-8") as f:
+    if os.path.exists(data_path):
+        with open(data_path, encoding="utf-8") as f:
             blob = json.load(f)
         meta = blob.get("meta", {})
         for r in blob.get("rows", []):
-            rec = dict(zip(blob["fields"], r))
+            rec = {k: None for k in FIELDS}
+            rec.update(dict(zip(blob["fields"], r)))
             existing[rec["path"]] = rec
 
     with open(run_csv, encoding="utf-8") as f:
@@ -87,7 +108,7 @@ def main() -> int:
 
     added = 0
     for row in scraped:
-        path = row["url"].replace(PREFIX, "")
+        path = row["url"].replace(prefix, "")
         prev = existing.get(path)
         rec = {
             "path": path,
@@ -102,6 +123,7 @@ def main() -> int:
             "first_seen": prev["first_seen"] if prev else today,
             "last_seen": today,
             "teaser": teaser_of(row),
+            "category": (row.get("category") or "").strip(),
         }
         if not prev:
             added += 1
@@ -111,7 +133,7 @@ def main() -> int:
     # Order = the site's own order (newest first): listings from this run in the order the
     # site showed them, then everything else in its previous order. The screen uses this
     # order to break ties, so "Newest first" matches the site.
-    run_paths = [row["url"].replace(PREFIX, "") for row in scraped]
+    run_paths = [row["url"].replace(prefix, "") for row in scraped]
     seen_now = set(run_paths)
     ordered = [existing[p] for p in dict.fromkeys(run_paths)] + \
               [r for p, r in existing.items() if p not in seen_now]
@@ -123,7 +145,8 @@ def main() -> int:
     # Everything in the very first crawl is "already on the market", not new.
     meta.setdefault("baseline_date", today)
     meta.update({
-        "source": "BusinessesForSale.com (US)",
+        "source": a.label,
+        "base": prefix,
         "updated_utc": datetime.now(timezone.utc).isoformat(timespec="minutes"),
         "site_total": run.get("site_total") or meta.get("site_total"),
         "tracked": len(kept),
@@ -134,12 +157,12 @@ def main() -> int:
     if full:
         meta["last_full_crawl_utc"] = meta["updated_utc"]
 
-    os.makedirs(os.path.dirname(DATA), exist_ok=True)
-    with open(DATA, "w", encoding="utf-8") as f:
+    os.makedirs(os.path.dirname(data_path), exist_ok=True)
+    with open(data_path, "w", encoding="utf-8") as f:
         json.dump({"meta": meta, "fields": FIELDS,
                    "rows": [[r[k] for k in FIELDS] for r in kept]},
                   f, separators=(",", ":"), ensure_ascii=False)
-    print(f"published {len(kept)} listings ({added} new, {dropped} dropped) -> {DATA}")
+    print(f"published {len(kept)} listings ({added} new, {dropped} dropped) -> {data_path}")
     return 0
 
 

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Deal screen · BusinessesForSale</title>
+<title>Deal screen</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -192,6 +192,9 @@
   }
   .biz a:hover { color: var(--pine); text-decoration: underline; text-underline-offset: 2px; }
   .meta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; margin-top: 3px; color: var(--muted); font-size: 12.5px; }
+  .cat { color: var(--ink-2); font-size: 12px; margin-top: 3px; }
+  .meta .srcname::before { content: ""; display: inline-block; width: 3px; height: 3px; border-radius: 50%; background: var(--faint); margin-right: 8px; vertical-align: middle; }
+  .meta .srcname { color: var(--faint); }
   .tag { display: inline-block; font-size: 11px; font-weight: 600; padding: 0 6px; line-height: 18px; border-radius: 4px; }
   .tag.vault { background: var(--pine-soft); color: var(--pine); }
   .tag.new { background: var(--brass-soft); color: #7A5612; }
@@ -265,7 +268,7 @@
 <body>
 
 <header class="appbar">
-  <div class="brand"><span class="name">Deal screen</span><span class="src">BusinessesForSale, US</span></div>
+  <div class="brand"><span class="name">Deal screen</span><span class="src">US business marketplaces</span></div>
   <p class="status" id="status">Loading listings…</p>
 </header>
 
@@ -288,6 +291,10 @@
       <div class="field">
         <label for="q">Search</label>
         <div class="search"><input type="search" id="q" placeholder="HVAC, dental, Austin…" aria-keyshortcuts="/"><kbd aria-hidden="true">/</kbd></div>
+      </div>
+      <div class="field">
+        <label for="src">Source</label>
+        <select id="src"><option value="">All sources</option></select>
       </div>
       <div class="field">
         <label for="state">State</label>
@@ -410,7 +417,13 @@
 
 <script>
 (() => {
-  const BASE = "https://us.businessesforsale.com/us/";
+  // Each source publishes its own data file in docs/data/.
+  const SOURCES = [
+    { key: "bfs", label: "BusinessesForSale", short: "BFS", file: "bfs.json", base: "https://us.businessesforsale.com/us/" },
+    { key: "tupelo", label: "Tupelo", short: "Tupelo", file: "tupelo.json", base: "https://www.tupelosmb.com/marketplace/listings/" },
+  ];
+  const SRC = Object.fromEntries(SOURCES.map(x => [x.key, x]));
+  let metas = {};
   const PAGE = 100;
   const $ = id => document.getElementById(id);
   let rows = [], meta = {}, filtered = [], shown = PAGE, sortState = { key: "first_seen", dir: "desc" };
@@ -436,7 +449,7 @@
     get() { try { return JSON.parse(localStorage.getItem("bfs-filters") || "{}"); } catch { return {}; } },
     set(v) { try { localStorage.setItem("bfs-filters", JSON.stringify(v)); } catch {} }
   };
-  const inputs = ["q", "state", "pmin", "pmax", "cfmin", "cfmax", "multmax", "since", "sort"];
+  const inputs = ["q", "src", "state", "pmin", "pmax", "cfmin", "cfmax", "multmax", "since", "sort"];
 
   function readFilters() {
     const f = {};
@@ -462,10 +475,11 @@
 
     const boxRes = activeBox ? results.get(activeBox) : null;
     filtered = rows.filter(r => {
-      if (boxRes && !boxRes.has(r.path)) return false;
+      if (boxRes && !boxRes.has(r.key)) return false;
       if (f.kind !== "all" && String(r.kind) !== f.kind) return false;
+      if (f.src && r.src !== f.src) return false;
       if (f.state && r.state !== f.state) return false;
-      if (q && !(r.title.toLowerCase().includes(q) || r.location.toLowerCase().includes(q) || r.teaser.toLowerCase().includes(q))) return false;
+      if (q && !r.hay.includes(q)) return false;
       if (pmin != null && !(r.price >= pmin)) return false;
       if (pmax != null && !(r.price != null && r.price <= pmax)) return false;
       if (cfmin != null && !(r.cash_flow >= cfmin)) return false;
@@ -537,7 +551,7 @@
   }
 
   function evaluate(r, c) {
-    const text = (r.title + " " + r.teaser).toUpperCase();
+    const text = (r.title + " " + r.category + " " + r.teaser).toUpperCase();
     const loc = (r.location || "").toUpperCase();
     if (c.skipFoodLegal && FOOD_LEGAL.test(r.title.toUpperCase())) return null;
     if (c.exRes.some(re => re.test(text))) return null;
@@ -597,7 +611,7 @@
     results = new Map();
     for (const b of boxes) {
       const c = compileBox(b), m = new Map();
-      for (const r of rows) { const res = evaluate(r, c); if (res) m.set(r.path, res); }
+      for (const r of rows) { const res = evaluate(r, c); if (res) m.set(r.key, res); }
       results.set(b.id, m);
     }
     if (activeBox && !results.has(activeBox)) activeBox = "";
@@ -751,6 +765,7 @@
   function renderChips(f) {
     const chips = [];
     if (f.q.trim()) chips.push([`“${f.q.trim()}”`, ["q"]]);
+    if (f.src) chips.push([SRC[f.src]?.label || f.src, ["src"]]);
     if (f.state) chips.push([f.state, ["state"]]);
     if (f.kind !== "all") chips.push([KIND_LABEL[f.kind], ["kind"]]);
     const pr = range("Asking", f.pmin, f.pmax); if (pr) chips.push([pr, ["pmin", "pmax"]]);
@@ -831,17 +846,18 @@
     }
     const res = activeBox ? results.get(activeBox) : null;
     const body = filtered.slice(0, shown).map(r => {
-      const m = res && res.get(r.path);
+      const m = res && res.get(r.key);
       const dec = m ? `<span class="dec ${m.cls}" title="${m.conf != null ? `Stress-test confidence ${m.conf.toFixed(0)}%` : "Check the listing for the missing figures"}">${m.decision}</span>` : "";
       const why = m ? [m.kw && `Matched “${esc(m.kw)}”`, m.maxSupport && isFinite(m.maxSupport) && `supports up to ${money(m.maxSupport)}`, m.after != null && `${money(Math.max(0, m.after))} left after debt`].filter(Boolean).join(", ") : "";
       const cfCell = r.cfSuspect
         ? `<td data-k="Cash flow"><span class="suspect" title="Looks like a typo on the listing (higher than revenue or the asking price). Left out of sorting and the multiple.">${money(r.cfRaw)} ?</span></td>`
         : cell(r.cash_flow, "Cash flow");
       return `
-      <tr data-href="${BASE}${esc(r.path)}">
+      <tr data-href="${esc(r.url)}">
         <td class="biz">
-          <div class="t"><a href="${BASE}${esc(r.path)}" target="_blank" rel="noopener">${esc(r.title)}</a>${dec}</div>
-          <div class="meta"><span>${esc(r.location || "Location not listed")}</span>${r.kind ? '<span class="tag vault">M&amp;A Vault</span>' : ""}${r.isNew ? '<span class="tag new">New</span>' : ""}</div>
+          <div class="t"><a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.title)}</a>${dec}</div>
+          <div class="meta"><span>${esc(r.location || "Location not listed")}</span><span class="srcname">${esc(SRC[r.src].label)}</span>${r.kind ? '<span class="tag vault">M&amp;A Vault</span>' : ""}${r.isNew ? '<span class="tag new">New</span>' : ""}</div>
+          ${r.category ? `<div class="cat">${esc(r.category)}</div>` : ""}
           ${why ? `<div class="why">${why}</div>` : ""}
           ${r.teaser ? `<div class="teaser">${esc(r.teaser)}</div>` : ""}
         </td>
@@ -865,55 +881,57 @@
 
   function exportCsv() {
     const ab = boxes.find(b => b.id === activeBox), bm = ab ? results.get(ab.id) : null;
-    const head = ["Title", "Type", "Location", "State", "Asking price", "Revenue", "Cash flow", "Cash flow looks wrong", "EBITDA", "Multiple", "First seen", "Last seen", "Link"].concat(ab ? ["Buy-box", "Decision", "Max supportable price", "Cash left after debt", "Matched keyword"] : []);
+    const head = ["Title", "Source", "Industry", "Type", "Location", "State", "Asking price", "Revenue", "Cash flow", "Cash flow looks wrong", "EBITDA", "Multiple", "First seen", "Last seen", "Link"].concat(ab ? ["Buy-box", "Decision", "Max supportable price", "Cash left after debt", "Matched keyword"] : []);
     const q = v => v == null ? "" : /[",\n]/.test(String(v)) ? `"${String(v).replace(/"/g, '""')}"` : v;
     const lines = [head.join(",")].concat(filtered.map(r => [
-      r.title, r.kind ? "M&A Vault" : "Listing", r.location, r.state, r.price, r.revenue, r.cfRaw, r.cfSuspect ? "yes" : "", r.ebitda,
-      r.mult != null ? r.mult.toFixed(2) : "", r.first_seen, r.last_seen, BASE + r.path
-    ].concat(ab ? (m => [ab.name, m?.decision || "", m?.maxSupport && isFinite(m.maxSupport) ? Math.round(m.maxSupport) : "", m?.after != null ? Math.round(m.after) : "", m?.kw || ""])(bm.get(r.path)) : []).map(q).join(",")));
+      r.title, SRC[r.src].label, r.category, r.kind ? "M&A Vault" : "Listing", r.location, r.state, r.price, r.revenue, r.cfRaw, r.cfSuspect ? "yes" : "", r.ebitda,
+      r.mult != null ? r.mult.toFixed(2) : "", r.first_seen, r.last_seen, r.url
+    ].concat(ab ? (m => [ab.name, m?.decision || "", m?.maxSupport && isFinite(m.maxSupport) ? Math.round(m.maxSupport) : "", m?.after != null ? Math.round(m.after) : "", m?.kw || ""])(bm.get(r.key)) : []).map(q).join(",")));
     const blob = new Blob([lines.join("\n")], { type: "text/csv" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = `${ab ? ab.name.replace(/[^\w-]+/g, "-") + "-" : ""}bfs-deals-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.download = `${ab ? ab.name.replace(/[^\w-]+/g, "-") + "-" : ""}deals-${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(a.href);
   }
 
   function statusLine() {
-    let fresh = "";
-    if (meta.updated_utc) {
-      const mins = Math.round((Date.now() - new Date(meta.updated_utc)) / 6e4);
-      const when = mins < 2 ? "just now" : mins < 60 ? `${mins} min ago` : mins < 1440 ? `${Math.round(mins / 60)} h ago` : `${Math.round(mins / 1440)} days ago`;
-      const stale = mins > 8 * 60;   // sweeps run every 4 hours
-      fresh = `<span class="fresh" title="${stale ? "Older than expected: the last sweeps may have failed" : "Checked for new listings every 4 hours"}"><span class="dot${stale ? " stale" : ""}"></span>Updated ${when}</span>`;
-    }
-    const total = meta.site_total ? `<span class="total"><strong>${meta.site_total.toLocaleString()}</strong> on the site</span>` : "";
-    $("status").innerHTML = fresh + total;
+    const list = Object.entries(metas);
+    if (!list.length) return;
+    const ages = list.map(([k, m]) => [k, m.updated_utc ? (Date.now() - new Date(m.updated_utc)) / 6e4 : Infinity]);
+    const newest = Math.min(...ages.map(a => a[1])), oldest = Math.max(...ages.map(a => a[1]));
+    const fmt = mins => !isFinite(mins) ? "never" : mins < 2 ? "just now" : mins < 60 ? `${Math.round(mins)} min ago` : mins < 1440 ? `${Math.round(mins / 60)} h ago` : `${Math.round(mins / 1440)} days ago`;
+    const stale = oldest > 8 * 60;   // sweeps run every 4 hours
+    const detail = ages.map(([k, mins]) => `${SRC[k].label}: updated ${fmt(mins)}`).join("\n");
+    const total = list.reduce((n, [, m]) => n + (m.site_total || m.tracked || 0), 0);
+    $("status").innerHTML = `<span class="fresh" title="${esc(detail)}${stale ? "\nOne source is older than expected: its last sweeps may have failed" : ""}"><span class="dot${stale ? " stale" : ""}"></span>Updated ${fmt(newest)}</span>`
+      + (total ? `<span class="total"><strong>${total.toLocaleString()}</strong> on ${list.length} ${list.length === 1 ? "site" : "sites"}</span>` : "");
   }
 
   async function load() {
-    try {
-      // Data lives in the GitHub repo; read it straight from there so the
-      // page shows each sweep without the host having to republish.
-      // Falls back to the copy deployed next to this page.
-      const sources = [
-        "https://raw.githubusercontent.com/MrPaoloSarino/dealsourcing-cloud/main/docs/data/bfs.json",
-        "data/bfs.json",
-      ];
-      let blob = null;
-      for (const url of sources) {
-        try {
-          const res = await fetch(url, { cache: "no-cache" });
-          if (res.ok) { blob = await res.json(); break; }
-        } catch (_) { /* try the next source */ }
+    // Data lives in the GitHub repo; read it straight from there so the page shows each
+    // sweep without the host having to republish. Falls back to the copy next to this page.
+    const RAW = "https://raw.githubusercontent.com/MrPaoloSarino/dealsourcing-cloud/refs/heads/main/docs/data/";
+    async function getJson(file) {
+      for (const url of [RAW + file, "data/" + file]) {
+        try { const res = await fetch(url, { cache: "no-cache" }); if (res.ok) return await res.json(); } catch (_) {}
       }
-      if (!blob) throw new Error("no data");
-      meta = blob.meta || {};
+      return null;
+    }
+    const blobs = await Promise.all(SOURCES.map(x => getJson(x.file)));
+    rows = []; metas = {};
+    SOURCES.forEach((src, si) => {
+      const blob = blobs[si];
+      if (!blob) return;
+      const meta = metas[src.key] = blob.meta || {};
       const idx = Object.fromEntries(blob.fields.map((f, i) => [f, i]));
-      rows = blob.rows.map((a, i) => {
-        const r = { ord: i };   // file order = the site's order, newest first
+      blob.rows.forEach((a, i) => {
+        const r = { ord: i, src: src.key };   // file order = the site's order, newest first
         for (const k in idx) r[k] = a[idx[k]];
-        r.title = r.title || ""; r.location = r.location || ""; r.teaser = r.teaser || "";
+        r.title = r.title || ""; r.location = r.location || ""; r.teaser = r.teaser || ""; r.category = r.category || "";
+        r.key = src.key + ":" + r.path;
+        r.url = (meta.base || src.base) + r.path;
+        r.hay = (r.title + " " + r.location + " " + r.category + " " + r.teaser).toLowerCase();
         // Seller-typed cash flow is sometimes impossible (above revenue, copied from
         // revenue or price, or wildly above the asking price). Keep it visible but
         // flag it, and leave it out of sorting and the multiple.
@@ -928,12 +946,14 @@
         if (r.cfSuspect) r.cash_flow = null;
         r.mult = r.price && r.cash_flow ? r.price / r.cash_flow : null;
         r.isNew = meta.baseline_date ? r.first_seen > meta.baseline_date : false;
-        return r;
+        rows.push(r);
       });
-    } catch (e) {
-      rows = [];
-      $("status").textContent = "Listings couldn't be loaded. The data file is missing until the first sweep finishes.";
-    }
+    });
+    if (!rows.length) $("status").textContent = "Listings couldn't be loaded. Check your connection and refresh.";
+    const srcCounts = {};
+    rows.forEach(r => { srcCounts[r.src] = (srcCounts[r.src] || 0) + 1; });
+    $("src").insertAdjacentHTML("beforeend", SOURCES.filter(x => srcCounts[x.key])
+      .map(x => `<option value="${x.key}">${x.label} (${srcCounts[x.key].toLocaleString()})</option>`).join(""));
     const counts = {};
     rows.forEach(r => { if (r.state) counts[r.state] = (counts[r.state] || 0) + 1; });
     $("state").insertAdjacentHTML("beforeend", Object.keys(counts).sort()
@@ -941,7 +961,7 @@
     const saved = store.get();
     if (saved.sort && !saved.sort.includes(":")) delete saved.sort;   // older saved format
     writeFilters(saved);
-    byPath = new Map(rows.map(r => [r.path, r]));
+    byPath = new Map(rows.map(r => [r.key, r]));
     runBoxes();
     if (rows.length) statusLine();
     apply();

@@ -1,0 +1,74 @@
+name: Tupelo sweep
+
+on:
+  schedule:
+    - cron: "37 */4 * * *"    # every 4 hours (Manila 12:37am/4/8am, 12:37pm/4/8pm): newest 10 pages
+    - cron: "53 19 * * *"     # daily 03:53 Manila: full crawl (~175 pages, ~10 min)
+  workflow_dispatch:
+    inputs:
+      pages:
+        description: "Pages to fetch (10 listings each). 0 = all pages"
+        required: false
+        default: "10"
+  push:
+    branches: [main]
+    paths: ["tupelo/**", ".github/workflows/tupelo_sweep.yml"]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: tupelo-sweep
+  cancel-in-progress: false
+
+jobs:
+  sweep:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      PUBLISH_ARGS: >-
+        out_tupelo/listings.csv --data docs/data/tupelo.json
+        --prefix https://www.tupelosmb.com/marketplace/listings/ --label Tupelo
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Decide how many pages
+        id: plan
+        env:
+          EVENT: ${{ github.event_name }}
+          CRON: ${{ github.event.schedule }}
+          INPUT_PAGES: ${{ github.event.inputs.pages }}
+        run: |
+          if [ "$EVENT" = "workflow_dispatch" ]; then P="${INPUT_PAGES:-10}"
+          elif [ "$EVENT" = "schedule" ] && [ "$CRON" = "53 19 * * *" ]; then P=0
+          elif [ "$EVENT" = "push" ]; then P=0      # first run after a code change: full crawl
+          else P=10; fi
+          echo "pages=$P" >> "$GITHUB_OUTPUT"
+          echo "Fetching pages: $P (0 = all)"
+
+      - name: Scrape Tupelo (saves progress every 50 pages)
+        run: >
+          python tupelo/scrape_tupelo.py --pages "${{ steps.plan.outputs.pages }}"
+          --checkpoint-every 50
+          --checkpoint-cmd "bash scripts/save_data.sh 'Tupelo data (crawl in progress)' $PUBLISH_ARGS"
+
+      - name: Save final data to the deal screen
+        if: always()
+        run: |
+          [ -f out_tupelo/listings.csv ] || { echo "No results file"; exit 0; }
+          bash scripts/save_data.sh "Update Tupelo data" $PUBLISH_ARGS
+
+      - name: Upload run files
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tupelo-results
+          path: out_tupelo/
+          retention-days: 7

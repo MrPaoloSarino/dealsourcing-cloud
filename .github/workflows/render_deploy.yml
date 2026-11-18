@@ -9,7 +9,7 @@ on:
     branches: [main]
     paths: ["docs/**"]
   workflow_run:
-    workflows: ["BusinessesForSale sweep"]   # data commits by the bot don't trigger push events
+    workflows: ["BusinessesForSale sweep", "Tupelo sweep"]   # bot data commits do not trigger push events
     types: [completed]
   workflow_dispatch:
 
