@@ -1,0 +1,75 @@
+name: BusinessesForSale sweep
+
+on:
+  schedule:
+    - cron: "17 22 * * *"     # daily 06:17 Manila: newest 20 pages (~500 listings)
+    - cron: "41 18 * * 6"     # weekly, Sun 02:41 Manila: full crawl of every page
+  workflow_dispatch:
+    inputs:
+      pages:
+        description: "Pages to fetch (25 listings each). 0 = all pages"
+        required: false
+        default: "20"
+  push:
+    branches: [main]
+    paths: ["bfs/**", ".github/workflows/**"]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: bfs-sweep
+  cancel-in-progress: false
+
+jobs:
+  sweep:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Decide how many pages
+        id: plan
+        env:
+          EVENT: ${{ github.event_name }}
+          CRON: ${{ github.event.schedule }}
+          INPUT_PAGES: ${{ github.event.inputs.pages }}
+          COMMIT_MSG: ${{ github.event.head_commit.message }}
+        run: |
+          if [ "$EVENT" = "workflow_dispatch" ]; then P="${INPUT_PAGES:-20}"
+          elif [ "$EVENT" = "schedule" ] && [ "$CRON" = "41 18 * * 6" ]; then P=0
+          elif [ "$EVENT" = "push" ] && echo "$COMMIT_MSG" | grep -q "\[full\]"; then P=0
+          elif [ "$EVENT" = "push" ]; then P=3
+          else P=20; fi
+          echo "pages=$P" >> "$GITHUB_OUTPUT"
+          echo "Fetching pages: $P (0 = all)"
+
+      - name: Scrape BusinessesForSale (plain HTTP, no browser)
+        run: python bfs/scrape_bfs.py --pages "${{ steps.plan.outputs.pages }}"
+
+      - name: Publish to the deal screen
+        run: python bfs/publish.py out/bfs_listings.csv
+
+      - name: Save updated data
+        run: |
+          git config user.name "dealsourcing-bot"
+          git config user.email "dealsourcing-bot@users.noreply.github.com"
+          git add docs/data/bfs.json
+          if git diff --cached --quiet; then echo "No changes"; exit 0; fi
+          git commit -m "Update BusinessesForSale data"
+          for i in 1 2 3; do git pull --rebase -q && git push && break; sleep 5; done
+
+      - name: Upload run files
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bfs-results
+          path: out/
+          retention-days: 7

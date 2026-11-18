@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deal screen · BusinessesForSale</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #F4F6F3;
+    --panel: #FFFFFF;
+    --ink: #1B2420;
+    --muted: #5E6B64;
+    --line: #D6DED8;
+    --pine: #23513F;
+    --pine-soft: #DCE8E1;
+    --brass: #A87A1E;
+    --rust: #A2513C;
+    --radius-s: 4px;
+    --radius-m: 8px;
+    --display: "Bricolage Grotesque", "Segoe UI", sans-serif;
+    --body: "Public Sans", "Segoe UI", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font: 15px/1.5 var(--body);
+    font-variant-numeric: tabular-nums;
+  }
+  a { color: inherit; }
+  :focus-visible { outline: 2px solid var(--pine); outline-offset: 2px; }
+
+  /* ---------- top ---------- */
+  .top {
+    display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 24px;
+    padding: 28px 32px 20px;
+    border-bottom: 1px solid var(--line);
+  }
+  .top h1 {
+    margin: 0;
+    font: 700 34px/1.05 var(--display);
+    letter-spacing: -0.02em;
+  }
+  .top h1 small {
+    font: 500 18px/1 var(--display);
+    color: var(--muted);
+    letter-spacing: 0;
+    margin-left: 10px;
+  }
+  .status { color: var(--muted); font-size: 14px; }
+  .status strong { color: var(--ink); font-weight: 600; }
+
+  /* ---------- layout ---------- */
+  .wrap {
+    display: grid;
+    grid-template-columns: 272px minmax(0, 1fr);
+    align-items: start;
+  }
+  .filters {
+    position: sticky; top: 0;
+    max-height: 100vh; overflow-y: auto;
+    padding: 20px 24px 32px 32px;
+    border-right: 1px solid var(--line);
+  }
+  .filters summary { display: none; }
+  .field { margin-bottom: 18px; }
+  .field > label, .field > .label {
+    display: block; font-weight: 600; font-size: 13px; margin-bottom: 6px;
+  }
+  .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  input[type=text], input[type=search], select {
+    width: 100%;
+    font: inherit; font-size: 14px;
+    padding: 7px 9px;
+    color: var(--ink);
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-s);
+  }
+  input::placeholder { color: #8C9891; }
+  .seg { display: flex; border: 1px solid var(--line); border-radius: var(--radius-s); overflow: hidden; background: var(--panel); }
+  .seg label { flex: 1; text-align: center; font-size: 13px; padding: 6px 4px; cursor: pointer; border-right: 1px solid var(--line); }
+  .seg label:last-child { border-right: 0; }
+  .seg input { position: absolute; opacity: 0; pointer-events: none; }
+  .seg label:has(input:checked) { background: var(--pine); color: #fff; }
+  .seg label:has(input:focus-visible) { outline: 2px solid var(--pine); outline-offset: -2px; }
+  .check { display: flex; gap: 8px; align-items: center; font-size: 14px; }
+  .check input { accent-color: var(--pine); width: 16px; height: 16px; }
+  .hint { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  button {
+    font: 600 14px var(--body);
+    padding: 8px 14px;
+    border-radius: var(--radius-s);
+    border: 1px solid var(--pine);
+    background: var(--panel); color: var(--pine);
+    cursor: pointer;
+  }
+  button.primary { background: var(--pine); color: #fff; }
+  button:hover { filter: brightness(0.95); }
+  .linkish { border: 0; background: none; padding: 0; color: var(--muted); font-weight: 500; text-decoration: underline; }
+
+  /* ---------- results ---------- */
+  .results { padding: 20px 32px 48px; min-width: 0; }
+  .bar {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px;
+    margin-bottom: 14px;
+  }
+  .count { font: 500 20px/1.2 var(--display); margin-right: auto; }
+  .count span { color: var(--muted); font: 400 14px var(--body); margin-left: 6px; }
+  .bar select { width: auto; }
+
+  table { width: 100%; border-collapse: collapse; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius-m); overflow: hidden; }
+  thead th {
+    text-align: right; font-size: 12px; font-weight: 600; color: var(--muted);
+    padding: 10px 14px; border-bottom: 1px solid var(--line); background: #FAFBFA; white-space: nowrap;
+  }
+  thead th:first-child { text-align: left; }
+  tbody td { padding: 12px 14px; border-bottom: 1px solid var(--line); text-align: right; vertical-align: top; white-space: nowrap; }
+  tbody tr:last-child td { border-bottom: 0; }
+  tbody tr:hover { background: #F8FAF8; }
+  td.biz { text-align: left; white-space: normal; width: 44%; }
+  .biz a { font-weight: 600; text-decoration: none; }
+  .biz a:hover { text-decoration: underline; }
+  .where { color: var(--muted); font-size: 13px; margin-top: 2px; }
+  .tag { display: inline-block; font-size: 11px; font-weight: 600; padding: 1px 6px; border-radius: 3px; margin-left: 6px; vertical-align: 2px; }
+  .tag.vault { background: var(--pine-soft); color: var(--pine); }
+  .tag.new { background: #F3E8CF; color: #7A5612; }
+  .teaser { color: var(--muted); font-size: 13px; margin-top: 4px; max-width: 62ch; }
+  .nil { color: #A9B3AD; }
+  .seen { color: var(--muted); font-size: 13px; }
+
+  /* the multiple gauge: asking price ÷ cash flow, scaled 0–8× */
+  .mult { display: grid; grid-template-columns: 44px 84px; align-items: center; gap: 8px; justify-content: end; }
+  .gauge { height: 8px; background: #EDF1EE; border-radius: 4px; position: relative; overflow: hidden; }
+  .gauge i { position: absolute; inset: 0 auto 0 0; border-radius: 4px; background: var(--pine); }
+  .gauge i.mid { background: var(--brass); }
+  .gauge i.high { background: var(--rust); }
+  .gauge::after { content: ""; position: absolute; left: 37.5%; top: 0; bottom: 0; width: 1px; background: #fff; }
+
+  .more { display: flex; justify-content: center; margin-top: 18px; }
+  .empty { padding: 48px 24px; text-align: center; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius-m); }
+  .empty h2 { font: 600 20px var(--display); margin: 0 0 6px; }
+  .empty p { color: var(--muted); margin: 0 0 16px; }
+
+  /* ---------- small screens ---------- */
+  @media (max-width: 900px) {
+    .top { padding: 20px 16px 14px; }
+    .top h1 { font-size: 28px; }
+    .wrap { grid-template-columns: 1fr; }
+    .filters { position: static; max-height: none; border-right: 0; border-bottom: 1px solid var(--line); padding: 12px 16px; }
+    .filters summary { display: block; cursor: pointer; font-weight: 600; padding: 4px 0; }
+    .filters[open] summary { margin-bottom: 14px; }
+    .results { padding: 16px; }
+    thead { display: none; }
+    table, tbody, tr, td { display: block; width: 100%; }
+    tbody tr { padding: 12px 14px; border-bottom: 1px solid var(--line); }
+    tbody td { border: 0; padding: 2px 0; text-align: left; }
+    td.biz { width: auto; margin-bottom: 6px; }
+    td[data-k]::before { content: attr(data-k) "  "; color: var(--muted); font-size: 12px; }
+    .mult { display: inline-grid; justify-content: start; vertical-align: middle; }
+  }
+  @media (min-width: 901px) { .filters summary + * { display: block; } }
+  @media (prefers-reduced-motion: no-preference) {
+    tbody tr { transition: background-color .12s; }
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <h1>Deal screen <small>BusinessesForSale, US</small></h1>
+  <p class="status" id="status">Loading listings…</p>
+</header>
+
+<div class="wrap">
+  <details class="filters" id="filtersBox" open>
+    <summary>Filters</summary>
+    <form id="filters" autocomplete="off" onsubmit="return false">
+      <div class="field">
+        <label for="q">Search</label>
+        <input type="search" id="q" placeholder="HVAC, dental, Austin…">
+      </div>
+      <div class="field">
+        <label for="state">State</label>
+        <select id="state"><option value="">All states</option></select>
+      </div>
+      <div class="field">
+        <span class="label" id="kindLabel">Type</span>
+        <div class="seg" role="radiogroup" aria-labelledby="kindLabel">
+          <label><input type="radio" name="kind" value="all" checked>All</label>
+          <label><input type="radio" name="kind" value="0">Listings</label>
+          <label><input type="radio" name="kind" value="1">M&amp;A Vault</label>
+        </div>
+      </div>
+      <div class="field">
+        <span class="label">Asking price</span>
+        <div class="pair">
+          <input type="text" id="pmin" placeholder="Min" aria-label="Minimum asking price">
+          <input type="text" id="pmax" placeholder="Max" aria-label="Maximum asking price">
+        </div>
+        <p class="hint">Type 500k or 2.5m</p>
+      </div>
+      <div class="field">
+        <span class="label">Cash flow</span>
+        <div class="pair">
+          <input type="text" id="cfmin" placeholder="Min" aria-label="Minimum cash flow">
+          <input type="text" id="cfmax" placeholder="Max" aria-label="Maximum cash flow">
+        </div>
+      </div>
+      <div class="field">
+        <label for="multmax">Highest multiple</label>
+        <select id="multmax">
+          <option value="">Any</option>
+          <option value="2">2× or less</option>
+          <option value="3">3× or less</option>
+          <option value="4">4× or less</option>
+          <option value="5">5× or less</option>
+        </select>
+        <p class="hint">Asking price ÷ cash flow</p>
+      </div>
+      <div class="field">
+        <label for="since">First seen</label>
+        <select id="since">
+          <option value="">Any time</option>
+          <option value="new">New since tracking began</option>
+          <option value="1">Last 24 hours</option>
+          <option value="7">Last 7 days</option>
+          <option value="30">Last 30 days</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="check"><input type="checkbox" id="hascf"> Only listings with cash flow</label>
+      </div>
+      <button type="button" class="linkish" id="reset">Clear filters</button>
+    </form>
+  </details>
+
+  <main class="results">
+    <div class="bar">
+      <p class="count" id="count" aria-live="polite"></p>
+      <label for="sort" class="hint" style="margin:0">Sort</label>
+      <select id="sort">
+        <option value="new">Newest first</option>
+        <option value="cf_desc">Cash flow, high to low</option>
+        <option value="mult_asc">Multiple, low to high</option>
+        <option value="price_asc">Asking price, low to high</option>
+        <option value="price_desc">Asking price, high to low</option>
+        <option value="rev_desc">Revenue, high to low</option>
+      </select>
+      <button type="button" id="export">Export CSV</button>
+    </div>
+    <div id="out"></div>
+    <div class="more"><button type="button" class="primary" id="moreBtn" hidden>Show 100 more</button></div>
+  </main>
+</div>
+
+<script>
+(() => {
+  const BASE = "https://us.businessesforsale.com/us/";
+  const PAGE = 100;
+  const $ = id => document.getElementById(id);
+  let rows = [], meta = {}, filtered = [], shown = PAGE;
+
+  const money = n => n == null ? null
+    : n >= 1e6 ? "$" + (n / 1e6).toFixed(n >= 1e7 ? 1 : 2).replace(/\.?0+$/, "") + "M"
+    : "$" + Math.round(n / 1e3).toLocaleString() + "K";
+  const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const parseAmt = s => {
+    const m = String(s || "").trim().toLowerCase().replace(/[$,\s]/g, "").match(/^(\d+(?:\.\d+)?)(k|m)?$/);
+    if (!m) return null;
+    return +m[1] * (m[2] === "m" ? 1e6 : m[2] === "k" ? 1e3 : 1);
+  };
+  const daysAgo = iso => Math.floor((Date.now() - new Date(iso + "T00:00:00Z")) / 864e5);
+  const ago = iso => {
+    const d = daysAgo(iso);
+    return d <= 0 ? "Today" : d === 1 ? "Yesterday" : d < 30 ? d + " days ago" : new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  };
+
+  const store = {
+    get() { try { return JSON.parse(localStorage.getItem("bfs-filters") || "{}"); } catch { return {}; } },
+    set(v) { try { localStorage.setItem("bfs-filters", JSON.stringify(v)); } catch {} }
+  };
+  const inputs = ["q", "state", "pmin", "pmax", "cfmin", "cfmax", "multmax", "since", "sort"];
+
+  function readFilters() {
+    const f = {};
+    inputs.forEach(id => f[id] = $(id).value);
+    f.kind = document.querySelector("input[name=kind]:checked").value;
+    f.hascf = $("hascf").checked;
+    return f;
+  }
+  function writeFilters(f) {
+    inputs.forEach(id => { if (f[id] != null) $(id).value = f[id]; });
+    if (f.kind) { const r = document.querySelector(`input[name=kind][value="${f.kind}"]`); if (r) r.checked = true; }
+    $("hascf").checked = !!f.hascf;
+  }
+
+  function apply() {
+    const f = readFilters();
+    store.set(f);
+    const q = f.q.trim().toLowerCase();
+    const pmin = parseAmt(f.pmin), pmax = parseAmt(f.pmax);
+    const cfmin = parseAmt(f.cfmin), cfmax = parseAmt(f.cfmax);
+    const mmax = f.multmax ? +f.multmax : null;
+    const sinceDays = f.since && f.since !== "new" ? +f.since : null;
+
+    filtered = rows.filter(r => {
+      if (f.kind !== "all" && String(r.kind) !== f.kind) return false;
+      if (f.state && r.state !== f.state) return false;
+      if (q && !(r.title.toLowerCase().includes(q) || r.location.toLowerCase().includes(q) || r.teaser.toLowerCase().includes(q))) return false;
+      if (pmin != null && !(r.price >= pmin)) return false;
+      if (pmax != null && !(r.price != null && r.price <= pmax)) return false;
+      if (cfmin != null && !(r.cash_flow >= cfmin)) return false;
+      if (cfmax != null && !(r.cash_flow != null && r.cash_flow <= cfmax)) return false;
+      if (f.hascf && !r.cash_flow) return false;
+      if (mmax != null && !(r.mult != null && r.mult <= mmax)) return false;
+      if (f.since === "new" && !r.isNew) return false;
+      if (sinceDays != null && daysAgo(r.first_seen) > sinceDays) return false;
+      return true;
+    });
+
+    const by = {
+      new: (a, b) => b.first_seen.localeCompare(a.first_seen) || (b.cash_flow || 0) - (a.cash_flow || 0),
+      cf_desc: (a, b) => (b.cash_flow ?? -1) - (a.cash_flow ?? -1),
+      mult_asc: (a, b) => (a.mult ?? 1e9) - (b.mult ?? 1e9),
+      price_asc: (a, b) => (a.price ?? 1e12) - (b.price ?? 1e12),
+      price_desc: (a, b) => (b.price ?? -1) - (a.price ?? -1),
+      rev_desc: (a, b) => (b.revenue ?? -1) - (a.revenue ?? -1),
+    }[f.sort] || (() => 0);
+    filtered.sort(by);
+    shown = PAGE;
+    render();
+  }
+
+  function cell(v, label) {
+    return `<td data-k="${label}">${v == null ? '<span class="nil">—</span>' : money(v)}</td>`;
+  }
+  function multCell(m) {
+    if (m == null) return `<td data-k="Multiple"><span class="nil">—</span></td>`;
+    const w = Math.min(m / 8, 1) * 100;
+    const cls = m <= 3 ? "" : m <= 5 ? "mid" : "high";
+    return `<td data-k="Multiple"><div class="mult" title="Asking price ÷ cash flow"><span>${m.toFixed(1)}×</span><div class="gauge"><i class="${cls}" style="width:${w}%"></i></div></div></td>`;
+  }
+
+  function render() {
+    const total = rows.length;
+    $("count").innerHTML = `${filtered.length.toLocaleString()} businesses<span>of ${total.toLocaleString()} tracked</span>`;
+    if (!filtered.length) {
+      $("out").innerHTML = total
+        ? `<div class="empty"><h2>No listings match these filters</h2><p>Widen the price or cash flow range, or clear the filters to see everything.</p><button type="button" class="primary" onclick="document.getElementById('reset').click()">Clear filters</button></div>`
+        : `<div class="empty"><h2>No listings yet</h2><p>The first crawl hasn't finished. Check back once the sweep has run.</p></div>`;
+      $("moreBtn").hidden = true;
+      return;
+    }
+    const body = filtered.slice(0, shown).map(r => `
+      <tr>
+        <td class="biz">
+          <a href="${BASE}${esc(r.path)}" target="_blank" rel="noopener">${esc(r.title)}</a>${r.kind ? '<span class="tag vault">M&amp;A Vault</span>' : ""}${r.isNew ? '<span class="tag new">New</span>' : ""}
+          <div class="where">${esc(r.location || "Location not listed")}</div>
+          ${r.teaser ? `<div class="teaser">${esc(r.teaser)}</div>` : ""}
+        </td>
+        ${cell(r.price, "Asking")}${cell(r.revenue, "Revenue")}${cell(r.cash_flow, "Cash flow")}${multCell(r.mult)}
+        <td data-k="First seen" class="seen">${ago(r.first_seen)}</td>
+      </tr>`).join("");
+    $("out").innerHTML = `<table>
+      <thead><tr><th>Business</th><th>Asking</th><th>Revenue</th><th>Cash flow</th><th title="Asking price ÷ cash flow">Multiple</th><th>First seen</th></tr></thead>
+      <tbody>${body}</tbody></table>`;
+    const left = filtered.length - shown;
+    $("moreBtn").hidden = left <= 0;
+    $("moreBtn").textContent = `Show ${Math.min(PAGE, left)} more`;
+  }
+
+  function exportCsv() {
+    const head = ["Title", "Type", "Location", "State", "Asking price", "Revenue", "Cash flow", "EBITDA", "Multiple", "First seen", "Last seen", "Link"];
+    const q = v => v == null ? "" : /[",\n]/.test(String(v)) ? `"${String(v).replace(/"/g, '""')}"` : v;
+    const lines = [head.join(",")].concat(filtered.map(r => [
+      r.title, r.kind ? "M&A Vault" : "Listing", r.location, r.state, r.price, r.revenue, r.cash_flow, r.ebitda,
+      r.mult != null ? r.mult.toFixed(2) : "", r.first_seen, r.last_seen, BASE + r.path
+    ].map(q).join(",")));
+    const blob = new Blob([lines.join("\n")], { type: "text/csv" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `bfs-deals-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  function statusLine() {
+    const parts = [];
+    if (meta.site_total) parts.push(`<strong>${meta.site_total.toLocaleString()}</strong> listings on the site`);
+    if (meta.updated_utc) {
+      const mins = Math.round((Date.now() - new Date(meta.updated_utc)) / 6e4);
+      const when = mins < 2 ? "just now" : mins < 60 ? `${mins} min ago` : mins < 1440 ? `${Math.round(mins / 60)} h ago` : `${Math.round(mins / 1440)} days ago`;
+      parts.push(`updated ${when}`);
+    }
+    if (meta.last_run_new != null) parts.push(`${meta.last_run_new} new in the last sweep`);
+    $("status").innerHTML = parts.length ? parts.join(", ") + "." : "";
+  }
+
+  async function load() {
+    try {
+      const res = await fetch("data/bfs.json", { cache: "no-cache" });
+      if (!res.ok) throw new Error(res.status);
+      const blob = await res.json();
+      meta = blob.meta || {};
+      const idx = Object.fromEntries(blob.fields.map((f, i) => [f, i]));
+      rows = blob.rows.map(a => {
+        const r = {};
+        for (const k in idx) r[k] = a[idx[k]];
+        r.title = r.title || ""; r.location = r.location || ""; r.teaser = r.teaser || "";
+        r.mult = r.price && r.cash_flow ? r.price / r.cash_flow : null;
+        r.isNew = meta.baseline_date ? r.first_seen > meta.baseline_date : false;
+        return r;
+      });
+    } catch (e) {
+      rows = [];
+      $("status").textContent = "Listings couldn't be loaded. The data file is missing until the first sweep finishes.";
+    }
+    const counts = {};
+    rows.forEach(r => { if (r.state) counts[r.state] = (counts[r.state] || 0) + 1; });
+    $("state").insertAdjacentHTML("beforeend", Object.keys(counts).sort()
+      .map(s => `<option value="${s}">${s} (${counts[s].toLocaleString()})</option>`).join(""));
+    writeFilters(store.get());
+    if (rows.length) statusLine();
+    apply();
+  }
+
+  let t;
+  $("filters").addEventListener("input", () => { clearTimeout(t); t = setTimeout(apply, 120); });
+  $("sort").addEventListener("change", apply);
+  $("reset").addEventListener("click", () => { $("filters").reset(); apply(); });
+  $("moreBtn").addEventListener("click", () => { shown += PAGE; render(); });
+  $("export").addEventListener("click", exportCsv);
+  if (matchMedia("(max-width: 900px)").matches) $("filtersBox").open = false;
+  load();
+})();
+</script>
+</body>
+</html>
