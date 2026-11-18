@@ -2,7 +2,7 @@ name: BusinessesForSale sweep
 
 on:
   schedule:
-    - cron: "17 22 * * *"     # daily 06:17 Manila: newest 20 pages (~500 listings)
+    - cron: "17 */4 * * *"    # every 4 hours (Manila 12:17am/4/8am, 12:17pm/4/8pm): newest 20 pages
     - cron: "41 18 * * 6"     # weekly, Sun 02:41 Manila: full crawl of every page
   workflow_dispatch:
     inputs:
