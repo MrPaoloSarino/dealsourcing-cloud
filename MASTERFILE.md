@@ -126,16 +126,25 @@ site's RSS feed `/us/search/businesses-for-sale.rss`, 25 newest items with pubDa
 - **Layout ("Private Equity Origination Desk", designed by the user 2026-11-19, phone fixes by Claude):**
   dark racing-green masthead (`--pe #0B3D2E`, gold accent `--gold-bright #E4C162`, Newsreader serif + Public Sans)
   with freshness dot, site totals, Import Buy-Boxes / Back up / Export CSV; a **Mandates** ribbon (buy-boxes as tabs,
-  "+ New Buy-Box", ★ Shortlist and Hide passed toggles with counts); one-line filter bar (search, source, state,
+  "+ New Buy-Box", a **Deciding for** client picker, ✓ Accepted and Hide axed toggles with counts); one-line filter bar (search, source, state,
   asking min/max, cash flow min/max, multiple, first seen, type, has cash flow; collapses to "Search & Filters" on
-  phones); results header with count and medians; filter chips incl. the active mandate (Edit / ×); table with star
-  column; **IC tearsheet panel** on the right (slide-over drawer below 1120px) for the selected row: mandate verdict
+  phones); results header with count and medians; filter chips incl. the active mandate (Edit / ×); table with a ✓ / ✕ (Accept / Axe) column; **IC tearsheet panel** on the right (slide-over drawer below 1120px) for the selected row: mandate verdict
   and confidence, description, figures, **target offer slider** ("Snap to SBA Max", manager-salary selector),
   10% equity / year-1 cash-on-cash / SBA DSCR, the 80/10/10 capital stack and annual cash flow, a private analyst
-  note, Shortlist / Pass / Open listing. `/` focuses search. Below 820px: header scrolls away (not sticky), mandate
+  note, a "Decisions on this deal" list (every client), Accept / Axe for the current client, Open listing.
+  Keys: `/` search, J/K move, A accept, X axe, O open. Below 820px: header scrolls away (not sticky), mandate
   tabs and triage buttons on their own rows, rows become two-column cards, selected card highlighted evenly.
-- **Triage** (shortlist, passed, notes) is stored in the browser only: localStorage `dealscreen-triage`
-  (`{starred:[key], passed:[key], notes:{key:text}}`, keys are `source:path`). Back up includes it.
+- **Accept / Axe per client** (added 2026-11-19, replaces the global Shortlist / Pass). Accepted = sourced or
+  inquired for that client; Axed = rejected for that client. The client is the open mandate tab, or the
+  "Deciding for" picker when "All listings" is open (changing the picker while a mandate is open switches the tab).
+  Pressing the same button again undoes it. Rows show an Accepted/Axed tag for the current client and
+  "Also: Laura ✓, Trey ✕" for other clients. CSV export adds Decision, Decided on, Other clients' decisions.
+  Stored in the browser only: localStorage `dealscreen-decisions` =
+  `{"<client name>": {"<source:path>": {"s": "accepted"|"axed", "d": "YYYY-MM-DD"}}}`, plus
+  `dealscreen-decide-for`. Keyed by client name on purpose so it maps to the cloud inquiries table later
+  (accepted → Inquired, axed → Axed). Back up / Import include it.
+- **Notes** stay in localStorage `dealscreen-triage` (`{starred, passed, notes:{key:text}}`); the old
+  starred/passed sets are no longer shown but are kept and still included in Back up.
 
 - **Filters:** search (title, location, teaser), state, type (all / listings / M&A Vault), asking
   min/max, cash flow min/max (type `500k`, `2.5m`), highest multiple, first seen (new / 24h / 7d / 30d),
@@ -243,8 +252,9 @@ Rows show the decision tag and "Matched "keyword", supports up to $X, $Y left af
 6. **More sources** — next by volume in the old app: Transworld, BBMS, BusinessBroker, Sunbelt. Probe each from
    Actions first (one-off probe workflow, then delete it), reuse `bfs/publish.py` + `scripts/save_data.sh`,
    add a `SOURCES` entry in `docs/app.html`.
-7. **Pipeline tracking** (Inquired → NDA → CIM → LOI) — needs private writable storage (Neon free Postgres or
-   similar); can't live in this public repo.
+7. **Clients & inquiries in the cloud** — Supabase (free) with row-level security; see the to-do Sheet
+   "Deal Sourcing Cloud: Clients & Inquiries To-Do". Move `dealscreen-decisions` into the inquiries table,
+   then point the Deal Capture extension at it. Never in this public repo.
 8. Housekeeping: alert when a sweep returns far fewer listings than usual (layout change); radius matching
    (needs a US cities lat/long table, the old app has `uscities.csv`); parse Tupelo's site total.
 
@@ -280,3 +290,4 @@ Rows show the decision tag and "Matched "keyword", supports up to $X, $Y left af
 | 2026-11-19 | **Tupelo added** as second source (1,746 listings, industry on every card); generic publish/save scripts; Source filter; industry used in buy-box matching. |
 | 2026-11-19 | User linked Render to GitHub (Render's GitHub app now has the repo): auto-deploy on commit works. Deploy Hook workflow removed. |
 | 2026-11-19 | User's redesign published as `docs/app.html`: masthead, Mandates ribbon, one-line filters, IC tearsheet with offer slider and capital stack, shortlist/pass/notes triage. Claude fixed three phone issues (sticky header too tall, patchy selected-row highlight, triage buttons covering buy-box tabs). |
+| 2026-11-19 | **Accept / Axe per client** replaces Shortlist / Pass on the deal screen (browser storage `dealscreen-decisions`, keyed by client name; A/X shortcuts; tearsheet shows decisions for every client; CSV and backup include them). |
