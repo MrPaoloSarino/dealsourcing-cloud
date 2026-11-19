@@ -110,6 +110,7 @@
     border-color: rgba(255,255,255,.22);
     color: #EFF5F2;
   }
+  button.mast-ghost.on { border-color: var(--gold-bright); color: var(--gold-bright); }
   button.mast-ghost:hover { background: rgba(255,255,255,.16); border-color: rgba(255,255,255,.38); }
   button.mast-gold {
     height: 30px; padding: 0 12px; font-size: 12px; font-weight: 700;
@@ -352,7 +353,7 @@
   .others { font-size: 11px; color: var(--muted); }
   .decide-for { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); font-weight: 600; white-space: nowrap; }
   .decide-for select { height: 30px; font-size: 12.5px; padding: 0 8px; min-width: 150px; width: auto; }
-  .ic-decisions { margin-top: 12px; border: 1px solid var(--line); border-radius: var(--r-s); padding: 10px 12px; font-size: 12.5px; }
+  .ic-decisions { margin: 0 18px 12px; flex-shrink: 0; border: 1px solid var(--line); border-radius: var(--r-s); padding: 10px 12px; font-size: 12.5px; }
   .ic-decisions .lbl { font-size: 10.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; display: block; }
   .ic-decisions ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
   .ic-decisions li { display: flex; justify-content: space-between; gap: 10px; }
@@ -652,6 +653,7 @@
   <div class="mast-right">
     <p class="status" id="status">Loading listings…</p>
     <div class="mast-actions">
+      <button type="button" class="mast-ghost" id="cloudBtn" title="Sign in to save Accept / Axe to your private cloud database">Sign in</button>
       <button type="button" class="mast-ghost" id="boxImport" title="Import desktop buybox.json or backup JSON">Import Buy-Boxes</button>
       <button type="button" class="mast-ghost" id="boxBackup" title="Back up buy-boxes, Accept/Axe decisions and notes">Back up</button>
       <button type="button" class="mast-gold" id="export">Export CSV</button>
@@ -755,7 +757,7 @@
         <button type="button" id="moreBtn" hidden>Show 100 more</button>
       </div>
       <div class="foot">
-        <span>Figures are seller-entered on source marketplaces and unverified. Buy-boxes, Accept/Axe decisions &amp; notes stay in this browser only — never uploaded.</span>
+        <span>Figures are seller-entered on source marketplaces and unverified. Notes stay in this browser. Signed in, Accept / Axe saves to your private cloud database; signed out, it stays in this browser.</span>
         <span class="kbd-hints">
           <span><kbd>/</kbd> search</span>
           <span><kbd>J</kbd>/<kbd>K</kbd> navigate</span>
@@ -775,6 +777,24 @@
 </main>
 
 <!-- 5. BUY-BOX MODAL DIALOG -->
+<dialog id="signDlg" aria-labelledby="signDlgTitle">
+  <form method="dialog" id="signForm">
+    <div class="dlg-head">
+      <h2 id="signDlgTitle">Sign in</h2>
+      <p>Your private client database. Accept / Axe and inquiries sync across every Chrome profile you sign in from.</p>
+    </div>
+    <div class="dlg-body">
+      <div class="field"><label for="sgEmail">Email</label><input type="email" id="sgEmail" autocomplete="username" required style="width:100%"></div>
+      <div class="field"><label for="sgPass">Password</label><input type="password" id="sgPass" autocomplete="current-password" required style="width:100%"></div>
+      <p class="err" id="sgErr" role="alert"></p>
+    </div>
+    <div class="actions">
+      <button type="button" id="sgCancel">Cancel</button>
+      <button type="submit" class="primary" id="sgSubmit">Sign in</button>
+    </div>
+  </form>
+</dialog>
+
 <dialog id="boxDlg" aria-labelledby="boxDlgTitle">
   <form method="dialog" id="boxForm" autocomplete="off">
     <div class="dlg-head">
@@ -894,6 +914,7 @@
   let decideFor = decStore.getFor();
   const todayIso = () => new Date().toLocaleDateString("en-CA");
   const shortDate = iso => iso ? new Date(iso + "T12:00:00").toLocaleDateString(undefined, { month: "short", day: "numeric" }) : "";
+  const decLabel = d => d?.st || (d?.s === "accepted" ? "Accepted" : d?.s === "axed" ? "Axed" : "");
   const firstName = n => String(n || "").trim().split(/\s+/)[0];
   function currentClient() {
     const ab = (typeof boxes !== "undefined" ? boxes : []).find(b => b.id === activeBox);
@@ -1052,7 +1073,7 @@
       ? boxes.map(b => `<option value="${esc(b.name)}"${b.name === client ? " selected" : ""}>${esc(b.name)}</option>`).join("")
       : `<option value="">No clients yet</option>`;
     sel.disabled = !boxes.length;
-    const cm = Object.values(decisionMap(client));
+    const cm = Object.entries(decisionMap(client)).filter(([k]) => byPath.has(k)).map(([, v]) => v);
     $("starCount").textContent = cm.filter(x => x.s === "accepted").length;
     $("passedCount").textContent = cm.filter(x => x.s === "axed").length;
     $("starFilterBtn").setAttribute("aria-pressed", String(starOnly));
@@ -1207,7 +1228,8 @@
         ? `<td data-k="Cash Flow"><span class="suspect" title="Looks like a seller typo (≥ revenue or equals asking price). Excluded from multiples.">${money(r.cfRaw)} ?</span></td>`
         : cell(r.cash_flow, "Cash Flow", r.cash_flow ? "cf-strong" : "");
       const client = currentClient();
-      const dcur = decisionMap(client)[r.key]?.s || "";
+      const dobj = decisionMap(client)[r.key] || null;
+      const dcur = dobj?.s || "";
       const others = othersFor(r.key, client);
       const hasNote = !!(triage.notes[r.key] || "").trim();
       const rowCls = [r.key === selectedKey ? "selected" : "", dcur === "axed" ? "is-passed" : ""].filter(Boolean).join(" ");
@@ -1225,7 +1247,7 @@
             <span class="dotsep">${esc(SRC[r.src].short)}</span>
             ${r.kind ? '<span class="tag vault">Vault</span>' : ""}
             ${r.isNew ? '<span class="tag new">New</span>' : ""}
-            ${dcur === "accepted" ? '<span class="tag acc">Accepted</span>' : dcur === "axed" ? '<span class="tag axed">Axed</span>' : ""}
+            ${dcur ? `<span class="tag ${dcur === "accepted" ? "acc" : "axed"}" title="${esc(client)}${dobj.d ? " · " + esc(dobj.d) : ""}">${esc(decLabel(dobj))}${dobj.d ? " " + esc(shortDate(dobj.d)) : ""}</span>` : ""}
             ${others.length ? `<span class="others" title="${esc(others.map(o => `${o.client}: ${o.s === "accepted" ? "Accepted" : "Axed"} ${shortDate(o.d)}`).join("\n"))}">Also: ${others.map(o => `${esc(firstName(o.client))} ${o.s === "accepted" ? "✓" : "✕"}`).join(", ")}</span>` : ""}
             ${hasNote ? '<span class="note-ind" title="Has personal note">● Note</span>' : ""}
           </div>
@@ -1398,8 +1420,8 @@
       </div>
 
       <div class="ic-decisions" aria-live="polite">
-        <span class="lbl">Decisions on this deal (this browser)</span>
-        ${allDec.length ? `<ul>${allDec.map(x => `<li><span>${esc(x.client)}</span><span><span class="tag ${x.s === "accepted" ? "acc" : "axed"}">${x.s === "accepted" ? "Accepted" : "Axed"}</span> ${esc(shortDate(x.d))}</span></li>`).join("")}</ul>` : `<span class="none">Not accepted or axed for any client yet.</span>`}
+        <span class="lbl">Decisions on this deal${cloud.ready ? "" : " (this browser)"}</span>
+        ${allDec.length ? `<ul>${allDec.map(x => `<li><span>${esc(x.client)}</span><span><span class="tag ${x.s === "accepted" ? "acc" : "axed"}">${esc(decLabel(x))}</span> ${esc(shortDate(x.d))}</span></li>`).join("")}</ul>` : `<span class="none">Not accepted or axed for any client yet.</span>`}
       </div>
 
       <div class="ic-foot">
@@ -1486,14 +1508,25 @@
   $("icBackdrop").addEventListener("click", closeDrawer);
 
   // Accept / Axe the listing for the current client; pressing the same one again undoes it.
-  function decide(key, status) {
+  let deciding = false;
+  async function decide(key, status) {
     const client = currentClient();
     if (!client) { alertMsg("Add a client first: + New Buy-Box, or Import Buy-Boxes."); return; }
-    const m = decisions[client] || (decisions[client] = {});
+    if (deciding) return;
     const idx = filtered.findIndex(r => r.key === key);
-    if (m[key]?.s === status) delete m[key];
-    else m[key] = { s: status, d: todayIso() };
-    decStore.set(decisions);
+    if (cloud.ready && cloudClient(client)) {
+      deciding = true;
+      try { await decideCloud(key, status, cloudClient(client)); }
+      catch (e) { alertMsg("Not saved to the cloud: " + e.message); deciding = false; return; }
+      deciding = false;
+    } else {
+      if (cloud.ready) alertMsg(`${client} isn't one of your cloud clients, so this is saved in this browser only.`);
+      const lm = cloud.ready ? (localDecisions[client] || (localDecisions[client] = {})) : (decisions[client] || (decisions[client] = {}));
+      if (lm[key]?.s === status) delete lm[key];
+      else lm[key] = { s: status, d: todayIso() };
+      if (cloud.ready) { decStore.set(localDecisions); rebuildDecisions(); } else decStore.set(decisions);
+    }
+    const m = decisions[client] || {};
     updateTriageButtons();
     const nowAxed = m[key]?.s === "axed";
     const leaves = (hidePassed && nowAxed && !starOnly) || (starOnly && m[key]?.s !== "accepted");
@@ -1506,6 +1539,196 @@
       renderIC();
     }
   }
+
+  /* ---------- Cloud: private Supabase database (sign-in, clients, inquiries) ----------
+     The URL and publishable key are public by design. Row-level security only lets accounts
+     listed in app_admins read or write, and public sign-ups are off. No client data is in this file. */
+  const SB_URL = "https://bfuczktomibpbzexkyah.supabase.co";
+  const SB_KEY = "sb_publishable_jCHIHI0ibe7UMKlf_pRlJg_ZcUjDYfC";
+  const AXED_STATUSES = new Set(["Axed", "Passed"]);
+  const cloud = { session: null, ready: false, clients: new Map(), inq: new Map(), undo: {} };
+  let localDecisions = decisions;
+  const lsGet = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k) || "null"); return v == null ? d : v; } catch { return d; } };
+  const lsSet = (k, v) => { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+  cloud.session = lsGet("dealscreen-sb-session", null);
+  cloud.undo = lsGet("dealscreen-cloud-undo", {});
+
+  function cloudClient(name) {
+    const n = String(name || "").toLowerCase();
+    for (const c of cloud.clients.values()) if (c.name.toLowerCase() === n) return c;
+    return null;
+  }
+
+  async function sbAuth(grant, body) {
+    const res = await fetch(`${SB_URL}/auth/v1/token?grant_type=${grant}`, {
+      method: "POST", headers: { apikey: SB_KEY, "Content-Type": "application/json" }, body: JSON.stringify(body),
+    });
+    const j = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(j.error_description || j.msg || j.message || `sign-in failed (${res.status})`);
+    return { access_token: j.access_token, refresh_token: j.refresh_token, expires_at: Date.now() + (j.expires_in || 3600) * 1000, email: j.user?.email || "" };
+  }
+
+  async function sbToken() {
+    const s = cloud.session;
+    if (!s) throw new Error("you're signed out");
+    if (Date.now() > s.expires_at - 60000) {
+      try {
+        const n = await sbAuth("refresh_token", { refresh_token: s.refresh_token });
+        n.email = n.email || s.email; cloud.session = n; lsSet("dealscreen-sb-session", n);
+      } catch (e) { signOut(); throw new Error("your sign-in expired, sign in again"); }
+    }
+    return cloud.session.access_token;
+  }
+
+  async function sb(path, { method = "GET", body, prefer, range } = {}) {
+    const h = { apikey: SB_KEY, Authorization: "Bearer " + await sbToken() };
+    if (body !== undefined) h["Content-Type"] = "application/json";
+    if (prefer) h.Prefer = prefer;
+    if (range) { h["Range-Unit"] = "items"; h.Range = range; }
+    const res = await fetch(`${SB_URL}/rest/v1/${path}`, { method, headers: h, body: body === undefined ? undefined : JSON.stringify(body) });
+    if (!res.ok) { const j = await res.json().catch(() => ({})); throw new Error(j.message || `cloud error ${res.status}`); }
+    const txt = await res.text();
+    return txt ? JSON.parse(txt) : null;
+  }
+
+  function rebuildDecisions() {
+    if (!cloud.ready) { decisions = localDecisions; return; }
+    const out = {};
+    for (const [c, m] of Object.entries(localDecisions)) if (!cloudClient(c)) out[c] = { ...m };   // non-cloud clients stay local
+    for (const [name, m] of cloud.inq) {
+      const o = out[name] = {};
+      for (const [k, r] of m) o[k] = { s: AXED_STATUSES.has(r.status) ? "axed" : "accepted", d: r.inquiry_date || "", st: r.status };
+    }
+    decisions = out;
+  }
+
+  function putInq(name, r) {
+    if (!cloud.inq.has(name)) cloud.inq.set(name, new Map());
+    const m = cloud.inq.get(name), prev = m.get(r.listing_key);
+    if (!prev || (r.inquiry_date || "") >= (prev.inquiry_date || "")) m.set(r.listing_key, r);
+  }
+
+  function inqBody(c, key, st) {
+    const r = byPath.get(key);
+    return {
+      client_id: c.id, link: r.url, listing_key: key, title: r.title || null, inquiry_date: todayIso(),
+      price: r.price ?? null, sde: r.cfRaw ?? null, revenue: r.revenue ?? null, ebitda: r.ebitda ?? null,
+      location: r.location || null, status: st, source_site: SRC[r.src]?.label || null,
+    };
+  }
+
+  // Accept = Inquired, Axe = Axed. Pressing the same button again undoes only what this screen did:
+  // a row it created is deleted, a status it changed is put back. Older inquiries are never deleted.
+  async function decideCloud(key, status, c) {
+    const m = cloud.inq.get(c.name) || new Map();
+    const cur = m.get(key);
+    const curS = cur ? (AXED_STATUSES.has(cur.status) ? "axed" : "accepted") : "";
+    const uk = c.id + "|" + key, u = cloud.undo[uk];
+    if (curS === status) {
+      if (u?.created) { await sb(`inquiries?id=eq.${cur.id}`, { method: "DELETE" }); m.delete(key); }
+      else if (u?.prev) { const [row] = await sb(`inquiries?id=eq.${cur.id}`, { method: "PATCH", body: { status: u.prev }, prefer: "return=representation" }); m.set(key, row); }
+      else { alertMsg(`Already "${cur.status}" for ${c.name} since ${cur.inquiry_date || "earlier"}. Older inquiries aren't removed from here.`); return; }
+      delete cloud.undo[uk];
+    } else if (cur) {
+      const [row] = await sb(`inquiries?id=eq.${cur.id}`, { method: "PATCH", body: { status: status === "axed" ? "Axed" : "Inquired" }, prefer: "return=representation" });
+      if (!u) cloud.undo[uk] = { prev: cur.status };
+      m.set(key, row);
+    } else {
+      if (!byPath.has(key)) return;
+      const [row] = await sb("inquiries?on_conflict=client_id,link", { method: "POST", body: inqBody(c, key, status === "axed" ? "Axed" : "Inquired"), prefer: "return=representation,resolution=merge-duplicates" });
+      cloud.undo[uk] = { created: true };
+      putInq(c.name, row);
+    }
+    if (!cloud.inq.has(c.name)) cloud.inq.set(c.name, m);
+    lsSet("dealscreen-cloud-undo", cloud.undo);
+    rebuildDecisions();
+  }
+
+  // Decisions made in this browser before signing in are sent up once, then removed locally.
+  async function migrateLocal() {
+    const body = [], done = [];
+    for (const [name, m] of Object.entries(localDecisions)) {
+      const c = cloudClient(name); if (!c) continue;
+      for (const [key, v] of Object.entries(m)) {
+        if (!byPath.has(key)) continue;
+        if (!cloud.inq.get(c.name)?.has(key)) body.push({ ...inqBody(c, key, v.s === "axed" ? "Axed" : "Inquired"), inquiry_date: v.d || todayIso() });
+        done.push([name, key]);
+      }
+    }
+    if (body.length) {
+      const rows = await sb("inquiries?on_conflict=client_id,link", { method: "POST", body, prefer: "return=representation,resolution=ignore-duplicates" });
+      const byId = new Map([...cloud.clients.values()].map(c => [c.id, c.name]));
+      (rows || []).forEach(r => putInq(byId.get(r.client_id), r));
+    }
+    for (const [name, key] of done) delete localDecisions[name][key];
+    for (const n of Object.keys(localDecisions)) if (!Object.keys(localDecisions[n]).length) delete localDecisions[n];
+    decStore.set(localDecisions);
+    return body.length;
+  }
+
+  async function cloudLoad() {
+    if (!cloud.session || !rows.length) { renderCloudBtn(); return; }
+    renderCloudBtn("Syncing…");
+    try {
+      const adm = await sb("app_admins?select=user_id");
+      if (!adm || !adm.length) { signOut(); alertMsg("This account isn't allowed into the client database."); return; }
+      const cl = await sb("clients?select=id,name,active,buybox&order=name");
+      cloud.clients = new Map(cl.filter(c => c.active).map(c => [c.id, c]));
+      const inqs = [];
+      for (let off = 0; ; off += 1000) {
+        const part = await sb("inquiries?select=id,client_id,listing_key,link,status,inquiry_date&listing_key=not.is.null&order=id", { range: `${off}-${off + 999}` });
+        inqs.push(...part); if (part.length < 1000) break;
+      }
+      cloud.inq = new Map();
+      for (const r of inqs) { const c = cloud.clients.get(r.client_id); if (c) putInq(c.name, r); }
+      let added = 0;
+      for (const c of cloud.clients.values()) {
+        if (c.buybox && !boxes.some(b => b.name.toLowerCase() === c.name.toLowerCase())) { boxes.push({ ...fromDesktop(c.buybox), name: c.name }); added++; }
+      }
+      if (added) { boxStore.set(boxes); runBoxes(); }
+      cloud.ready = true;
+      const moved = await migrateLocal();
+      rebuildDecisions();
+      renderCloudBtn();
+      updateTriageButtons(); apply();
+      const n = inqs.length;
+      alertMsg(`Synced ${n.toLocaleString()} inquiries on listed deals${added ? `, added ${added} buy-box${added === 1 ? "" : "es"}` : ""}${moved ? `, uploaded ${moved} decision${moved === 1 ? "" : "s"} from this browser` : ""}.`);
+    } catch (e) {
+      cloud.ready = false; rebuildDecisions(); renderCloudBtn();
+      alertMsg("Cloud sync failed: " + e.message + ". Decisions are saving in this browser for now.");
+    }
+  }
+
+  function renderCloudBtn(text) {
+    const b = $("cloudBtn");
+    b.classList.toggle("on", cloud.ready);
+    b.textContent = text || (cloud.ready ? "● Synced" : cloud.session ? "Retry sync" : "Sign in");
+    b.title = cloud.ready ? `Signed in as ${cloud.session?.email || ""}. Click to sign out.` : "Sign in to save Accept / Axe to your private cloud database";
+  }
+
+  function signOut() {
+    cloud.session = null; cloud.ready = false; cloud.inq = new Map(); cloud.clients = new Map();
+    lsSet("dealscreen-sb-session", null);
+    rebuildDecisions(); renderCloudBtn(); updateTriageButtons(); apply();
+  }
+
+  $("cloudBtn").addEventListener("click", () => {
+    if (cloud.ready) { if (confirm(`Sign out of the cloud (${cloud.session?.email || ""})? Decisions will save in this browser until you sign in again.`)) signOut(); return; }
+    if (cloud.session) { cloudLoad(); return; }
+    $("sgErr").textContent = ""; $("signDlg").showModal(); $("sgEmail").focus();
+  });
+  $("sgCancel").addEventListener("click", () => $("signDlg").close());
+  $("signForm").addEventListener("submit", async e => {
+    e.preventDefault();
+    $("sgSubmit").disabled = true; $("sgErr").textContent = "";
+    try {
+      cloud.session = await sbAuth("password", { email: $("sgEmail").value.trim(), password: $("sgPass").value });
+      lsSet("dealscreen-sb-session", cloud.session);
+      $("sgPass").value = ""; $("signDlg").close();
+      await cloudLoad();
+    } catch (err) { $("sgErr").textContent = /invalid/i.test(err.message) ? "Wrong email or password." : err.message; }
+    finally { $("sgSubmit").disabled = false; }
+  });
 
   /* ---------- Buy-Box Editor, Import, Backup ---------- */
   const list = s => String(s || "").split(/[,\n]/).map(x => x.trim()).filter(Boolean);
@@ -1635,7 +1858,7 @@
     const lines = [head.join(",")].concat(filtered.map(r => [
       r.title, SRC[r.src].label, r.category, r.kind ? "M&A Vault" : "Listing", r.location, r.state, r.price, r.revenue, r.cfRaw, r.cfSuspect ? "yes" : "", r.ebitda,
       r.mult != null ? r.mult.toFixed(2) : "", r.first_seen, r.last_seen, r.url,
-      ...(d => [d ? (d.s === "accepted" ? "Accepted" : "Axed") : "", d?.d || ""])(decisionMap()[r.key]),
+      ...(d => [d ? decLabel(d) : "", d?.d || ""])(decisionMap()[r.key]),
       othersFor(r.key).map(o => `${o.client}: ${o.s === "accepted" ? "Accepted" : "Axed"} ${o.d}`).join("; "),
       triage.notes[r.key] || ""
     ].concat(ab ? (m => [ab.name, m?.decision || "", m?.maxSupport && isFinite(m.maxSupport) ? Math.round(m.maxSupport) : "", m?.after != null ? Math.round(m.after) : "", m?.kw || ""])(bm.get(r.key)) : []).map(q).join(",")));
@@ -1715,6 +1938,7 @@
     runBoxes();
     if (rows.length) statusLine();
     apply();
+    cloudLoad();
   }
 
   /* ---------- Event Wiring ---------- */
