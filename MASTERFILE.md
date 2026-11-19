@@ -65,7 +65,7 @@ freelancer) who sources small and lower-middle-market businesses for buy-side cl
 | **Repo is public** | Claude's GitHub link could only see public repos; also gives unlimited Actions minutes. Only public listing data is stored. |
 | **Data in a JSON file in the repo** (no database yet) | One source, ~15k rows, ~2.9 MB. A database is only needed for writable features (pipeline). |
 | **Render** static site for hosting | `*.github.io` (GitHub Pages) is **blocked on the user's network** (connection reset, even `pages.github.com`; changing DNS to 1.1.1.1 didn't help). Cloudflare Pages: user believes their account is banned / can't reach the email. Netlify free: ~20 production deploys/month (credit model), too few. Vercel Hobby: non-commercial use only, and this is client work. Render free static sites work on the user's network and allow commercial use. |
-| **Self-updating loader** (`docs/index.html` → fetches `docs/app.html` from GitHub raw) | Render auto-deploy ("On Commit") never fired, probably because the service was connected by public repo URL rather than through the GitHub app. With the loader, Render never needs to redeploy again. `raw.githubusercontent.com` works on the user's network. |
+| **Self-updating loader** (`docs/index.html` → fetches `docs/app.html` from GitHub raw) | Added when Render's auto-deploy wasn't firing (the repo had been added as a Public Git Repository). Kept as a safety net: the screen and data update from GitHub even if Render doesn't redeploy. `raw.githubusercontent.com` works on the user's network. Render auto-deploy now works too (see below). |
 | **Data also read from GitHub raw** | Same reason: new data appears on refresh without any host redeploy. Falls back to `data/bfs.json` next to the page. |
 | Rejected: paid VPS / residential proxy / scraping APIs | User chose zero cost. Researched for later: Vultr Regular 4 GB $20/mo; residential proxies ~$1–4/GB; Hetzner US became expensive and restricts new customers in 2026. |
 | Rejected: Supabase free DB | Pauses projects after 7 days of low activity. Neon free (1 GB, scales to zero) is the preferred DB if one is added. |
@@ -84,7 +84,6 @@ file; the `refs/heads/main/...` form worked immediately. The loader uses `refs/h
 | `bfs/publish.py` | Generic publisher (default BusinessesForSale; Tupelo passes `--data docs/data/tupelo.json --prefix https://www.tupelosmb.com/marketplace/listings/ --label Tupelo`). Merges a run into the source's data file: keeps `first_seen` from earlier runs, sets `last_seen` to today, derives US state code from location, keeps a short teaser for M&A Vault cards, **drops listings not seen for 21 days**. Row order in the file = the site's order (newest first): this run's listings in site order, then the rest in their previous order, stable-sorted by `first_seen` desc. Sets `meta.baseline_date` on first ever run (listings first seen after it are "New"). |
 | `scripts/save_data.sh` | `save_data.sh "<commit msg>" [publish args…]`: runs publish, then commits and pushes `docs/data/*.json` as `dealsourcing-bot` (retries with `git pull --rebase`). |
 | `.github/workflows/tupelo_sweep.yml` | Tupelo schedule (below). |
-| `.github/workflows/render_deploy.yml` | Calls the Render Deploy Hook (secret `RENDER_DEPLOY_HOOK`) after `docs/**` pushes and after each sweep; no-op without the secret. Render's own auto-deploy didn't fire because the repo was added as a Public Git Repository; the fix is to give Render's GitHub app access to `dealsourcing-cloud` and select it as the source. |
 | `.github/workflows/bfs_sweep.yml` | Schedule + manual + push triggers (below). `permissions: contents: write`, `concurrency: bfs-sweep`. |
 | `docs/index.html` | Loader page that hosts serve. |
 | `docs/app.html` | The deal screen (single file: HTML + CSS + JS, no build step). |
@@ -204,8 +203,8 @@ Rows show the decision tag and "Matched "keyword", supports up to $X, $Y left af
 - **Run a sweep now:** GitHub → Actions → *BusinessesForSale sweep* or *Tupelo sweep* → Run workflow → pages (0 = all).
 - **If the screen looks stale:** hover "Updated…" in the app bar to see each source's last update, then check that
   source's latest Actions run; data files are `docs/data/bfs.json` and `docs/data/tupelo.json` (`meta.updated_utc`). Raw GitHub can cache up to ~5 min.
-- **If Render shows an old page:** Render → Manual Deploy → Deploy latest commit (should only be needed
-  if `docs/index.html` itself changes).
+- **Render deploys automatically** on every push to `main` (Render's GitHub app has access to `dealsourcing-cloud`;
+  linked 2026-11-19, first automatic deploy 4:07pm Manila). If it ever stops: Render → Manual Deploy → Deploy latest commit.
 - **Failure signals:** a failed run (GitHub emails the account), `blocked=True` lines in the run log,
   or a sudden drop in `tracked`.
 - Commits by the bot are `dealsourcing-bot`; code commits use the user's name with a
@@ -216,10 +215,6 @@ Rows show the decision tag and "Matched "keyword", supports up to $X, $Y left af
 ## 8. Known gaps / roadmap
 
 **Waiting on the user**
-- Link Render to GitHub properly: Render → Update Source → *Configure in GitHub* → give the Render app access to
-  `dealsourcing-cloud` → select it (currently added as a Public Git Repository, so auto-deploy never fires).
-  Not required for updates (the loader pulls from GitHub), only for Render's deploy list / its own copy.
-  Alternative: add the Render Deploy Hook as secret `RENDER_DEPLOY_HOOK` (workflow already in place). Don't do both.
 - Import buy-boxes (`buybox.json`) in the browser the user actually uses; each browser/device is separate.
 
 **Next to build (priority order)**
@@ -271,3 +266,4 @@ Rows show the decision tag and "Matched "keyword", supports up to $X, $Y left af
 | 2026-11-19 | UI redesign: app bar with freshness dot, side panel sections, medians summary, filter chips, sticky header, clickable rows. Fixed empty side panel after widening; "Newest first" follows site order. |
 | 2026-11-19 | Render Deploy Hook workflow added (inactive until the secret exists). |
 | 2026-11-19 | **Tupelo added** as second source (1,746 listings, industry on every card); generic publish/save scripts; Source filter; industry used in buy-box matching. |
+| 2026-11-19 | User linked Render to GitHub (Render's GitHub app now has the repo): auto-deploy on commit works. Deploy Hook workflow removed. |
