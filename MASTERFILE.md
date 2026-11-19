@@ -152,6 +152,10 @@ site's RSS feed `/us/search/businesses-for-sale.rss`, 25 newest items with pubDa
   the real status and date ("NDA sent Oct 1"). Undo only reverts what the screen did (`dealscreen-cloud-undo`:
   delete a row it created, or restore the status it changed); older inquiries are never deleted from the screen.
   Clients that aren't in the cloud keep browser-only decisions. Statuses Axed/Passed count as axed, all others as accepted.
+- **Profile lock (added 2026-11-19).** With a mandate open, "🔓 Lock profile to <client>" stores
+  localStorage `dealscreen-lock`. Locked: only "All listings" + that client's tab show, "+ New Buy-Box" and the
+  "Deciding for" picker are disabled, and every Accept / Axe applies to that client. Unlock = type the client's
+  name. **Cross-inquiry check** (locked or not): accepting a deal another client already has asks for confirmation.
 - **Notes** stay in localStorage `dealscreen-triage` (`{starred, passed, notes:{key:text}}`); the old
   starred/passed sets are no longer shown but are kept and still included in Back up.
 
@@ -299,6 +303,8 @@ Rows show the decision tag and "Matched "keyword", supports up to $X, $Y left af
   plus `inquirySuccess` stripped) and Transworld slugs (`transworld_dedupe_key`); updates only fields provided;
   sets `listing_key` for BFS/Tupelo so the deal screen shows the status. "Already inquired" checks link, canonical
   link, listing_key and Transworld slug, across all clients.
+- v2.1 lock: "Lock this profile to <client>" (`profileClient`) makes the client field read-only in the popup,
+  overlay and portal tab, and `background.js` refuses saves for any other client. Changing it = type the name.
 - Each save is also mirrored best-effort to the desktop app (`127.0.0.1:8050/api/inquiries`) when it's running, so
   `deals.db` and the Excel export keep up during the switch-over.
 
@@ -335,3 +341,4 @@ Rows show the decision tag and "Matched "keyword", supports up to $X, $Y left af
 | 2026-11-19 | **Accept / Axe per client** replaces Shortlist / Pass on the deal screen (browser storage `dealscreen-decisions`, keyed by client name; A/X shortcuts; tearsheet shows decisions for every client; CSV and backup include them). |
 | 2026-11-19 | **Cloud database live** (Supabase, RLS, admin-only): 5 clients and their inquiries imported; deal screen sign-in syncs Accept/Axe as Inquired/Axed and shows each deal's inquiry status per client. |
 | 2026-11-19 | **Deal Capture extension v2.0 writes to the cloud** (per-profile sign-in and client, duplicate check across link variants, best-effort mirror to the desktop app). |
+| 2026-11-19 | **Profile lock**: deal screen and Deal Capture extension (v2.1) can be locked to one client per Chrome profile; cross-inquiry confirmation on the deal screen. |
