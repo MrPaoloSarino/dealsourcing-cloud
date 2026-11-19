@@ -173,6 +173,12 @@
     border-style: dashed; border-color: #B4C4BB; color: var(--pe); background: transparent;
   }
   .box-add:hover { background: var(--pe-tint); border-style: solid; }
+  .box-lock {
+    height: 30px; padding: 0 10px; font-size: 12px; font-weight: 600;
+    border-color: #B4C4BB; color: var(--ink-2); background: transparent;
+  }
+  .box-lock:hover { background: var(--pe-tint); }
+  .box-lock.on { background: var(--gold-soft, #F6EBCF); border-color: var(--gold, #A87A1E); color: #6B4E0E; }
 
   .triage-group {
     margin-left: auto;
@@ -916,7 +922,13 @@
   const shortDate = iso => iso ? new Date(iso + "T12:00:00").toLocaleDateString(undefined, { month: "short", day: "numeric" }) : "";
   const decLabel = d => d?.st || (d?.s === "accepted" ? "Accepted" : d?.s === "axed" ? "Axed" : "");
   const firstName = n => String(n || "").trim().split(/\s+/)[0];
+  // Profile lock: this browser profile only ever accepts / axes for one client.
+  let lockName = (() => { try { return localStorage.getItem("dealscreen-lock") || ""; } catch { return ""; } })();
+  const setLock = v => { lockName = v || ""; try { v ? localStorage.setItem("dealscreen-lock", v) : localStorage.removeItem("dealscreen-lock"); } catch {} };
+  const lockedBox = () => lockName ? (typeof boxes !== "undefined" ? boxes : []).find(b => b.name.toLowerCase() === lockName.toLowerCase()) || null : null;
   function currentClient() {
+    const lb = lockedBox();
+    if (lb) return lb.name;
     const ab = (typeof boxes !== "undefined" ? boxes : []).find(b => b.id === activeBox);
     if (ab) return ab.name;
     const names = (typeof boxes !== "undefined" ? boxes : []).map(b => b.name);
@@ -1047,16 +1059,23 @@
   }
 
   function renderBoxes() {
+    const lb = lockedBox();
+    if (lb && activeBox && activeBox !== lb.id) { activeBox = lb.id; boxStore.setActive(lb.id); }
     const items = [`<button type="button" class="box" data-box="" aria-pressed="${!activeBox}"><span>All listings</span><span class="ct">${rows.length.toLocaleString()}</span></button>`];
-    for (const b of boxes) {
+    for (const b of (lb ? [lb] : boxes)) {
       const m = results.get(b.id) || new Map();
       let nw = 0; for (const p of m.keys()) { const r = byPath.get(p); if (r && r.isNew) nw++; }
       items.push(`<button type="button" class="box" data-box="${esc(b.id)}" aria-pressed="${activeBox === b.id}"><span>${esc(b.name)}</span><span class="ct">${m.size.toLocaleString()}</span>${nw ? `<span class="nw">${nw} new</span>` : ""}</button>`);
     }
-    items.push(`<button type="button" class="box-add" id="boxAdd">+ New Buy-Box</button>`);
+    const ab = boxes.find(b => b.id === activeBox);
+    if (lb) items.push(`<button type="button" class="box-lock on" id="boxLock" title="This browser profile only accepts / axes for ${esc(lb.name)}. Click to unlock.">🔒 Locked to ${esc(firstName(lb.name))}</button>`);
+    else if (lockName) items.push(`<button type="button" class="box-lock on" id="boxLock" title="Locked to ${esc(lockName)}, but that buy-box isn't in this browser yet. Sign in or import buy-boxes. Click to unlock.">🔒 Locked to ${esc(firstName(lockName))} (buy-box missing)</button>`);
+    else {
+      items.push(`<button type="button" class="box-add" id="boxAdd">+ New Buy-Box</button>`);
+      if (ab) items.push(`<button type="button" class="box-lock" id="boxLock" title="Lock this browser profile to ${esc(ab.name)}: Accept / Axe can then only apply to them">🔓 Lock profile to ${esc(firstName(ab.name))}</button>`);
+    }
     $("boxlist").innerHTML = items.join("");
 
-    const ab = boxes.find(b => b.id === activeBox);
     $("activebox").hidden = !ab;
     if (ab) {
       $("activebox").innerHTML = `<span class="chip box-chip">Mandate: <strong>${esc(ab.name)}</strong><button type="button" class="act" id="boxEdit">Edit</button><button type="button" id="boxClear" aria-label="Show all listings" title="Show all listings">×</button></span>`;
@@ -1072,7 +1091,8 @@
     sel.innerHTML = boxes.length
       ? boxes.map(b => `<option value="${esc(b.name)}"${b.name === client ? " selected" : ""}>${esc(b.name)}</option>`).join("")
       : `<option value="">No clients yet</option>`;
-    sel.disabled = !boxes.length;
+    sel.disabled = !boxes.length || !!lockedBox();
+    sel.title = lockedBox() ? `Locked to ${lockedBox().name} in this browser profile` : "Accept / Axe decisions are saved for this client";
     const cm = Object.entries(decisionMap(client)).filter(([k]) => byPath.has(k)).map(([, v]) => v);
     $("starCount").textContent = cm.filter(x => x.s === "accepted").length;
     $("passedCount").textContent = cm.filter(x => x.s === "axed").length;
@@ -1511,8 +1531,14 @@
   let deciding = false;
   async function decide(key, status) {
     const client = currentClient();
+    if (lockName && !lockedBox()) { alertMsg(`This profile is locked to ${lockName}, but their buy-box isn't here yet. Sign in or import buy-boxes first.`); return; }
     if (!client) { alertMsg("Add a client first: + New Buy-Box, or Import Buy-Boxes."); return; }
     if (deciding) return;
+    // Cross-inquiry guard: accepting a deal another client already has needs a deliberate yes.
+    if (status === "accepted" && decisionMap(client)[key]?.s !== "accepted") {
+      const taken = othersFor(key, client).filter(o => o.s === "accepted");
+      if (taken.length && !confirm(`Cross-inquiry check\n\nAlready ${taken.map(o => `${decLabel(o).toLowerCase()} for ${o.client}${o.d ? " (" + o.d + ")" : ""}`).join("; ")}.\n\nAccept it for ${client} too?`)) return;
+    }
     const idx = filtered.findIndex(r => r.key === key);
     if (cloud.ready && cloudClient(client)) {
       deciding = true;
@@ -1951,9 +1977,25 @@
 
   $("boxlist").addEventListener("click", e => {
     if (e.target.id === "boxAdd") { openEditor(null); return; }
+    if (e.target.closest("#boxLock")) { toggleLock(); return; }
     const b = e.target.closest("button.box"); if (!b) return;
+    const lb = lockedBox(); if (lb && b.dataset.box && b.dataset.box !== lb.id) return;
     activeBox = b.dataset.box; boxStore.setActive(activeBox); mgrOverride = null; renderBoxes(); apply();
   });
+  function toggleLock() {
+    if (lockName) {
+      const typed = prompt(`This profile is locked to ${lockName}.\n\nTo unlock, type the client's name (${lockName}):`);
+      if (typed == null) return;
+      const t = typed.trim().toLowerCase();
+      if (t !== lockName.toLowerCase() && t !== firstName(lockName).toLowerCase()) { alertMsg("Name didn't match, so the profile stays locked."); return; }
+      setLock(""); alertMsg("Unlocked. You can switch clients again in this profile.");
+    } else {
+      const ab = boxes.find(b => b.id === activeBox); if (!ab) return;
+      if (!confirm(`Lock this browser profile to ${ab.name}?\n\nOther clients' tabs are hidden and Accept / Axe only ever applies to ${ab.name}. Unlocking asks you to type their name.`)) return;
+      setLock(ab.name); alertMsg(`Locked to ${ab.name} in this browser profile.`);
+    }
+    renderBoxes(); apply();
+  }
   $("activebox").addEventListener("click", e => {
     if (e.target.id === "boxEdit") openEditor(boxes.find(b => b.id === activeBox));
     if (e.target.id === "boxClear") { activeBox = ""; boxStore.setActive(""); mgrOverride = null; renderBoxes(); apply(); }
