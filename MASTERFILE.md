@@ -1,7 +1,7 @@
 # DealSourcing Cloud — Master File
 
 Full context for any AI assistant or developer picking up this project. Read this first.
-Last updated: 2026-11-19.
+Last updated: 2026-11-19 (after adding Tupelo).
 
 > **Privacy rule (hard):** this repository is **public**. Never commit client names, buy-box
 > criteria, inquiry/pipeline data, or any credentials. Client buy-boxes live only in the
@@ -176,11 +176,24 @@ Rows show the decision tag and "Matched "keyword", supports up to $X, $Y left af
 
 ---
 
-## 6. Current numbers (first full crawl, 2026-11-18)
+## 6. Current numbers (as of 2026-11-19, 3:53pm Manila)
 
-- Site total ~17,750; tracked **14,663** (gap is mostly franchise ads, skipped on purpose).
-- With asking price 98%, with cash flow 74%, with a US state 90%, M&A Vault cards 31.
-- Full crawl: 711 pages + 2 trailing 404s, 0 blocked, ~50 min.
+| | BusinessesForSale | Tupelo |
+|---|---|---|
+| Listings tracked | 14,671 (site shows ~17,750; gap is mostly franchise ads, skipped on purpose) | 1,747 (matches the site's "1,746 vetted businesses") |
+| With asking price | 97% | 90% |
+| With cash flow | 73% | 57% |
+| With a US state | 89% | 89% |
+| With an industry | 0% (not on search cards) | 100% |
+| Tagged New since baseline (2026-11-18) | 5 | 1 |
+| First full crawl | 2026-11-18: 711 pages + 2 trailing 404s, 0 blocked, ~50 min | 2026-11-18: 175 pages + 2 empty, 0 blocked, ~10 min |
+
+- BusinessesForSale M&A Vault cards: ~31 (no dollar figures on search cards).
+- Tupelo top industries: American Restaurants 110, Other Building & Construction 88, Auto Repair 69,
+  HVAC Businesses 60; top states CA 433, FL 172, IL 141, TX 89.
+- Tupelo's site total isn't parsed (`meta.site_total` is null); the screen counts Tupelo by `tracked`.
+- Scheduled sweeps for both sources are running and succeeding. GitHub starts them a few to ~15 minutes
+  after the cron time.
 
 ---
 
@@ -188,9 +201,9 @@ Rows show the decision tag and "Matched "keyword", supports up to $X, $Y left af
 
 - **See the screen:** https://dealsourcing-cloud.onrender.com (refresh; Ctrl+F5 if stale).
   https://mrpaolosarino.github.io/dealsourcing-cloud/ also works but is blocked on the user's network.
-- **Run a sweep now:** GitHub → Actions → *BusinessesForSale sweep* → Run workflow → pages (0 = all).
-- **If the screen looks stale:** check the latest Actions run; data file is `docs/data/bfs.json`
-  (`meta.updated_utc`). Raw GitHub can cache up to ~5 min.
+- **Run a sweep now:** GitHub → Actions → *BusinessesForSale sweep* or *Tupelo sweep* → Run workflow → pages (0 = all).
+- **If the screen looks stale:** hover "Updated…" in the app bar to see each source's last update, then check that
+  source's latest Actions run; data files are `docs/data/bfs.json` and `docs/data/tupelo.json` (`meta.updated_utc`). Raw GitHub can cache up to ~5 min.
 - **If Render shows an old page:** Render → Manual Deploy → Deploy latest commit (should only be needed
   if `docs/index.html` itself changes).
 - **Failure signals:** a failed run (GitHub emails the account), `blocked=True` lines in the run log,
@@ -200,24 +213,33 @@ Rows show the decision tag and "Matched "keyword", supports up to $X, $Y left af
 
 ---
 
-## 8. Known gaps / roadmap (agreed priority)
+## 8. Known gaps / roadmap
 
-1. **Industry / category per listing** — crawl the site's category search pages (e.g.
-   `/us/search/services-businesses-for-sale`) and tag listings; improves buy-box matching.
-2. ~~Client buy-boxes as saved views~~ — **done** (2026-11-19).
-3. **Daily email digest of new matches** — GitHub Actions + Gmail app password as an Actions secret.
-   Note: buy-boxes are browser-only, so the digest needs its own private copy of criteria (e.g. an
-   encrypted secret), never a file in this public repo.
-4. **M&A Vault section crawl** — `/us/m-and-a-vault` pages show revenue + profitability % (and
-   sometimes growth/leverage); derive estimated profit = revenue × margin. Vault deals require buyer
-   verification/NDA on the site; usually no asking price.
-5. **Detail pages for new listings only** — fill missing cash flow (~26%) and descriptions.
-6. **More sources** — Tupelo done; next by volume in the old app: Transworld, BBMS, BusinessBroker, Sunbelt.
-   Test each from Actions first; merge duplicates across sources (one listing, many sources).
-7. **Pipeline tracking** (Inquired → NDA → CIM → LOI) — needs private writable storage (Neon free
-   Postgres or similar); can't live in this public repo.
-8. Housekeeping: alert when a sweep returns far fewer listings than usual (layout change); radius
-   matching (needs a US cities lat/long table, the old app has `uscities.csv`).
+**Waiting on the user**
+- Link Render to GitHub properly: Render → Update Source → *Configure in GitHub* → give the Render app access to
+  `dealsourcing-cloud` → select it (currently added as a Public Git Repository, so auto-deploy never fires).
+  Not required for updates (the loader pulls from GitHub), only for Render's deploy list / its own copy.
+  Alternative: add the Render Deploy Hook as secret `RENDER_DEPLOY_HOOK` (workflow already in place). Don't do both.
+- Import buy-boxes (`buybox.json`) in the browser the user actually uses; each browser/device is separate.
+
+**Next to build (priority order)**
+1. **Industry for BusinessesForSale** — crawl the site's category search pages (e.g.
+   `/us/search/services-businesses-for-sale`) and fill `category`. Tupelo already has it.
+2. **Detail pages for new listings only** — fill missing cash flow (BFS ~27%, Tupelo ~43%) and descriptions,
+   so keyword matching sees full text like the old desktop app.
+3. **Cross-source duplicates** — the same business can be on BFS and Tupelo; merge by normalized title +
+   location + asking price, show both sources on one row.
+4. **Daily email digest of new matches** — GitHub Actions + Gmail app password as an Actions secret. Buy-boxes
+   are browser-only, so the digest needs its own private copy of criteria (e.g. an encrypted secret), never a
+   file in this public repo.
+5. **M&A Vault section crawl** — `/us/m-and-a-vault` shows revenue + profitability %; derive estimated profit.
+6. **More sources** — next by volume in the old app: Transworld, BBMS, BusinessBroker, Sunbelt. Probe each from
+   Actions first (one-off probe workflow, then delete it), reuse `bfs/publish.py` + `scripts/save_data.sh`,
+   add a `SOURCES` entry in `docs/app.html`.
+7. **Pipeline tracking** (Inquired → NDA → CIM → LOI) — needs private writable storage (Neon free Postgres or
+   similar); can't live in this public repo.
+8. Housekeeping: alert when a sweep returns far fewer listings than usual (layout change); radius matching
+   (needs a US cities lat/long table, the old app has `uscities.csv`); parse Tupelo's site total.
 
 ---
 
@@ -233,3 +255,19 @@ Rows show the decision tag and "Matched "keyword", supports up to $X, $Y left af
   saved-search email alerts are the fallback if scraping is ever blocked.
 - When changing `docs/app.html`, test with real data (`docs/data/bfs.json`) in a headless browser:
   load, sort each column, filters, buy-box import, and check for JS errors.
+
+---
+
+## 10. Change log
+
+| Date (Manila) | Change |
+|---|---|
+| 2026-11-19 | Repo `dealsourcing-cloud` created (public). BusinessesForSale plain-HTTP scraper tested from GitHub Actions: not blocked. |
+| 2026-11-19 | First full BFS crawl (14,663 listings). Deal screen on GitHub Pages; GitHub Pages blocked on the user's network, moved to Render. |
+| 2026-11-19 | Data and screen loaded from GitHub raw via a loader page, so the host never needs redeploys. |
+| 2026-11-19 | Progress saves every 50 pages; sweeps every 4 h + weekly full crawl. |
+| 2026-11-19 | Column-header sorting; flag impossible seller-entered cash flow. |
+| 2026-11-19 | Buy-boxes (browser-only) with the desktop matcher's rules and SBA underwriting; import from `buybox.json`. |
+| 2026-11-19 | UI redesign: app bar with freshness dot, side panel sections, medians summary, filter chips, sticky header, clickable rows. Fixed empty side panel after widening; "Newest first" follows site order. |
+| 2026-11-19 | Render Deploy Hook workflow added (inactive until the secret exists). |
+| 2026-11-19 | **Tupelo added** as second source (1,746 listings, industry on every card); generic publish/save scripts; Source filter; industry used in buy-box matching. |
