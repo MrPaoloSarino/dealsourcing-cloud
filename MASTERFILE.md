@@ -138,7 +138,7 @@ site's RSS feed `/us/search/businesses-for-sale.rss`, 25 newest items with pubDa
   inquired for that client; Axed = rejected for that client. The client is the open mandate tab, or the
   "Deciding for" picker when "All listings" is open (changing the picker while a mandate is open switches the tab).
   Pressing the same button again undoes it. Rows show an Accepted/Axed tag for the current client and
-  "Also: Laura ✓, Trey ✕" for other clients. CSV export adds Decision, Decided on, Other clients' decisions.
+  "Also: Client A ✓, Client B ✕" for other clients. CSV export adds Decision, Decided on, Other clients' decisions.
   Stored in the browser only: localStorage `dealscreen-decisions` =
   `{"<client name>": {"<source:path>": {"s": "accepted"|"axed", "d": "YYYY-MM-DD"}}}`, plus
   `dealscreen-decide-for`. Keyed by client name on purpose so it maps to the cloud inquiries table later
