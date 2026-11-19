@@ -334,7 +334,31 @@
   tbody tr.selected td:first-child { box-shadow: inset 3px 0 0 var(--pe); }
   tbody tr.is-passed td { opacity: .52; }
 
-  td.star-col { text-align: center; padding: 10px 4px 10px 10px; width: 34px; }
+  td.star-col { text-align: center; padding: 9px 2px 9px 8px; width: 62px; white-space: nowrap; }
+  .dec-btns { display: inline-flex; gap: 3px; }
+  .dbtn {
+    all: unset; cursor: pointer; box-sizing: border-box;
+    width: 24px; height: 24px; border-radius: 5px; display: inline-grid; place-items: center;
+    font-size: 13px; font-weight: 700; line-height: 1;
+    color: #A9B6AF; border: 1px solid var(--line); background: var(--panel);
+  }
+  .dbtn:hover { border-color: #B4C4BB; color: var(--ink-2); }
+  .dbtn:focus-visible { outline: 2px solid var(--pe); outline-offset: 1px; }
+  .dbtn.acc.on { background: var(--pe); border-color: var(--pe); color: #fff; }
+  .dbtn.axe.on { background: var(--rust); border-color: var(--rust); color: #fff; }
+  .dbtn[disabled] { opacity: .4; cursor: not-allowed; }
+  .tag.acc { background: var(--pe-soft); color: var(--pe); }
+  .tag.axed { background: var(--rust-soft); color: var(--rust); }
+  .others { font-size: 11px; color: var(--muted); }
+  .decide-for { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); font-weight: 600; white-space: nowrap; }
+  .decide-for select { height: 30px; font-size: 12.5px; padding: 0 8px; min-width: 150px; width: auto; }
+  .ic-decisions { margin-top: 12px; border: 1px solid var(--line); border-radius: var(--r-s); padding: 10px 12px; font-size: 12.5px; }
+  .ic-decisions .lbl { font-size: 10.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; display: block; }
+  .ic-decisions ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+  .ic-decisions li { display: flex; justify-content: space-between; gap: 10px; }
+  .ic-decisions .none { color: var(--muted); }
+  .ic-foot #icStarBtn.on { background: var(--pe); border-color: var(--pe); color: #fff; }
+  .ic-foot #icPassBtn.on { background: var(--rust); border-color: var(--rust); color: #fff; }
   .star-btn {
     all: unset; cursor: pointer; font-size: 15px; line-height: 1;
     color: #C7D1CB; padding: 2px; border-radius: 4px; display: inline-block;
@@ -587,7 +611,7 @@
       display: grid; grid-template-columns: 1fr 1fr; gap: 3px 10px;
     }
     tbody td { border: 0; padding: 1px 0; text-align: left; font-size: 12.5px; }
-    td.star-col { position: absolute; right: 12px; width: auto; padding: 0; }
+    td.star-col { position: absolute; right: 12px; top: 10px; width: auto; padding: 0; }
     tbody tr { position: relative; }
     td.biz { grid-column: 1 / -1; min-width: 0; padding-right: 26px; margin-bottom: 5px; }
     td[data-k]::before { content: attr(data-k) "  "; color: var(--muted); font-size: 11px; }
@@ -605,7 +629,9 @@
     .mandate-bar { gap: 8px; }
     .mandate-label { flex: 1 1 100%; }
     .boxlist { flex: 1 1 100%; }
-    .triage-group { margin-left: 0; flex: 1 1 100%; }
+    .triage-group { margin-left: 0; flex: 1 1 100%; flex-wrap: wrap; }
+    .triage-group .decide-for { flex: 1 1 100%; }
+    .triage-group .decide-for select { flex: 1; min-width: 0; }
     .triage-group .triage-btn { flex: 1; justify-content: center; }
 
     /* phones: highlight the whole selected card evenly (cells are laid out on a grid) */
@@ -627,7 +653,7 @@
     <p class="status" id="status">Loading listings…</p>
     <div class="mast-actions">
       <button type="button" class="mast-ghost" id="boxImport" title="Import desktop buybox.json or backup JSON">Import Buy-Boxes</button>
-      <button type="button" class="mast-ghost" id="boxBackup" title="Back up buy-boxes, shortlist and notes">Back up</button>
+      <button type="button" class="mast-ghost" id="boxBackup" title="Back up buy-boxes, Accept/Axe decisions and notes">Back up</button>
       <button type="button" class="mast-gold" id="export">Export CSV</button>
       <input type="file" id="boxFile" accept=".json,application/json" hidden>
     </div>
@@ -639,8 +665,9 @@
   <span class="mandate-label">Mandates</span>
   <div class="boxlist" id="boxlist"></div>
   <div class="triage-group">
-    <button type="button" class="triage-btn" id="starFilterBtn" aria-pressed="false" title="Show only your shortlisted deals (stored in this browser)"><span>★ Shortlist (<span id="starCount">0</span>)</span></button>
-    <button type="button" class="triage-btn passed-btn" id="hidePassedBtn" aria-pressed="true" title="Hide deals you marked as passed"><span>Hide passed (<span id="passedCount">0</span>)</span></button>
+    <label class="decide-for" for="decideFor">Deciding for <select id="decideFor" title="Accept / Axe decisions are saved for this client"></select></label>
+    <button type="button" class="triage-btn" id="starFilterBtn" aria-pressed="false" title="Show only deals accepted (sourced or inquired) for this client"><span>✓ Accepted (<span id="starCount">0</span>)</span></button>
+    <button type="button" class="triage-btn passed-btn" id="hidePassedBtn" aria-pressed="true" title="Hide deals axed for this client"><span>Hide axed (<span id="passedCount">0</span>)</span></button>
   </div>
 </section>
 
@@ -728,12 +755,12 @@
         <button type="button" id="moreBtn" hidden>Show 100 more</button>
       </div>
       <div class="foot">
-        <span>Figures are seller-entered on source marketplaces and unverified. Buy-boxes, shortlist &amp; notes stay in this browser only — never uploaded.</span>
+        <span>Figures are seller-entered on source marketplaces and unverified. Buy-boxes, Accept/Axe decisions &amp; notes stay in this browser only — never uploaded.</span>
         <span class="kbd-hints">
           <span><kbd>/</kbd> search</span>
           <span><kbd>J</kbd>/<kbd>K</kbd> navigate</span>
-          <span><kbd>S</kbd> shortlist</span>
-          <span><kbd>X</kbd> pass</span>
+          <span><kbd>A</kbd> accept</span>
+          <span><kbd>X</kbd> axe</span>
           <span><kbd>O</kbd> open</span>
         </span>
       </div>
@@ -852,7 +879,32 @@
       } catch {}
     }
   };
-  let triage = triageStore.get();
+  let triage = triageStore.get();   // notes live here (the old star/pass sets are no longer shown)
+
+  /* Accept / Axe per client: { "<client name>": { "<listing key>": { s: "accepted" | "axed", d: "YYYY-MM-DD" } } }.
+     Keyed by client name so it moves to the cloud inquiry tracker later
+     (accepted = sourced/inquired, axed = Axed). */
+  const decStore = {
+    get() { try { const d = JSON.parse(localStorage.getItem("dealscreen-decisions") || "{}"); return d && typeof d === "object" ? d : {}; } catch { return {}; } },
+    set(v) { try { localStorage.setItem("dealscreen-decisions", JSON.stringify(v)); } catch {} },
+    getFor() { try { return localStorage.getItem("dealscreen-decide-for") || ""; } catch { return ""; } },
+    setFor(v) { try { localStorage.setItem("dealscreen-decide-for", v || ""); } catch {} },
+  };
+  let decisions = decStore.get();
+  let decideFor = decStore.getFor();
+  const todayIso = () => new Date().toLocaleDateString("en-CA");
+  const shortDate = iso => iso ? new Date(iso + "T12:00:00").toLocaleDateString(undefined, { month: "short", day: "numeric" }) : "";
+  const firstName = n => String(n || "").trim().split(/\s+/)[0];
+  function currentClient() {
+    const ab = (typeof boxes !== "undefined" ? boxes : []).find(b => b.id === activeBox);
+    if (ab) return ab.name;
+    const names = (typeof boxes !== "undefined" ? boxes : []).map(b => b.name);
+    return names.includes(decideFor) ? decideFor : (names[0] || "");
+  }
+  const decisionMap = (client = currentClient()) => (client && decisions[client]) || {};
+  function othersFor(key, client = currentClient()) {
+    return Object.entries(decisions).filter(([c, m]) => c !== client && m && m[key]).map(([c, m]) => ({ client: c, ...m[key] }));
+  }
 
   const inputs = ["q", "src", "state", "pmin", "pmax", "cfmin", "cfmax", "multmax", "since", "sort"];
   function readFilters() {
@@ -992,8 +1044,17 @@
   }
 
   function updateTriageButtons() {
-    $("starCount").textContent = triage.starred.size;
-    $("passedCount").textContent = triage.passed.size;
+    const client = currentClient();
+    const ab = boxes.find(b => b.id === activeBox);
+    if (ab && decideFor !== ab.name) { decideFor = ab.name; decStore.setFor(decideFor); }
+    const sel = $("decideFor");
+    sel.innerHTML = boxes.length
+      ? boxes.map(b => `<option value="${esc(b.name)}"${b.name === client ? " selected" : ""}>${esc(b.name)}</option>`).join("")
+      : `<option value="">No clients yet</option>`;
+    sel.disabled = !boxes.length;
+    const cm = Object.values(decisionMap(client));
+    $("starCount").textContent = cm.filter(x => x.s === "accepted").length;
+    $("passedCount").textContent = cm.filter(x => x.s === "axed").length;
     $("starFilterBtn").setAttribute("aria-pressed", String(starOnly));
     $("hidePassedBtn").setAttribute("aria-pressed", String(hidePassed));
   }
@@ -1009,10 +1070,11 @@
     const sinceDays = f.since && f.since !== "new" ? +f.since : null;
 
     const boxRes = activeBox ? results.get(activeBox) : null;
+    const cmap = decisionMap();
     filtered = rows.filter(r => {
       if (boxRes && !boxRes.has(r.key)) return false;
-      if (starOnly && !triage.starred.has(r.key)) return false;
-      if (hidePassed && !starOnly && triage.passed.has(r.key)) return false;
+      if (starOnly && cmap[r.key]?.s !== "accepted") return false;
+      if (hidePassed && !starOnly && cmap[r.key]?.s === "axed") return false;
       if (f.kind !== "all" && String(r.kind) !== f.kind) return false;
       if (f.src && r.src !== f.src) return false;
       if (f.state && r.state !== f.state) return false;
@@ -1071,7 +1133,7 @@
     if (f.multmax) chips.push([`≤ ${f.multmax}× mult`, ["multmax"]]);
     if (f.since) chips.push([SINCE_LABEL[f.since], ["since"]]);
     if (f.hascf) chips.push(["Has CF", ["hascf"]]);
-    if (starOnly) chips.push(["★ Shortlisted", ["__star"]]);
+    if (starOnly) chips.push([`✓ Accepted for ${firstName(currentClient())}`, ["__star"]]);
     $("chips").innerHTML = chips.map(([label, ids]) =>
       `<span class="chip">${esc(label)}<button type="button" data-clear="${ids.join(",")}" aria-label="Remove filter: ${esc(label)}">×</button></span>`).join("")
       + (chips.length > 1 ? `<button type="button" class="linkish" data-clear="all">Clear all</button>` : "");
@@ -1129,7 +1191,7 @@
         return;
       }
       $("out").innerHTML = total
-        ? `<div class="empty"><h2>No listings match these filters</h2><p>Widen your price or cash flow range, toggle Shortlist/Passed, or clear filters to see everything.</p><button type="button" class="primary" id="emptyReset">Clear filters</button></div>`
+        ? `<div class="empty"><h2>No listings match these filters</h2><p>Widen your price or cash flow range, turn off "Accepted" / "Hide axed", or clear filters to see everything.</p><button type="button" class="primary" id="emptyReset">Clear filters</button></div>`
         : `<div class="empty"><h2>No listings loaded yet</h2><p>Check your connection and refresh once a sweep has published.</p></div>`;
       $("emptyReset")?.addEventListener("click", () => { starOnly = false; updateTriageButtons(); $("clearFiltersBtn").click(); });
       $("moreBtn").hidden = true;
@@ -1144,13 +1206,18 @@
       const cfCell = r.cfSuspect
         ? `<td data-k="Cash Flow"><span class="suspect" title="Looks like a seller typo (≥ revenue or equals asking price). Excluded from multiples.">${money(r.cfRaw)} ?</span></td>`
         : cell(r.cash_flow, "Cash Flow", r.cash_flow ? "cf-strong" : "");
-      const isStar = triage.starred.has(r.key);
-      const isPass = triage.passed.has(r.key);
+      const client = currentClient();
+      const dcur = decisionMap(client)[r.key]?.s || "";
+      const others = othersFor(r.key, client);
       const hasNote = !!(triage.notes[r.key] || "").trim();
-      const rowCls = [r.key === selectedKey ? "selected" : "", isPass ? "is-passed" : ""].filter(Boolean).join(" ");
+      const rowCls = [r.key === selectedKey ? "selected" : "", dcur === "axed" ? "is-passed" : ""].filter(Boolean).join(" ");
+      const who = client ? ` for ${esc(client)}` : "";
       return `
       <tr data-key="${esc(r.key)}" data-href="${esc(r.url)}" class="${rowCls}">
-        <td class="star-col"><button type="button" class="star-btn${isStar ? " on" : ""}" data-star="${esc(r.key)}" aria-label="${isStar ? "Remove from shortlist" : "Add to shortlist"}" title="Shortlist (S)">★</button></td>
+        <td class="star-col"><span class="dec-btns">
+          <button type="button" class="dbtn acc${dcur === "accepted" ? " on" : ""}" data-decide="accepted" data-key="${esc(r.key)}"${client ? "" : " disabled"} aria-pressed="${dcur === "accepted"}" aria-label="${dcur === "accepted" ? "Undo accept" : "Accept"}${who}" title="${dcur === "accepted" ? "Undo accept" : "Accept (sourced / inquired)"}${who} (A)">✓</button>
+          <button type="button" class="dbtn axe${dcur === "axed" ? " on" : ""}" data-decide="axed" data-key="${esc(r.key)}"${client ? "" : " disabled"} aria-pressed="${dcur === "axed"}" aria-label="${dcur === "axed" ? "Undo axe" : "Axe"}${who}" title="${dcur === "axed" ? "Undo axe" : "Axe"}${who} (X)">✕</button>
+        </span></td>
         <td class="biz">
           <div class="t"><a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.title)}</a>${dec}</div>
           <div class="meta">
@@ -1158,6 +1225,8 @@
             <span class="dotsep">${esc(SRC[r.src].short)}</span>
             ${r.kind ? '<span class="tag vault">Vault</span>' : ""}
             ${r.isNew ? '<span class="tag new">New</span>' : ""}
+            ${dcur === "accepted" ? '<span class="tag acc">Accepted</span>' : dcur === "axed" ? '<span class="tag axed">Axed</span>' : ""}
+            ${others.length ? `<span class="others" title="${esc(others.map(o => `${o.client}: ${o.s === "accepted" ? "Accepted" : "Axed"} ${shortDate(o.d)}`).join("\n"))}">Also: ${others.map(o => `${esc(firstName(o.client))} ${o.s === "accepted" ? "✓" : "✕"}`).join(", ")}</span>` : ""}
             ${hasNote ? '<span class="note-ind" title="Has personal note">● Note</span>' : ""}
           </div>
           ${r.category ? `<div class="cat">${esc(r.category)}</div>` : ""}
@@ -1170,7 +1239,7 @@
 
     $("out").innerHTML = `<table>
       <thead><tr>
-        <th title="Shortlist">★</th>
+        <th title="Accept / Axe for the selected client">✓ ✕</th>
         ${COLS.map(([k, label, tip]) => {
           const on = sortState.key === k;
           const aria = on ? (sortState.dir === "asc" ? "ascending" : "descending") : "none";
@@ -1224,8 +1293,9 @@
 
     const ab = boxes.find(b => b.id === activeBox);
     const bm = ab ? results.get(ab.id)?.get(r.key) : null;
-    const isStar = triage.starred.has(r.key);
-    const isPass = triage.passed.has(r.key);
+    const client = currentClient();
+    const dcur = decisionMap(client)[r.key] || null;
+    const allDec = Object.entries(decisions).filter(([, mm]) => mm && mm[r.key]).map(([c, mm]) => ({ client: c, ...mm[r.key] }));
     const note = triage.notes[r.key] || "";
 
     const basePrice = r.price || (bm?.maxSupport && isFinite(bm.maxSupport) ? Math.round(bm.maxSupport / 25000) * 25000 : 1000000);
@@ -1327,17 +1397,22 @@
         </div>
       </div>
 
+      <div class="ic-decisions" aria-live="polite">
+        <span class="lbl">Decisions on this deal (this browser)</span>
+        ${allDec.length ? `<ul>${allDec.map(x => `<li><span>${esc(x.client)}</span><span><span class="tag ${x.s === "accepted" ? "acc" : "axed"}">${x.s === "accepted" ? "Accepted" : "Axed"}</span> ${esc(shortDate(x.d))}</span></li>`).join("")}</ul>` : `<span class="none">Not accepted or axed for any client yet.</span>`}
+      </div>
+
       <div class="ic-foot">
-        <button type="button" id="icStarBtn" title="Shortlist (S)">${isStar ? "★ Shortlisted" : "☆ Shortlist"}</button>
-        <button type="button" id="icPassBtn" title="Mark passed (X)">${isPass ? "↺ Restore" : "✕ Pass"}</button>
+        <button type="button" id="icStarBtn" class="${dcur?.s === "accepted" ? "on" : ""}"${client ? "" : " disabled"} title="${client ? `Accept (sourced / inquired) for ${esc(client)} (A)` : "Add or pick a client first"}">${dcur?.s === "accepted" ? "↺ Undo accept" : `✓ Accept${client ? ` for ${esc(firstName(client))}` : ""}`}</button>
+        <button type="button" id="icPassBtn" class="${dcur?.s === "axed" ? "on" : ""}"${client ? "" : " disabled"} title="${client ? `Axe for ${esc(client)} (X)` : "Add or pick a client first"}">${dcur?.s === "axed" ? "↺ Undo axe" : `✕ Axe${client ? ` for ${esc(firstName(client))}` : ""}`}</button>
         <a class="btn-open" href="${esc(r.url)}" target="_blank" rel="noopener">Open Listing ↗</a>
       </div>
     `;
 
     // Wire IC events
     $("icCloseBtn")?.addEventListener("click", closeDrawer);
-    $("icStarBtn")?.addEventListener("click", () => toggleStar(r.key));
-    $("icPassBtn")?.addEventListener("click", () => togglePass(r.key));
+    $("icStarBtn")?.addEventListener("click", () => decide(r.key, "accepted"));
+    $("icPassBtn")?.addEventListener("click", () => decide(r.key, "axed"));
 
     $("icSlider")?.addEventListener("input", e => {
       const val = +e.target.value;
@@ -1410,23 +1485,21 @@
   }
   $("icBackdrop").addEventListener("click", closeDrawer);
 
-  function toggleStar(key) {
-    if (triage.starred.has(key)) triage.starred.delete(key);
-    else { triage.starred.add(key); triage.passed.delete(key); }
-    triageStore.set(triage);
-    updateTriageButtons();
-    if (starOnly) apply(); else { render(); renderIC(); }
-  }
-
-  function togglePass(key) {
+  // Accept / Axe the listing for the current client; pressing the same one again undoes it.
+  function decide(key, status) {
+    const client = currentClient();
+    if (!client) { alertMsg("Add a client first: + New Buy-Box, or Import Buy-Boxes."); return; }
+    const m = decisions[client] || (decisions[client] = {});
     const idx = filtered.findIndex(r => r.key === key);
-    if (triage.passed.has(key)) triage.passed.delete(key);
-    else { triage.passed.add(key); triage.starred.delete(key); }
-    triageStore.set(triage);
+    if (m[key]?.s === status) delete m[key];
+    else m[key] = { s: status, d: todayIso() };
+    decStore.set(decisions);
     updateTriageButtons();
-    if (hidePassed && triage.passed.has(key)) {
+    const nowAxed = m[key]?.s === "axed";
+    const leaves = (hidePassed && nowAxed && !starOnly) || (starOnly && m[key]?.s !== "accepted");
+    if (leaves) {
       const next = filtered[idx + 1] || filtered[idx - 1];
-      selectedKey = next ? next.key : "";
+      selectedKey = next && next.key !== key ? next.key : "";
       apply();
     } else {
       render();
@@ -1517,7 +1590,17 @@
       triageStore.set(triage);
     }
 
-    if (!incoming.length && !data.triage) { alertMsg("No buy-boxes found in that file."); return; }
+    let decAdded = 0;
+    if (data.decisions && typeof data.decisions === "object") {
+      for (const [c, mm] of Object.entries(data.decisions)) {
+        if (!mm || typeof mm !== "object") continue;
+        const tgt = decisions[c] || (decisions[c] = {});
+        for (const [k, v] of Object.entries(mm)) if (v && (v.s === "accepted" || v.s === "axed")) { tgt[k] = { s: v.s, d: v.d || todayIso() }; decAdded++; }
+      }
+      decStore.set(decisions);
+    }
+    if (!incoming.length && !data.triage && !decAdded) { alertMsg("No buy-boxes found in that file."); return; }
+    if (!incoming.length) { updateTriageButtons(); apply(); alertMsg(`Imported ${decAdded} Accept/Axe decision${decAdded === 1 ? "" : "s"} and notes.`); return; }
     const names = new Set(boxes.map(b => b.name.toLowerCase()));
     let added = 0, replaced = 0;
     for (const b of incoming) {
@@ -1534,6 +1617,7 @@
     const payload = {
       buyboxes: boxes,
       triage: { starred: [...triage.starred], passed: [...triage.passed], notes: triage.notes },
+      decisions,
     };
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
     const a = document.createElement("a");
@@ -1545,13 +1629,15 @@
   /* ---------- CSV Export ---------- */
   function exportCsv() {
     const ab = boxes.find(b => b.id === activeBox), bm = ab ? results.get(ab.id) : null;
-    const head = ["Title", "Source", "Industry", "Type", "Location", "State", "Asking price", "Revenue", "Cash flow", "Cash flow looks wrong", "EBITDA", "Multiple", "First seen", "Last seen", "Link", "Shortlisted", "Note"]
+    const head = ["Title", "Source", "Industry", "Type", "Location", "State", "Asking price", "Revenue", "Cash flow", "Cash flow looks wrong", "EBITDA", "Multiple", "First seen", "Last seen", "Link", `Decision (${currentClient() || "no client"})`, "Decided on", "Other clients' decisions", "Note"]
       .concat(ab ? ["Buy-box", "Decision", "Max supportable price", "Cash left after debt", "Matched keyword"] : []);
     const q = v => v == null ? "" : /[",\n]/.test(String(v)) ? `"${String(v).replace(/"/g, '""')}"` : v;
     const lines = [head.join(",")].concat(filtered.map(r => [
       r.title, SRC[r.src].label, r.category, r.kind ? "M&A Vault" : "Listing", r.location, r.state, r.price, r.revenue, r.cfRaw, r.cfSuspect ? "yes" : "", r.ebitda,
       r.mult != null ? r.mult.toFixed(2) : "", r.first_seen, r.last_seen, r.url,
-      triage.starred.has(r.key) ? "yes" : "", triage.notes[r.key] || ""
+      ...(d => [d ? (d.s === "accepted" ? "Accepted" : "Axed") : "", d?.d || ""])(decisionMap()[r.key]),
+      othersFor(r.key).map(o => `${o.client}: ${o.s === "accepted" ? "Accepted" : "Axed"} ${o.d}`).join("; "),
+      triage.notes[r.key] || ""
     ].concat(ab ? (m => [ab.name, m?.decision || "", m?.maxSupport && isFinite(m.maxSupport) ? Math.round(m.maxSupport) : "", m?.after != null ? Math.round(m.after) : "", m?.kw || ""])(bm.get(r.key)) : []).map(q).join(",")));
     const blob = new Blob([lines.join("\n")], { type: "text/csv" });
     const a = document.createElement("a");
@@ -1661,6 +1747,14 @@
   });
 
   $("starFilterBtn").addEventListener("click", () => { starOnly = !starOnly; updateTriageButtons(); apply(); });
+  $("decideFor").addEventListener("change", e => {
+    decideFor = e.target.value; decStore.setFor(decideFor);
+    if (activeBox) {   // with a mandate open, "Deciding for" and the open mandate stay the same client
+      const b = boxes.find(x => x.name === decideFor);
+      if (b && b.id !== activeBox) { activeBox = b.id; boxStore.setActive(b.id); mgrOverride = null; renderBoxes(); }
+    }
+    updateTriageButtons(); apply();
+  });
   $("hidePassedBtn").addEventListener("click", () => { hidePassed = !hidePassed; updateTriageButtons(); apply(); });
   $("toggleIcBtn").addEventListener("click", () => {
     icVisible = !icVisible;
@@ -1689,8 +1783,8 @@
   });
 
   $("out").addEventListener("click", e => {
-    const starBtn = e.target.closest("button[data-star]");
-    if (starBtn) { e.stopPropagation(); toggleStar(starBtn.dataset.star); return; }
+    const dBtn = e.target.closest("button[data-decide]");
+    if (dBtn) { e.stopPropagation(); decide(dBtn.dataset.key, dBtn.dataset.decide); return; }
 
     const sortBtn = e.target.closest("button.sorter");
     if (sortBtn) {
@@ -1739,10 +1833,10 @@
       const rowEl = document.querySelector(`tbody tr[data-key="${CSS.escape(selectedKey)}"]`);
       if (rowEl) { rowEl.classList.add("selected"); rowEl.scrollIntoView({ block: "nearest" }); }
       renderIC();
-    } else if (k === "s" && selectedKey) {
-      e.preventDefault(); toggleStar(selectedKey);
+    } else if ((k === "a" || k === "s") && selectedKey) {
+      e.preventDefault(); decide(selectedKey, "accepted");
     } else if (k === "x" && selectedKey) {
-      e.preventDefault(); togglePass(selectedKey);
+      e.preventDefault(); decide(selectedKey, "axed");
     } else if (k === "o" && selectedKey) {
       const r = byPath.get(selectedKey);
       if (r) window.open(r.url, "_blank", "noopener");
