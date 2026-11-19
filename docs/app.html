@@ -3,360 +3,699 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Deal screen</title>
+<title>Deal Screen · Sovereign PE Origination Desk</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,500&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --paper: #F4F6F3;
+    --pe: #0B3D2E;          /* Federal Reserve racing green */
+    --pe-2: #135641;
+    --pe-3: #082B20;
+    --pe-soft: #E2EFE8;
+    --pe-tint: #F2F7F4;
+    --gold: #A87A14;        /* Treasury gold */
+    --gold-bright: #E4C162; /* Masthead gold CTA */
+    --gold-soft: #F8EED6;
+    --rust: #9E372F;        /* Risk crimson/rust */
+    --rust-soft: #F9E8E6;
+
+    --paper: #F5F6F2;       /* Crisp ivory stock */
     --panel: #FFFFFF;
-    --wash: #FAFBFA;
-    --ink: #1B2420;
-    --ink-2: #3A4640;
-    --muted: #66736C;
-    --faint: #A3ADA7;
-    --line: #DDE4DF;
-    --line-2: #E9EEEA;
-    --pine: #23513F;
-    --pine-2: #2E6B53;
-    --pine-soft: #E3EDE7;
-    --brass: #A87A1E;
-    --brass-soft: #F5ECD7;
-    --rust: #A2513C;
-    --r-s: 6px;
-    --r-m: 10px;
-    --display: "Bricolage Grotesque", "Segoe UI", sans-serif;
-    --body: "Public Sans", "Segoe UI", sans-serif;
+    --wash: #F7F9F7;
+    --ink: #111B16;
+    --ink-2: #31423A;
+    --muted: #5C6F65;
+    --faint: #93A39B;
+    --line: #D8E0DB;
+    --line-2: #E8EEEA;
+
+    --serif: "Newsreader", Georgia, "Times New Roman", serif;
+    --body: "Public Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --r-s: 5px;
+    --r-m: 8px;
     --bar-h: 56px;
   }
+
   * { box-sizing: border-box; }
   html, body { margin: 0; }
   body {
     background: var(--paper);
     color: var(--ink);
-    font: 14px/1.5 var(--body);
+    font: 13.5px/1.48 var(--body);
     font-variant-numeric: tabular-nums;
     -webkit-font-smoothing: antialiased;
   }
   a { color: inherit; }
-  :focus-visible { outline: 2px solid var(--pine); outline-offset: 2px; }
+  :focus-visible { outline: 2px solid var(--pe); outline-offset: 2px; }
   [hidden] { display: none !important; }
 
-  /* ---------- app bar ---------- */
-  .appbar {
-    position: sticky; top: 0; z-index: 20;
-    height: var(--bar-h);
-    display: flex; align-items: center; gap: 16px;
-    padding: 0 24px;
-    background: var(--panel);
-    border-bottom: 1px solid var(--line);
+  /* ---------- Federal Reserve Green Masthead ---------- */
+  .masthead {
+    position: sticky; top: 0; z-index: 30;
+    min-height: var(--bar-h);
+    display: flex; flex-wrap: wrap; align-items: center; gap: 12px 18px;
+    padding: 8px 24px;
+    background: var(--pe);
+    color: #F4F7F5;
+    border-bottom: 2px solid var(--gold-bright);
   }
-  .brand { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
-  .brand .name { font: 700 19px/1 var(--display); letter-spacing: -0.01em; white-space: nowrap; }
-  .brand .src { color: var(--muted); font-size: 13px; white-space: nowrap; }
-  .status { margin: 0 0 0 auto; display: flex; align-items: center; gap: 14px; color: var(--muted); font-size: 13px; white-space: nowrap; }
+  .brand { display: flex; align-items: baseline; gap: 12px; min-width: 0; }
+  .brand .name {
+    font: 700 20px/1 var(--serif);
+    letter-spacing: 0.01em;
+    color: #FFFFFF;
+    white-space: nowrap;
+  }
+  .brand .sub {
+    font-size: 10.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: #A9CAB9;
+    white-space: nowrap;
+  }
+  .mast-right {
+    margin-left: auto;
+    display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px;
+  }
+  .status {
+    margin: 0;
+    display: flex; align-items: center; gap: 12px;
+    font-size: 12.5px; color: #C2DBD0; white-space: nowrap;
+  }
   .status .fresh { display: inline-flex; align-items: center; gap: 6px; }
-  .status .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--pine-2); }
-  .status .dot.stale { background: var(--brass); }
-  .status strong { color: var(--ink-2); font-weight: 600; }
+  .status .dot { width: 7px; height: 7px; border-radius: 50%; background: #4ADE80; box-shadow: 0 0 0 3px rgba(74, 222, 128, .2); }
+  .status .dot.stale { background: var(--gold-bright); box-shadow: 0 0 0 3px rgba(228, 193, 98, .22); }
+  .status strong { color: #FFFFFF; font-weight: 600; }
+  .mast-actions { display: flex; align-items: center; gap: 6px; }
 
-  /* ---------- layout ---------- */
-  .wrap { display: grid; grid-template-columns: 288px minmax(0, 1fr); align-items: start; }
-  .filters {
-    position: sticky; top: var(--bar-h);
-    height: calc(100vh - var(--bar-h)); overflow-y: auto;
-    background: var(--panel);
-    border-right: 1px solid var(--line);
-    padding: 18px 20px 28px;
-  }
-  .filters summary { display: none; }
-  .side-h { display: flex; align-items: center; justify-content: space-between; margin: 0 0 8px; }
-  .side-h h2 { margin: 0; font: 600 13px/1.2 var(--body); color: var(--ink); }
-  .side-sec + .side-sec { margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--line-2); }
-
-  .field { margin-bottom: 14px; }
-  .field > label, .field > .label { display: block; font-weight: 500; font-size: 12px; color: var(--ink-2); margin-bottom: 5px; }
-  .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  input[type=text], input[type=search], select, textarea {
-    width: 100%; height: 34px;
-    font: inherit; font-size: 13px;
-    padding: 0 10px;
-    color: var(--ink);
-    background: var(--panel);
-    border: 1px solid var(--line);
-    border-radius: var(--r-s);
-    transition: border-color .12s;
-  }
-  textarea { height: auto; padding: 8px 10px; }
-  input:hover, select:hover, textarea:hover { border-color: #C6D0CA; }
-  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--pine); box-shadow: 0 0 0 3px rgba(35, 81, 63, .12); }
-  input::placeholder, textarea::placeholder { color: var(--faint); }
-  .search { position: relative; }
-  .search input { padding-right: 28px; }
-  .search kbd { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); font: 500 11px var(--body); color: var(--faint); border: 1px solid var(--line); border-radius: 4px; padding: 0 5px; line-height: 16px; pointer-events: none; }
-  .seg { display: grid; grid-template-columns: repeat(3, 1fr); padding: 2px; gap: 2px; background: var(--paper); border: 1px solid var(--line); border-radius: var(--r-s); }
-  .seg label { text-align: center; font-size: 12px; font-weight: 500; padding: 5px 4px; cursor: pointer; border-radius: 4px; color: var(--ink-2); white-space: nowrap; }
-  .seg input { position: absolute; opacity: 0; pointer-events: none; }
-  .seg label:has(input:checked) { background: var(--panel); color: var(--ink); box-shadow: 0 1px 2px rgba(27, 36, 32, .12); }
-  .seg label:has(input:focus-visible) { outline: 2px solid var(--pine); outline-offset: -2px; }
-  .check { display: flex; gap: 8px; align-items: center; font-size: 13px; color: var(--ink-2); cursor: pointer; }
-  .check input { accent-color: var(--pine); width: 15px; height: 15px; margin: 0; }
-  .hint { font-size: 11.5px; color: var(--muted); margin: 4px 0 0; line-height: 1.4; }
-
+  /* ---------- Buttons & Inputs ---------- */
   button {
-    font: 500 13px var(--body);
-    height: 34px; padding: 0 14px;
+    font: 500 12.5px var(--body);
+    height: 32px; padding: 0 12px;
     border-radius: var(--r-s);
     border: 1px solid var(--line);
     background: var(--panel); color: var(--ink);
     cursor: pointer;
-    transition: background-color .12s, border-color .12s;
+    transition: background-color .12s, border-color .12s, color .12s;
+    white-space: nowrap;
   }
-  button:hover { background: var(--wash); border-color: #C6D0CA; }
-  button.primary { background: var(--pine); border-color: var(--pine); color: #fff; }
-  button.primary:hover { background: var(--pine-2); }
-  .linkish { height: auto; border: 0; background: none; padding: 0; color: var(--muted); font-weight: 500; font-size: 12px; }
-  .linkish:hover { background: none; color: var(--pine); text-decoration: underline; }
-  .mini { height: 28px; padding: 0 10px; font-size: 12px; }
+  button:hover { background: var(--wash); border-color: #BFCAC3; }
+  button.primary { background: var(--pe); border-color: var(--pe); color: #FFFFFF; font-weight: 600; }
+  button.primary:hover { background: var(--pe-2); border-color: var(--pe-2); }
+  button.mast-ghost {
+    height: 30px; padding: 0 10px; font-size: 12px;
+    background: rgba(255,255,255,.08);
+    border-color: rgba(255,255,255,.22);
+    color: #EFF5F2;
+  }
+  button.mast-ghost:hover { background: rgba(255,255,255,.16); border-color: rgba(255,255,255,.38); }
+  button.mast-gold {
+    height: 30px; padding: 0 12px; font-size: 12px; font-weight: 700;
+    background: var(--gold-bright); border-color: var(--gold-bright); color: var(--pe-3);
+  }
+  button.mast-gold:hover { background: #EED07B; border-color: #EED07B; }
+  .linkish {
+    height: auto; border: 0; background: none; padding: 0;
+    color: var(--pe); font-weight: 600; font-size: 12px;
+  }
+  .linkish:hover { background: none; text-decoration: underline; text-underline-offset: 2px; }
 
-  /* ---------- buy-boxes ---------- */
-  .boxlist { display: grid; gap: 2px; margin: 0 -8px 10px; }
+  input[type=text], input[type=search], select, textarea {
+    font: inherit; font-size: 12.5px;
+    height: 32px; padding: 0 9px;
+    color: var(--ink); background: var(--panel);
+    border: 1px solid var(--line); border-radius: var(--r-s);
+    transition: border-color .12s, box-shadow .12s;
+  }
+  textarea { height: auto; padding: 8px 10px; width: 100%; }
+  input:hover, select:hover, textarea:hover { border-color: #BCC8C1; }
+  input:focus, select:focus, textarea:focus {
+    outline: none; border-color: var(--pe);
+    box-shadow: 0 0 0 3px rgba(11, 61, 46, .12);
+  }
+  input::placeholder, textarea::placeholder { color: var(--faint); }
+
+  /* ---------- Mandate Ribbon (Buy-Boxes + Personal Triage) ---------- */
+  .mandate-bar {
+    background: var(--panel);
+    border-bottom: 1px solid var(--line);
+    padding: 9px 24px;
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px;
+  }
+  .mandate-label {
+    font-size: 10.5px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.12em; color: var(--muted); white-space: nowrap;
+  }
+  .boxlist { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; flex: 1 1 320px; min-width: 0; }
   .box {
-    all: unset; box-sizing: border-box; cursor: pointer;
-    display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 0 8px;
-    padding: 6px 8px 6px 10px; border-radius: var(--r-s); position: relative;
+    height: 30px; padding: 0 11px;
+    display: inline-flex; align-items: center; gap: 7px;
+    border-radius: var(--r-s);
+    border: 1px solid var(--line);
+    background: var(--wash); color: var(--ink-2);
+    font-size: 12.5px; font-weight: 500;
   }
-  .box:hover { background: var(--paper); }
-  .box:focus-visible { outline: 2px solid var(--pine); outline-offset: -2px; }
-  .box[aria-pressed="true"] { background: var(--pine-soft); }
-  .box[aria-pressed="true"]::before { content: ""; position: absolute; left: 0; top: 6px; bottom: 6px; width: 3px; border-radius: 2px; background: var(--pine); }
-  .box .nm { font-weight: 500; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .box[aria-pressed="true"] .nm { font-weight: 600; color: var(--pine); }
-  .box .ct { font-size: 12px; color: var(--muted); }
-  .box .nw { grid-column: 1 / -1; font-size: 11px; color: #7A5612; }
-  .boxtools { display: flex; flex-wrap: wrap; gap: 6px; }
-  .privacy { font-size: 11.5px; color: var(--muted); margin: 10px 0 0; line-height: 1.4; }
+  .box:hover { background: var(--pe-tint); border-color: #B9CCC1; color: var(--ink); }
+  .box[aria-pressed="true"] {
+    background: var(--pe); border-color: var(--pe); color: #FFFFFF; font-weight: 600;
+  }
+  .box .ct { font-size: 11.5px; opacity: .78; }
+  .box .nw {
+    font-size: 10px; font-weight: 700; padding: 1px 5px; border-radius: 3px;
+    background: var(--gold-soft); color: #7C580C;
+  }
+  .box[aria-pressed="true"] .nw { background: var(--gold-bright); color: var(--pe-3); }
+  .box-add {
+    height: 30px; padding: 0 10px; font-size: 12px; font-weight: 600;
+    border-style: dashed; border-color: #B4C4BB; color: var(--pe); background: transparent;
+  }
+  .box-add:hover { background: var(--pe-tint); border-style: solid; }
 
-  /* ---------- results ---------- */
-  .results { padding: 20px 28px 32px; min-width: 0; }
-  .bar { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px 16px; margin-bottom: 12px; }
-  .headline { margin-right: auto; min-width: 0; }
-  .count { margin: 0; font: 600 20px/1.2 var(--display); letter-spacing: -0.01em; }
-  .count span { color: var(--muted); font: 400 13px var(--body); margin-left: 6px; letter-spacing: 0; }
-  .summary { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
-  .summary b { color: var(--ink-2); font-weight: 600; }
-  .sortbox { display: flex; align-items: center; gap: 8px; }
-  .sortbox label { font-size: 12px; color: var(--muted); }
-  .bar select { width: auto; min-width: 200px; }
+  .triage-group {
+    margin-left: auto;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .triage-btn {
+    height: 30px; padding: 0 10px; font-size: 12px; font-weight: 600;
+    display: inline-flex; align-items: center; gap: 5px;
+    background: var(--panel); border-color: var(--line); color: var(--ink-2);
+  }
+  .triage-btn[aria-pressed="true"] {
+    background: var(--gold-soft); border-color: #DFC485; color: #75520A;
+  }
+  .triage-btn.passed-btn[aria-pressed="true"] {
+    background: var(--pe-soft); border-color: #B8D2C5; color: var(--pe);
+  }
 
-  .context { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 12px; min-height: 0; }
+  /* ---------- Slim Filter Toolbar ---------- */
+  .filter-shell {
+    background: var(--wash);
+    border-bottom: 1px solid var(--line);
+    padding: 10px 24px;
+  }
+  .filter-shell summary { display: none; }
+  .filter-grid {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+  }
+  .search-wrap { position: relative; flex: 1 1 175px; max-width: 225px; }
+  .search-wrap input { width: 100%; padding-right: 26px; }
+  .search-wrap kbd {
+    position: absolute; right: 7px; top: 50%; transform: translateY(-50%);
+    font: 600 10.5px var(--body); color: var(--faint);
+    border: 1px solid var(--line); border-radius: 3px; padding: 0 5px; line-height: 16px;
+    pointer-events: none; background: var(--wash);
+  }
+  .f-sel { width: auto; min-width: 104px; max-width: 152px; }
+  .f-pair {
+    display: inline-flex; align-items: center;
+    background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-s);
+    height: 32px; overflow: hidden;
+  }
+  .f-pair span {
+    font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em;
+    color: var(--muted); padding: 0 6px 0 7px; background: var(--wash); height: 100%;
+    display: inline-flex; align-items: center; border-right: 1px solid var(--line-2);
+  }
+  .f-pair input {
+    width: 56px; height: 100%; border: 0; border-radius: 0; padding: 0 6px; font-size: 12px;
+  }
+  .f-pair input + input { border-left: 1px solid var(--line-2); }
+  .f-pair input:focus { box-shadow: none; background: #F4FBF7; }
+
+  .seg {
+    display: inline-grid; grid-template-columns: repeat(3, auto);
+    padding: 2px; gap: 2px; height: 32px;
+    background: var(--paper); border: 1px solid var(--line); border-radius: var(--r-s);
+  }
+  .seg label {
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 11.5px; font-weight: 600; padding: 0 8px;
+    cursor: pointer; border-radius: 3px; color: var(--muted); white-space: nowrap;
+  }
+  .seg input { position: absolute; opacity: 0; pointer-events: none; }
+  .seg label:has(input:checked) { background: var(--panel); color: var(--pe); box-shadow: 0 1px 2px rgba(11,61,46,.12); }
+
+  .check-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    height: 32px; padding: 0 10px;
+    background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-s);
+    font-size: 12px; font-weight: 500; color: var(--ink-2); cursor: pointer; white-space: nowrap;
+  }
+  .check-pill input { accent-color: var(--pe); margin: 0; width: 14px; height: 14px; }
+
+  /* ---------- KPI Summary & Controls Row ---------- */
+  .workspace {
+    max-width: 1680px;
+    margin: 0 auto;
+    padding: 16px 24px 36px;
+  }
+  .results-bar {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+    gap: 10px 16px; margin-bottom: 10px;
+  }
+  .headline-group { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 16px; }
+  .count { margin: 0; font: 700 20px/1.15 var(--serif); color: var(--ink); }
+  .count span { font: 400 12.5px var(--body); color: var(--muted); margin-left: 6px; }
+  .kpi-inline { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; font-size: 12.5px; color: var(--muted); }
+  .kpi-inline b { color: var(--ink); font-weight: 700; }
+  .kpi-inline .sep { color: var(--line); }
+
+  .controls-right { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .sortbox { display: inline-flex; align-items: center; gap: 6px; }
+  .sortbox label { font-size: 11.5px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+  .sortbox select { min-width: 185px; }
+
+  .context { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 12px; }
   #activebox, #chips { display: contents; }
   .chip {
     display: inline-flex; align-items: center; gap: 6px;
-    height: 26px; padding: 0 4px 0 10px;
-    font: 500 12px var(--body); color: var(--ink-2);
-    background: var(--panel); border: 1px solid var(--line); border-radius: 13px;
+    height: 25px; padding: 0 5px 0 10px;
+    font-size: 12px; font-weight: 500; color: var(--ink-2);
+    background: var(--panel); border: 1px solid var(--line); border-radius: 99px;
   }
-  .chip button { all: unset; cursor: pointer; width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center; color: var(--muted); font-size: 14px; line-height: 1; }
+  .chip button {
+    all: unset; cursor: pointer; width: 17px; height: 17px; border-radius: 50%;
+    display: grid; place-items: center; color: var(--muted); font-size: 13px; line-height: 1;
+  }
   .chip button:hover { background: var(--paper); color: var(--ink); }
-  .chip button:focus-visible { outline: 2px solid var(--pine); }
-  .chip.box-chip { background: var(--pine-soft); border-color: transparent; color: var(--pine); padding-right: 4px; }
-  .chip.box-chip .act { all: unset; cursor: pointer; font-size: 12px; text-decoration: underline; text-underline-offset: 2px; width: auto; height: auto; padding: 0 4px; border-radius: 0; }
-  .chip.box-chip .act:hover { background: none; color: var(--ink); }
-  .clear-all { margin-left: 4px; }
+  .chip.box-chip { background: var(--pe-soft); border-color: #C0D9CC; color: var(--pe); }
+  .chip.box-chip .act {
+    all: unset; cursor: pointer; font-size: 11.5px; font-weight: 700;
+    text-decoration: underline; text-underline-offset: 2px; padding: 0 4px;
+  }
 
-  .tablewrap { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-m); }
+  /* ---------- Split Origination Desk (Ledger + Sticky IC One-Pager) ---------- */
+  .split {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 405px;
+    gap: 18px;
+    align-items: start;
+  }
+  .split.no-ic { grid-template-columns: minmax(0, 1fr); }
+  .split.no-ic .ic-pane { display: none; }
+
+  /* Ledger Table */
+  .tablewrap {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--r-m);
+    overflow-x: auto;
+  }
   table { width: 100%; border-collapse: separate; border-spacing: 0; }
   thead th {
-    position: sticky; top: var(--bar-h); z-index: 5;
-    text-align: right; font-size: 12px; font-weight: 500; color: var(--muted);
-    padding: 0 16px; height: 40px; background: var(--wash); border-bottom: 1px solid var(--line); white-space: nowrap;
+    position: sticky; top: 0; z-index: 4;
+    text-align: right;
+    font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em;
+    color: var(--muted);
+    padding: 0 12px; height: 38px;
+    background: var(--pe-tint);
+    border-bottom: 1px solid var(--line);
+    white-space: nowrap;
   }
-  thead th:first-child { text-align: left; border-top-left-radius: var(--r-m); }
-  thead th:last-child { border-top-right-radius: var(--r-m); }
+  thead th:first-child { text-align: center; padding: 0 6px 0 12px; width: 34px; }
+  thead th:nth-child(2) { text-align: left; }
   .sorter { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; font: inherit; color: inherit; }
   .sorter:hover { color: var(--ink); }
-  .sorter.on { color: var(--pine); font-weight: 600; }
-  .sorter:focus-visible { outline: 2px solid var(--pine); outline-offset: 2px; border-radius: 3px; }
+  .sorter.on { color: var(--pe); }
   .arrow { font-size: 9px; min-width: 9px; }
-  tbody td { padding: 12px 16px; border-bottom: 1px solid var(--line-2); text-align: right; vertical-align: top; white-space: nowrap; font-size: 14px; }
+
+  tbody td {
+    padding: 11px 12px;
+    border-bottom: 1px solid var(--line-2);
+    text-align: right; vertical-align: top;
+    white-space: nowrap; font-size: 13px;
+  }
   tbody tr:last-child td { border-bottom: 0; }
-  tbody tr { cursor: pointer; }
-  tbody tr:hover td { background: #F8FAF8; }
-  td.biz { text-align: left; white-space: normal; width: 46%; }
-  .biz .t { display: flex; align-items: flex-start; gap: 8px; }
+  tbody tr { cursor: pointer; transition: background-color .1s; }
+  tbody tr:hover td { background: #F5F9F6; }
+  tbody tr.selected td { background: #E9F3EE; }
+  tbody tr.selected td:first-child { box-shadow: inset 3px 0 0 var(--pe); }
+  tbody tr.is-passed td { opacity: .52; }
+
+  td.star-col { text-align: center; padding: 10px 4px 10px 10px; width: 34px; }
+  .star-btn {
+    all: unset; cursor: pointer; font-size: 15px; line-height: 1;
+    color: #C7D1CB; padding: 2px; border-radius: 4px; display: inline-block;
+  }
+  .star-btn:hover { color: var(--gold); transform: scale(1.1); }
+  .star-btn.on { color: var(--gold); }
+
+  td.biz { text-align: left; white-space: normal; min-width: 240px; }
+  .biz .t { display: flex; align-items: flex-start; gap: 7px; }
   .biz a {
-    font-weight: 600; text-decoration: none; color: var(--ink);
+    font-weight: 600; font-size: 13.5px; text-decoration: none; color: var(--ink);
     display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
   }
-  .biz a:hover { color: var(--pine); text-decoration: underline; text-underline-offset: 2px; }
-  .meta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; margin-top: 3px; color: var(--muted); font-size: 12.5px; }
-  .cat { color: var(--ink-2); font-size: 12px; margin-top: 3px; }
-  .meta .srcname::before { content: ""; display: inline-block; width: 3px; height: 3px; border-radius: 50%; background: var(--faint); margin-right: 8px; vertical-align: middle; }
-  .meta .srcname { color: var(--faint); }
-  .tag { display: inline-block; font-size: 11px; font-weight: 600; padding: 0 6px; line-height: 18px; border-radius: 4px; }
-  .tag.vault { background: var(--pine-soft); color: var(--pine); }
-  .tag.new { background: var(--brass-soft); color: #7A5612; }
-  .dec { flex: none; font-size: 11px; font-weight: 600; padding: 0 7px; line-height: 20px; border-radius: 4px; margin-top: 1px; }
-  .dec.fast { background: var(--pine); color: #fff; }
-  .dec.pursue { background: var(--pine-soft); color: var(--pine); }
-  .dec.cond { background: var(--brass-soft); color: #7A5612; }
-  .dec.tbd { background: var(--paper); color: var(--muted); border: 1px solid var(--line); }
-  .why { color: var(--ink-2); font-size: 12px; margin-top: 4px; }
-  .teaser { color: var(--muted); font-size: 12.5px; margin-top: 4px; max-width: 70ch; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-  .nil { color: var(--faint); }
-  .suspect { color: var(--faint); text-decoration: line-through dotted; cursor: help; }
-  .seen { color: var(--muted); font-size: 12.5px; }
+  .biz a:hover { color: var(--pe); text-decoration: underline; text-underline-offset: 2px; }
+  .meta {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 4px 7px;
+    margin-top: 3px; color: var(--muted); font-size: 12px;
+  }
+  .meta .dotsep::before { content: "·"; margin-right: 7px; color: var(--faint); }
+  .cat { color: var(--ink-2); font-size: 11.5px; margin-top: 2px; }
+  .why { color: var(--pe); font-size: 11.5px; font-weight: 500; margin-top: 3px; }
+  .note-ind { display: inline-flex; align-items: center; gap: 3px; font-size: 11px; color: var(--gold); font-weight: 600; }
 
-  /* the multiple gauge: asking price ÷ cash flow, scaled 0–8× */
-  .mult { display: inline-grid; grid-template-columns: 40px 64px; align-items: center; gap: 8px; }
-  .gauge { height: 6px; background: #EDF1EE; border-radius: 3px; position: relative; overflow: hidden; }
-  .gauge i { position: absolute; inset: 0 auto 0 0; border-radius: 3px; background: var(--pine); }
-  .gauge i.mid { background: var(--brass); }
+  .tag {
+    display: inline-block; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+    padding: 1px 5px; line-height: 15px; border-radius: 3px;
+  }
+  .tag.vault { background: var(--pe-soft); color: var(--pe); }
+  .tag.new { background: var(--pe); color: #FFFFFF; }
+  .dec {
+    flex: none; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+    padding: 1px 6px; line-height: 17px; border-radius: 3px; margin-top: 1px;
+  }
+  .dec.fast { background: var(--pe); color: #FFFFFF; }
+  .dec.pursue { background: var(--pe-soft); color: var(--pe); }
+  .dec.cond { background: var(--gold-soft); color: #825C0D; }
+  .dec.tbd { background: var(--paper); color: var(--muted); border: 1px solid var(--line); }
+
+  .nil { color: var(--faint); }
+  .cf-strong { font-weight: 600; color: var(--pe); }
+  .suspect { color: var(--faint); text-decoration: line-through dotted; cursor: help; }
+  .seen { color: var(--muted); font-size: 12px; }
+
+  /* Multiple gauge */
+  .mult { display: inline-grid; grid-template-columns: 38px 50px; align-items: center; gap: 7px; }
+  .mult span { font-weight: 600; }
+  .mult span.good { color: var(--pe); }
+  .mult span.mid { color: var(--gold); }
+  .mult span.high { color: var(--rust); }
+  .gauge { height: 5px; background: #E6ECE8; border-radius: 3px; position: relative; overflow: hidden; }
+  .gauge i { position: absolute; inset: 0 auto 0 0; border-radius: 3px; background: var(--pe); }
+  .gauge i.mid { background: var(--gold); }
   .gauge i.high { background: var(--rust); }
   .gauge::after { content: ""; position: absolute; left: 37.5%; top: 0; bottom: 0; width: 1px; background: #fff; }
 
-  .more { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 14px; color: var(--muted); font-size: 13px; }
-  .more:has(#moreBtn[hidden]) { justify-content: flex-start; }
-  .empty { padding: 56px 24px; text-align: center; }
-  .empty h2 { font: 600 18px var(--display); margin: 0 0 6px; }
-  .empty p { color: var(--muted); margin: 0 auto 16px; max-width: 56ch; }
-  .foot { margin: 24px 0 0; color: var(--faint); font-size: 12px; }
+  /* ---------- Sticky Investment Committee (IC) One-Pager ---------- */
+  .ic-pane {
+    position: sticky;
+    top: calc(var(--bar-h) + 14px);
+    max-height: calc(100vh - var(--bar-h) - 28px);
+    overflow: hidden;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-top: 3px solid var(--pe);
+    border-radius: var(--r-m);
+    display: flex; flex-direction: column;
+  }
+  .ic-head {
+    flex-shrink: 0;
+    padding: 14px 18px 12px;
+    border-bottom: 1px solid var(--line-2);
+    background: var(--pe-tint);
+  }
+  .ic-eyebrow {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em;
+    color: var(--pe);
+  }
+  .ic-close { all: unset; display: none; cursor: pointer; font-size: 18px; line-height: 1; color: var(--muted); padding: 0 4px; }
+  .ic-title {
+    margin: 6px 0 0;
+    font: 700 17px/1.28 var(--serif);
+    color: var(--ink);
+  }
+  .ic-sub { margin-top: 5px; font-size: 12px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px 8px; }
+  .ic-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 14px 18px;
+    display: flex; flex-direction: column; gap: 13px;
+  }
+  .ic-teaser { margin: 0; font-size: 12.5px; line-height: 1.55; color: var(--ink-2); }
+
+  .ic-banner {
+    padding: 9px 12px; border-radius: var(--r-s); font-size: 12px;
+    border: 1px solid var(--line); background: var(--wash);
+  }
+  .ic-banner.fast { background: var(--pe-soft); border-color: #B7D2C4; color: var(--pe); }
+  .ic-banner.pursue { background: var(--pe-tint); border-color: #C7DCD1; color: var(--pe); }
+  .ic-banner.cond { background: var(--gold-soft); border-color: #E5CD96; color: #7C580C; }
+  .ic-banner.warn { background: var(--rust-soft); border-color: #E7C2BE; color: var(--rust); }
+
+  /* What-If Offer Card */
+  .ic-box {
+    border: 1px solid var(--line);
+    border-radius: var(--r-s);
+    padding: 12px 13px;
+    background: #FCFDFC;
+  }
+  .ic-box-h {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    margin-bottom: 8px;
+  }
+  .ic-box-h .lbl {
+    font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--pe);
+  }
+  .offer-val { font-size: 14px; font-weight: 700; color: var(--ink); }
+  .offer-diff { font-size: 11px; font-weight: 500; color: var(--muted); margin-left: 4px; }
+  .ic-slider { width: 100%; accent-color: var(--pe); margin: 4px 0 8px; cursor: pointer; }
+  .ic-quick-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; font-size: 11.5px; }
+
+  .kpi3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
+  .kpi3 .k {
+    background: var(--pe-tint); border: 1px solid var(--line-2);
+    border-radius: var(--r-s); padding: 7px 6px; text-align: center;
+  }
+  .kpi3 .kl { font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); }
+  .kpi3 .kv { font-size: 13.5px; font-weight: 700; color: var(--ink); margin-top: 2px; }
+  .kv.good { color: var(--pe); }
+  .kv.mid { color: var(--gold); }
+  .kv.bad { color: var(--rust); }
+
+  .stack-rows { display: flex; flex-direction: column; gap: 5px; font-size: 12.5px; }
+  .srow { display: flex; justify-content: space-between; gap: 10px; }
+  .srow span { color: var(--muted); }
+  .srow strong { color: var(--ink); font-weight: 600; }
+  .srow.total { padding-top: 7px; margin-top: 3px; border-top: 1px solid var(--line); font-weight: 700; }
+  .srow.total span { color: var(--ink); font-weight: 700; }
+  .sdiv { height: 1px; background: var(--line-2); margin: 5px 0; }
+
+  .mgr-toggle {
+    display: inline-flex; gap: 4px; align-items: center;
+    font-size: 11px; color: var(--muted);
+  }
+  .mgr-toggle select {
+    height: 22px; font-size: 11px; padding: 0 5px; width: auto;
+  }
+
+  .ic-note-lbl {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .09em;
+    color: var(--muted); margin-bottom: 5px;
+  }
+  .ic-note { min-height: 54px; resize: vertical; font-size: 12.5px; }
+
+  .ic-foot {
+    flex-shrink: 0;
+    padding: 11px 18px;
+    border-top: 1px solid var(--line-2);
+    background: var(--wash);
+    display: flex; gap: 8px;
+  }
+  .ic-foot .btn-open { flex: 1; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; height: 34px; border-radius: var(--r-s); background: var(--pe); color: #fff; font-weight: 600; font-size: 12.5px; }
+  .ic-foot .btn-open:hover { background: var(--pe-2); }
+
+  .ic-empty { padding: 48px 20px; text-align: center; color: var(--muted); font-size: 13px; }
+  .ic-backdrop { display: none; }
+
+  /* Pagination & Footnote */
+  .more { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 12px; color: var(--muted); font-size: 12.5px; }
+  .empty { padding: 52px 24px; text-align: center; }
+  .empty h2 { font: 700 18px var(--serif); margin: 0 0 6px; }
+  .empty p { color: var(--muted); margin: 0 auto 14px; max-width: 54ch; }
   .loading { padding: 56px 24px; text-align: center; color: var(--muted); }
+  .foot { margin: 18px 0 0; color: var(--faint); font-size: 11.5px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; }
+  .kbd-hints { display: flex; gap: 10px; }
+  .kbd-hints kbd { border: 1px solid var(--line); border-radius: 3px; padding: 0 4px; font-size: 10.5px; background: var(--panel); color: var(--muted); }
 
-  /* ---------- dialog ---------- */
-  dialog { border: 1px solid var(--line); border-radius: 12px; padding: 0; width: min(580px, 94vw); color: var(--ink); box-shadow: 0 20px 50px rgba(27, 36, 32, .18); }
-  dialog::backdrop { background: rgba(27, 36, 32, .4); }
-  dialog form { padding: 22px 24px 20px; max-height: 88vh; overflow-y: auto; }
-  dialog h2 { font: 700 20px var(--display); margin: 0 0 16px; }
+  /* ---------- Buy-Box Dialog ---------- */
+  dialog {
+    border: 1px solid var(--line); border-radius: 10px; padding: 0;
+    width: min(580px, 94vw); color: var(--ink);
+    box-shadow: 0 24px 60px rgba(8, 43, 32, .25);
+  }
+  dialog::backdrop { background: rgba(8, 43, 32, .45); }
+  .dlg-head {
+    background: var(--pe); color: #FFFFFF;
+    padding: 16px 24px; border-bottom: 2px solid var(--gold-bright);
+  }
+  .dlg-head h2 { font: 700 19px/1.2 var(--serif); margin: 0; }
+  .dlg-head p { margin: 3px 0 0; font-size: 12px; color: #B4D1C2; }
+  dialog form { padding: 0; max-height: 88vh; overflow-y: auto; }
+  .dlg-body { padding: 18px 24px 8px; }
+  .field { margin-bottom: 13px; }
+  .field > label { display: block; font-weight: 600; font-size: 12px; color: var(--ink-2); margin-bottom: 4px; }
+  .field input[type=text], .field textarea { width: 100%; }
+  .hint { font-size: 11px; color: var(--muted); margin: 4px 0 0; line-height: 1.4; }
   dialog .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 14px; }
-  dialog textarea { min-height: 54px; resize: vertical; }
-  dialog .actions { display: flex; gap: 8px; justify-content: flex-end; margin: 10px -24px -20px; padding: 14px 24px 20px; border-top: 1px solid var(--line-2); position: sticky; bottom: -20px; background: var(--panel); }
+  dialog textarea { min-height: 52px; resize: vertical; }
+  dialog .check { display: flex; gap: 8px; align-items: center; font-size: 12.5px; color: var(--ink-2); cursor: pointer; }
+  dialog .check input { accent-color: var(--pe); width: 15px; height: 15px; margin: 0; }
+  dialog .actions {
+    display: flex; gap: 8px; justify-content: flex-end;
+    padding: 13px 24px 16px; border-top: 1px solid var(--line-2);
+    position: sticky; bottom: 0; background: var(--panel);
+  }
   dialog .actions .danger { margin-right: auto; color: var(--rust); border-color: transparent; background: none; padding: 0 6px; }
-  dialog .actions .danger:hover { background: #F7ECE8; }
-  dialog .err { color: var(--rust); font-size: 13px; min-height: 1em; margin: 0 0 4px; }
+  dialog .actions .danger:hover { background: var(--rust-soft); }
+  dialog .err { color: var(--rust); font-size: 12.5px; min-height: 1em; margin: 0 0 6px; }
 
-  /* ---------- small screens ---------- */
-  @media (max-width: 900px) {
-    :root { --bar-h: 52px; }
-    .appbar { padding: 0 16px; }
-    .brand .src, .status .total { display: none; }
-    .wrap { grid-template-columns: 1fr; }
-    .filters { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--line); padding: 0 16px; }
-    .filters summary { display: flex; align-items: center; justify-content: space-between; cursor: pointer; font-weight: 600; font-size: 13px; height: 44px; list-style: none; }
-    .filters summary::-webkit-details-marker { display: none; }
-    .filters summary::after { content: "Show"; font-weight: 500; color: var(--pine); font-size: 12px; }
-    .filters[open] summary::after { content: "Hide"; }
-    .filters[open] { padding-bottom: 16px; }
-    .results { padding: 16px; }
-    .bar select { min-width: 0; flex: 1; }
-    .sortbox { flex: 1; }
+  /* ---------- Responsive (<1120px slide-over IC drawer, <760px mobile cards) ---------- */
+  @media (max-width: 1120px) {
+    .split { grid-template-columns: minmax(0, 1fr); }
+    .ic-pane {
+      position: fixed; top: 0; right: 0; bottom: 0; z-index: 50;
+      width: min(420px, 94vw); max-height: 100vh;
+      border-radius: 0; border-top: 0; border-left: 2px solid var(--pe);
+      transform: translateX(105%); transition: transform .2s ease;
+      box-shadow: -12px 0 36px rgba(8, 43, 32, .22);
+    }
+    .ic-pane.drawer-open { transform: translateX(0); display: flex !important; }
+    .ic-close { display: inline-block; }
+    .ic-backdrop.open {
+      display: block; position: fixed; inset: 0; z-index: 45;
+      background: rgba(8, 43, 32, .38);
+    }
+    #toggleIcBtn { display: none; }
+  }
+
+  @media (max-width: 820px) {
+    .masthead { padding: 10px 14px; }
+    .brand .sub, .status .total { display: none; }
+    .mandate-bar { padding: 8px 14px; }
+    .filter-shell { padding: 0 14px; }
+    .filter-shell summary {
+      display: flex; align-items: center; justify-content: space-between;
+      height: 40px; cursor: pointer; font-weight: 600; font-size: 12.5px; color: var(--pe); list-style: none;
+    }
+    .filter-shell summary::-webkit-details-marker { display: none; }
+    .filter-shell summary::after { content: "Show"; font-size: 11.5px; }
+    .filter-shell[open] summary::after { content: "Hide"; }
+    .filter-shell[open] .filter-grid { padding-bottom: 12px; }
+    .workspace { padding: 12px 14px 28px; }
+    .kbd-hints { display: none; }
     thead { display: none; }
-    .tablewrap { border-radius: var(--r-m); overflow: hidden; }
     table, tbody, tr, td { display: block; width: 100%; }
-    tbody tr { padding: 12px 14px; border-bottom: 1px solid var(--line-2); display: grid; grid-template-columns: 1fr 1fr; gap: 2px 12px; }
-    tbody tr:last-child { border-bottom: 0; }
-    tbody td { border: 0; padding: 1px 0; text-align: left; font-size: 13px; }
-    td.biz { grid-column: 1 / -1; width: auto; margin-bottom: 6px; }
-    td[data-k]::before { content: attr(data-k) "  "; color: var(--muted); font-size: 11.5px; }
-    .mult { vertical-align: middle; grid-template-columns: 36px 56px; }
+    tbody tr {
+      padding: 11px 12px; border-bottom: 1px solid var(--line-2);
+      display: grid; grid-template-columns: 1fr 1fr; gap: 3px 10px;
+    }
+    tbody td { border: 0; padding: 1px 0; text-align: left; font-size: 12.5px; }
+    td.star-col { position: absolute; right: 12px; width: auto; padding: 0; }
+    tbody tr { position: relative; }
+    td.biz { grid-column: 1 / -1; min-width: 0; padding-right: 26px; margin-bottom: 5px; }
+    td[data-k]::before { content: attr(data-k) "  "; color: var(--muted); font-size: 11px; }
+    dialog .grid2 { grid-template-columns: 1fr; }
+
+    /* phones: compact header that scrolls away instead of covering a quarter of the screen */
+    .masthead { position: static; gap: 6px 10px; padding: 10px 14px 8px; }
+    .brand .name { font-size: 17px; }
+    .mast-right { margin-left: 0; width: 100%; gap: 6px 10px; justify-content: space-between; }
+    .mast-right .status { font-size: 12px; }
+    .mast-actions { gap: 6px; }
+    .mast-actions button { height: 28px; padding: 0 9px; font-size: 11.5px; }
+
+    /* phones: buy-box tabs get their own full row; triage buttons go below instead of on top of them */
+    .mandate-bar { gap: 8px; }
+    .mandate-label { flex: 1 1 100%; }
+    .boxlist { flex: 1 1 100%; }
+    .triage-group { margin-left: 0; flex: 1 1 100%; }
+    .triage-group .triage-btn { flex: 1; justify-content: center; }
+
+    /* phones: highlight the whole selected card evenly (cells are laid out on a grid) */
+    tbody tr.selected { background: #E9F3EE; box-shadow: inset 3px 0 0 var(--pe); }
+    tbody tr.selected td, tbody tr.selected td:first-child { background: transparent; box-shadow: none; }
   }
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 </head>
 <body>
 
-<header class="appbar">
-  <div class="brand"><span class="name">Deal screen</span><span class="src">US business marketplaces</span></div>
-  <p class="status" id="status">Loading listings…</p>
+<!-- 1. FEDERAL RESERVE GREEN MASTHEAD -->
+<header class="masthead">
+  <div class="brand">
+    <span class="name">DEAL SCREEN</span>
+    <span class="sub">Private Equity Origination Desk</span>
+  </div>
+  <div class="mast-right">
+    <p class="status" id="status">Loading listings…</p>
+    <div class="mast-actions">
+      <button type="button" class="mast-ghost" id="boxImport" title="Import desktop buybox.json or backup JSON">Import Buy-Boxes</button>
+      <button type="button" class="mast-ghost" id="boxBackup" title="Back up buy-boxes, shortlist and notes">Back up</button>
+      <button type="button" class="mast-gold" id="export">Export CSV</button>
+      <input type="file" id="boxFile" accept=".json,application/json" hidden>
+    </div>
+  </div>
 </header>
 
-<div class="wrap">
-  <details class="filters" id="filtersBox" open>
-    <summary>Buy-boxes and filters</summary>
-    <section class="side-sec" aria-labelledby="boxesTitle">
-      <div class="side-h"><h2 id="boxesTitle">Buy-boxes</h2><button type="button" class="mini" id="boxAdd">New</button></div>
-      <div class="boxlist" id="boxlist"></div>
-      <div class="boxtools">
-        <button type="button" class="mini" id="boxImport">Import buybox.json</button>
-        <button type="button" class="mini" id="boxBackup">Back up</button>
-        <input type="file" id="boxFile" accept=".json,application/json" hidden>
-      </div>
-      <p class="privacy">Stored in this browser only, never uploaded. Back up to move them to another device.</p>
-    </section>
-    <section class="side-sec" aria-labelledby="filtersTitle">
-    <div class="side-h"><h2 id="filtersTitle">Filters</h2><button type="button" class="linkish" id="reset">Clear all</button></div>
-    <form id="filters" autocomplete="off" onsubmit="return false">
-      <div class="field">
-        <label for="q">Search</label>
-        <div class="search"><input type="search" id="q" placeholder="HVAC, dental, Austin…" aria-keyshortcuts="/"><kbd aria-hidden="true">/</kbd></div>
-      </div>
-      <div class="field">
-        <label for="src">Source</label>
-        <select id="src"><option value="">All sources</option></select>
-      </div>
-      <div class="field">
-        <label for="state">State</label>
-        <select id="state"><option value="">All states</option></select>
-      </div>
-      <div class="field">
-        <span class="label" id="kindLabel">Type</span>
-        <div class="seg" role="radiogroup" aria-labelledby="kindLabel">
-          <label><input type="radio" name="kind" value="all" checked>All</label>
-          <label><input type="radio" name="kind" value="0">Listings</label>
-          <label><input type="radio" name="kind" value="1">M&amp;A Vault</label>
-        </div>
-      </div>
-      <div class="field">
-        <span class="label">Asking price</span>
-        <div class="pair">
-          <input type="text" id="pmin" placeholder="Min" aria-label="Minimum asking price">
-          <input type="text" id="pmax" placeholder="Max" aria-label="Maximum asking price">
-        </div>
-        <p class="hint">Type amounts like 500k or 2.5m</p>
-      </div>
-      <div class="field">
-        <span class="label">Cash flow</span>
-        <div class="pair">
-          <input type="text" id="cfmin" placeholder="Min" aria-label="Minimum cash flow">
-          <input type="text" id="cfmax" placeholder="Max" aria-label="Maximum cash flow">
-        </div>
-      </div>
-      <div class="field">
-        <label for="multmax">Highest multiple</label>
-        <select id="multmax">
-          <option value="">Any</option>
-          <option value="2">2× or less</option>
-          <option value="3">3× or less</option>
-          <option value="4">4× or less</option>
-          <option value="5">5× or less</option>
-        </select>
-        <p class="hint">Asking price ÷ cash flow</p>
-      </div>
-      <div class="field">
-        <label for="since">First seen</label>
-        <select id="since">
-          <option value="">Any time</option>
-          <option value="new">New since tracking began</option>
-          <option value="1">Last 24 hours</option>
-          <option value="7">Last 7 days</option>
-          <option value="30">Last 30 days</option>
-        </select>
-      </div>
-      <div class="field">
-        <label class="check"><input type="checkbox" id="hascf"> Only listings with cash flow</label>
-      </div>
-    </form>
-    </section>
-  </details>
+<!-- 2. CLIENT MANDATE RIBBON (BUY-BOXES + BROWSER-ONLY TRIAGE) -->
+<section class="mandate-bar" aria-label="Client buy-boxes and triage">
+  <span class="mandate-label">Mandates</span>
+  <div class="boxlist" id="boxlist"></div>
+  <div class="triage-group">
+    <button type="button" class="triage-btn" id="starFilterBtn" aria-pressed="false" title="Show only your shortlisted deals (stored in this browser)"><span>★ Shortlist (<span id="starCount">0</span>)</span></button>
+    <button type="button" class="triage-btn passed-btn" id="hidePassedBtn" aria-pressed="true" title="Hide deals you marked as passed"><span>Hide passed (<span id="passedCount">0</span>)</span></button>
+  </div>
+</section>
 
-  <main class="results">
-    <div class="bar">
-      <div class="headline">
-        <p class="count" id="count" aria-live="polite"></p>
-        <p class="summary" id="summary"></p>
-      </div>
+<!-- 3. SLIM FILTER BAR -->
+<details class="filter-shell" id="filtersBox" open>
+  <summary>Search &amp; Filters</summary>
+  <form id="filters" class="filter-grid" autocomplete="off" onsubmit="return false">
+    <div class="search-wrap">
+      <input type="search" id="q" placeholder="Search HVAC, Austin, construction…" aria-keyshortcuts="/">
+      <kbd aria-hidden="true">/</kbd>
+    </div>
+    <select id="src" class="f-sel" aria-label="Source"><option value="">All sources</option></select>
+    <select id="state" class="f-sel" aria-label="State"><option value="">All states</option></select>
+    <div class="f-pair">
+      <span>Ask</span>
+      <input type="text" id="pmin" placeholder="Min" aria-label="Minimum asking price" title="Type amounts like 500k or 2.5m">
+      <input type="text" id="pmax" placeholder="Max" aria-label="Maximum asking price" title="Type amounts like 500k or 2.5m">
+    </div>
+    <div class="f-pair">
+      <span>CF</span>
+      <input type="text" id="cfmin" placeholder="Min" aria-label="Minimum cash flow" title="Type amounts like 300k or 1m">
+      <input type="text" id="cfmax" placeholder="Max" aria-label="Maximum cash flow" title="Type amounts like 300k or 1m">
+    </div>
+    <select id="multmax" class="f-sel" aria-label="Highest multiple">
+      <option value="">Any mult</option>
+      <option value="2">≤ 2× mult</option>
+      <option value="3">≤ 3× mult</option>
+      <option value="4">≤ 4× mult</option>
+      <option value="5">≤ 5× mult</option>
+    </select>
+    <select id="since" class="f-sel" aria-label="First seen">
+      <option value="">Any time</option>
+      <option value="new">New only</option>
+      <option value="1">Last 24h</option>
+      <option value="7">Last 7d</option>
+      <option value="30">Last 30d</option>
+    </select>
+    <div class="seg" role="radiogroup" aria-label="Listing type">
+      <label><input type="radio" name="kind" value="all" checked>All</label>
+      <label><input type="radio" name="kind" value="0">Listings</label>
+      <label><input type="radio" name="kind" value="1">Vault</label>
+    </div>
+    <label class="check-pill"><input type="checkbox" id="hascf"> Has CF</label>
+    <button type="button" class="linkish" id="clearFiltersBtn" hidden>Clear</button>
+  </form>
+</details>
+
+<!-- 4. MAIN ORIGINATION WORKSPACE -->
+<main class="workspace">
+  <div class="results-bar">
+    <div class="headline-group">
+      <h1 class="count" id="count" aria-live="polite">Loading…</h1>
+      <div class="kpi-inline" id="summary"></div>
+    </div>
+    <div class="controls-right">
       <div class="sortbox">
         <label for="sort">Sort</label>
         <select id="sort">
@@ -374,39 +713,70 @@
           <option value="title:desc">Name, Z to A</option>
         </select>
       </div>
-      <button type="button" id="export">Export CSV</button>
+      <button type="button" id="toggleIcBtn" title="Toggle Investment Committee Tearsheet panel">Hide IC Panel</button>
     </div>
-    <div class="context" id="context"><span id="activebox" hidden></span><span id="chips"></span></div>
-    <div class="tablewrap" id="out"><div class="loading">Loading listings…</div></div>
-    <div class="more"><span id="shownInfo"></span><button type="button" id="moreBtn" hidden>Show 100 more</button></div>
-    <p class="foot">Figures are what sellers entered on BusinessesForSale.com and aren't verified. Check the listing before relying on them.</p>
-  </main>
-</div>
+  </div>
 
+  <div class="context" id="context" hidden><span id="activebox" hidden></span><span id="chips"></span></div>
+
+  <div class="split" id="splitWrap">
+    <!-- LEFT: ORIGINATION LEDGER -->
+    <section aria-label="Listings ledger">
+      <div class="tablewrap" id="out"><div class="loading">Loading listings from BusinessesForSale &amp; Tupelo…</div></div>
+      <div class="more">
+        <span id="shownInfo"></span>
+        <button type="button" id="moreBtn" hidden>Show 100 more</button>
+      </div>
+      <div class="foot">
+        <span>Figures are seller-entered on source marketplaces and unverified. Buy-boxes, shortlist &amp; notes stay in this browser only — never uploaded.</span>
+        <span class="kbd-hints">
+          <span><kbd>/</kbd> search</span>
+          <span><kbd>J</kbd>/<kbd>K</kbd> navigate</span>
+          <span><kbd>S</kbd> shortlist</span>
+          <span><kbd>X</kbd> pass</span>
+          <span><kbd>O</kbd> open</span>
+        </span>
+      </div>
+    </section>
+
+    <!-- RIGHT: STICKY INVESTMENT COMMITTEE (IC) ONE-PAGER -->
+    <div class="ic-backdrop" id="icBackdrop"></div>
+    <aside class="ic-pane" id="icPane" aria-label="Investment Committee Tearsheet">
+      <div class="ic-empty">Select any listing to model 80/10/10 SBA debt service, equity check, and Year-1 Cash-on-Cash ROI.</div>
+    </aside>
+  </div>
+</main>
+
+<!-- 5. BUY-BOX MODAL DIALOG -->
 <dialog id="boxDlg" aria-labelledby="boxDlgTitle">
   <form method="dialog" id="boxForm" autocomplete="off">
-    <h2 id="boxDlgTitle">Buy-box</h2>
-    <div class="field"><label for="bxName">Name</label><input type="text" id="bxName" required></div>
-    <div class="field"><label for="bxStates">States</label><input type="text" id="bxStates" placeholder="FL, TN, Louisiana">
-      <p class="hint">Codes or full names, separated by commas. Leave empty for anywhere.</p></div>
-    <div class="field"><label for="bxPlaces">Also match these places</label><textarea id="bxPlaces" placeholder="Tampa, Pinellas, Nashville, Online, Remote"></textarea>
-      <p class="hint">Cities, counties, or Online / Remote / Relocatable. A listing matches if it's in one of the states or names one of these places.</p></div>
-    <div class="field"><label for="bxInd">Industry keywords</label><textarea id="bxInd" placeholder="hvac, plumb, clean, saas"></textarea>
-      <p class="hint">Matched against the listing title. Words of 4+ letters also match longer words: plumb matches plumbing. Leave empty for any industry.</p></div>
-    <div class="field"><label for="bxEx">Skip listings mentioning</label><input type="text" id="bxEx" placeholder="franchise, startup"></div>
-    <div class="grid2">
-      <div class="field"><label for="bxMinE">Minimum cash flow</label><input type="text" id="bxMinE" placeholder="300k">
-        <p class="hint">After the manager salary below.</p></div>
-      <div class="field"><label for="bxMaxP">Maximum asking price</label><input type="text" id="bxMaxP" placeholder="1.2m"></div>
-      <div class="field"><label for="bxFree">Cash left after debt</label><input type="text" id="bxFree" placeholder="150k">
-        <p class="hint">Yearly, after SBA + seller note payments.</p></div>
-      <div class="field"><label for="bxMgr">Manager salary to deduct</label><input type="text" id="bxMgr" placeholder="100k">
-        <p class="hint">Taken off seller's cash flow figures.</p></div>
-      <div class="field"><label for="bxMult">Highest multiple</label><input type="text" id="bxMult" placeholder="Any"></div>
+    <div class="dlg-head">
+      <h2 id="boxDlgTitle">Buy-box</h2>
+      <p>Stored locally in your browser only — never committed or uploaded.</p>
     </div>
-    <div class="field"><label class="check"><input type="checkbox" id="bxTbd"> Include listings with missing figures</label></div>
-    <div class="field"><label class="check"><input type="checkbox" id="bxFood" checked> Skip restaurants, food and law firms</label></div>
-    <p class="err" id="bxErr" role="alert"></p>
+    <div class="dlg-body">
+      <div class="field"><label for="bxName">Client / Mandate Name</label><input type="text" id="bxName" required></div>
+      <div class="field"><label for="bxStates">Target States</label><input type="text" id="bxStates" placeholder="FL, TN, Louisiana">
+        <p class="hint">State codes or full names, comma-separated. Leave empty for anywhere.</p></div>
+      <div class="field"><label for="bxPlaces">Also match these places</label><textarea id="bxPlaces" placeholder="Tampa, Pinellas, Nashville, Online, Remote"></textarea>
+        <p class="hint">Cities, counties, or Online / Remote / Relocatable.</p></div>
+      <div class="field"><label for="bxInd">Industry keywords</label><textarea id="bxInd" placeholder="hvac, plumb, clean, saas"></textarea>
+        <p class="hint">Matched against title, industry &amp; teaser. Words of 4+ letters match prefixes (plumb → plumbing).</p></div>
+      <div class="field"><label for="bxEx">Skip listings mentioning</label><input type="text" id="bxEx" placeholder="franchise, startup"></div>
+      <div class="grid2">
+        <div class="field"><label for="bxMinE">Minimum adjusted profit</label><input type="text" id="bxMinE" placeholder="300k">
+          <p class="hint">After manager salary deduction.</p></div>
+        <div class="field"><label for="bxMaxP">Maximum asking price</label><input type="text" id="bxMaxP" placeholder="1.2m"></div>
+        <div class="field"><label for="bxFree">Target free cash after debt</label><input type="text" id="bxFree" placeholder="150k">
+          <p class="hint">Yearly, after SBA + seller note.</p></div>
+        <div class="field"><label for="bxMgr">Manager salary to deduct</label><input type="text" id="bxMgr" placeholder="100k">
+          <p class="hint">Deducted from seller SDE/cash flow.</p></div>
+        <div class="field"><label for="bxMult">Highest multiple</label><input type="text" id="bxMult" placeholder="Any"></div>
+      </div>
+      <div class="field"><label class="check"><input type="checkbox" id="bxTbd"> Include listings with missing figures</label></div>
+      <div class="field"><label class="check"><input type="checkbox" id="bxFood" checked> Skip restaurants, food and law firms</label></div>
+      <p class="err" id="bxErr" role="alert"></p>
+    </div>
     <div class="actions">
       <button type="button" class="danger" id="bxDelete">Delete buy-box</button>
       <button type="button" id="bxCancel">Cancel</button>
@@ -426,13 +796,23 @@
   let metas = {};
   const PAGE = 100;
   const $ = id => document.getElementById(id);
-  let rows = [], meta = {}, filtered = [], shown = PAGE, sortState = { key: "first_seen", dir: "desc" };
-  // first click on a column sorts in its most useful direction
+
+  let rows = [], filtered = [], shown = PAGE;
+  let sortState = { key: "first_seen", dir: "desc" };
+  let selectedKey = "";
+  let offerOverrides = new Map(); // listing key -> custom offer price
+  let mgrOverride = null;         // null = use activeBox or $100k default
+  let starOnly = false;
+  let hidePassed = true;
+  let icVisible = true;
+
   const SORT_DEFAULT = { title: "asc", price: "asc", revenue: "desc", cash_flow: "desc", mult: "asc", first_seen: "desc" };
 
-  const money = n => n == null ? null
-    : n >= 1e6 ? "$" + (n / 1e6).toFixed(n >= 1e7 ? 1 : 2).replace(/\.?0+$/, "") + "M"
-    : "$" + Math.round(n / 1e3).toLocaleString() + "K";
+  const money = n => n == null || !isFinite(n) ? null
+    : (n < 0 ? "-$" : "$") + (Math.abs(n) >= 1e6 ? (Math.abs(n) / 1e6).toFixed(Math.abs(n) >= 1e7 ? 1 : 2).replace(/\.?0+$/, "") + "M"
+    : Math.round(Math.abs(n) / 1e3).toLocaleString() + "K");
+  const moneyFull = n => n == null || !isFinite(n) ? "—"
+    : (n < 0 ? "-$" : "$") + Math.round(Math.abs(n)).toLocaleString();
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const parseAmt = s => {
     const m = String(s || "").trim().toLowerCase().replace(/[$,\s]/g, "").match(/^(\d+(?:\.\d+)?)(k|m)?$/);
@@ -441,16 +821,40 @@
   };
   const daysAgo = iso => Math.floor((Date.now() - new Date(iso + "T00:00:00Z")) / 864e5);
   const ago = iso => {
+    if (!iso) return "—";
     const d = daysAgo(iso);
-    return d <= 0 ? "Today" : d === 1 ? "Yesterday" : d < 30 ? d + " days ago" : new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+    return d <= 0 ? "Today" : d === 1 ? "Yesterday" : d < 30 ? d + "d ago" : new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric" });
   };
 
+  /* ---------- localStorage stores (filters, buy-boxes, personal triage) ---------- */
   const store = {
     get() { try { return JSON.parse(localStorage.getItem("bfs-filters") || "{}"); } catch { return {}; } },
     set(v) { try { localStorage.setItem("bfs-filters", JSON.stringify(v)); } catch {} }
   };
-  const inputs = ["q", "src", "state", "pmin", "pmax", "cfmin", "cfmax", "multmax", "since", "sort"];
+  const triageStore = {
+    get() {
+      try {
+        const d = JSON.parse(localStorage.getItem("dealscreen-triage") || "{}");
+        return {
+          starred: new Set(Array.isArray(d.starred) ? d.starred : []),
+          passed: new Set(Array.isArray(d.passed) ? d.passed : []),
+          notes: d.notes && typeof d.notes === "object" ? d.notes : {},
+        };
+      } catch { return { starred: new Set(), passed: new Set(), notes: {} }; }
+    },
+    set(t) {
+      try {
+        localStorage.setItem("dealscreen-triage", JSON.stringify({
+          starred: [...t.starred],
+          passed: [...t.passed],
+          notes: t.notes,
+        }));
+      } catch {}
+    }
+  };
+  let triage = triageStore.get();
 
+  const inputs = ["q", "src", "state", "pmin", "pmax", "cfmin", "cfmax", "multmax", "since", "sort"];
   function readFilters() {
     const f = {};
     inputs.forEach(id => f[id] = $(id).value);
@@ -464,55 +868,7 @@
     $("hascf").checked = !!f.hascf;
   }
 
-  function apply() {
-    const f = readFilters();
-    store.set(f);
-    const q = f.q.trim().toLowerCase();
-    const pmin = parseAmt(f.pmin), pmax = parseAmt(f.pmax);
-    const cfmin = parseAmt(f.cfmin), cfmax = parseAmt(f.cfmax);
-    const mmax = f.multmax ? +f.multmax : null;
-    const sinceDays = f.since && f.since !== "new" ? +f.since : null;
-
-    const boxRes = activeBox ? results.get(activeBox) : null;
-    filtered = rows.filter(r => {
-      if (boxRes && !boxRes.has(r.key)) return false;
-      if (f.kind !== "all" && String(r.kind) !== f.kind) return false;
-      if (f.src && r.src !== f.src) return false;
-      if (f.state && r.state !== f.state) return false;
-      if (q && !r.hay.includes(q)) return false;
-      if (pmin != null && !(r.price >= pmin)) return false;
-      if (pmax != null && !(r.price != null && r.price <= pmax)) return false;
-      if (cfmin != null && !(r.cash_flow >= cfmin)) return false;
-      if (cfmax != null && !(r.cash_flow != null && r.cash_flow <= cfmax)) return false;
-      if (f.hascf && !r.cash_flow) return false;
-      if (mmax != null && !(r.mult != null && r.mult <= mmax)) return false;
-      if (f.since === "new" && !r.isNew) return false;
-      if (sinceDays != null && daysAgo(r.first_seen) > sinceDays) return false;
-      return true;
-    });
-
-    let [key, dir] = (f.sort || "").split(":");
-    if (!SORT_DEFAULT[key]) { key = "first_seen"; dir = "desc"; }
-    const sign = dir === "asc" ? 1 : -1;
-    const by = (a, b) => {
-      const x = a[key], y = b[key];
-      const xe = x == null || x === "", ye = y == null || y === "";
-      if (xe || ye) return xe === ye ? a.ord - b.ord : xe ? 1 : -1;
-      const c = typeof x === "string" ? x.localeCompare(y) : x - y;
-      return c * sign || a.ord - b.ord;
-    };
-    sortState = { key, dir };
-    renderChips(f);
-    filtered.sort(by);
-    shown = PAGE;
-    render();
-  }
-
-
-  /* ================= buy-boxes ================= */
-  // Same rules as the desktop app's matcher.py: geography, keywords, exclusions,
-  // then SBA underwriting (80% SBA 10.5%/10y + 10% seller note 8%/5y, 2.4x DSCR screen)
-  // and a stress-test confidence score that decides Fast-track / Pursue / Conditional.
+  /* ================= Buy-Boxes & SBA 80/10/10 Underwriting ================= */
   const STATE_NAMES = { alabama:"AL",alaska:"AK",arizona:"AZ",arkansas:"AR",california:"CA",colorado:"CO",connecticut:"CT",delaware:"DE","district of columbia":"DC",florida:"FL",georgia:"GA",hawaii:"HI",idaho:"ID",illinois:"IL",indiana:"IN",iowa:"IA",kansas:"KS",kentucky:"KY",louisiana:"LA",maine:"ME",maryland:"MD",massachusetts:"MA",michigan:"MI",minnesota:"MN",mississippi:"MS",missouri:"MO",montana:"MT",nebraska:"NE",nevada:"NV","new hampshire":"NH","new jersey":"NJ","new mexico":"NM","new york":"NY","north carolina":"NC","north dakota":"ND",ohio:"OH",oklahoma:"OK",oregon:"OR",pennsylvania:"PA","rhode island":"RI","south carolina":"SC","south dakota":"SD",tennessee:"TN",texas:"TX",utah:"UT",vermont:"VT",virginia:"VA",washington:"WA","west virginia":"WV",wisconsin:"WI",wyoming:"WY","puerto rico":"PR" };
   const CODES = new Set(Object.values(STATE_NAMES));
   const toCode = s => { const t = String(s || "").trim(); const u = t.toUpperCase(); return CODES.has(u) ? u : STATE_NAMES[t.toLowerCase()] || ""; };
@@ -522,6 +878,7 @@
   const REMOTE = ["RELOCATABLE", "ONLINE", "REMOTE"];
   const reEsc = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const FOOD_LEGAL = new RegExp("\\b(?:RESTAURANTS?|FOOD|CAFES?|BAKER(?:Y|IES)|DELIS?|PIZZAS?|PIZZERIAS?|GRILLS?|PUBS?|BAR\\s*&|EATER(?:Y|IES)|DINERS?|CATER(?:ER|ING)|COFFEE\\s+(?:SHOP|BAR)|LIQUOR|TAVERNS?|BISTROS?|BREWER(?:Y|IES)|LAW\\s+FIRMS?|LAWYERS?|ATTORNEYS?|LAW\\s+PRACTICES?)\\b");
+
   function kwRe(k) {
     const K = k.trim().toUpperCase();
     if (K.endsWith("*") && K.length > 1) return new RegExp("\\b" + reEsc(K.slice(0, -1)) + "\\w*");
@@ -555,12 +912,10 @@
     const loc = (r.location || "").toUpperCase();
     if (c.skipFoodLegal && FOOD_LEGAL.test(r.title.toUpperCase())) return null;
     if (c.exRes.some(re => re.test(text))) return null;
-    // geography
     let geo = !c.hasGeo || (r.state && c.stateSet.has(r.state));
     if (!geo && c.remote && REMOTE.some(m => loc.includes(m) || text.includes(m))) geo = true;
     if (!geo && c.placeRes.some(re => re.test(loc))) geo = true;
     if (!geo) return null;
-    // industry
     let kw = "";
     if (c.indRes.length) {
       const hit = c.indRes.find(([, re]) => re.test(text));
@@ -570,7 +925,6 @@
     const minE = c.minEbitda || 0, maxP = c.maxPrice || Infinity, free = c.freeCash || 0;
     const maxMult = c.maxMultiple || Infinity;
     const price = r.price || 0;
-    // which profit figure: EBITDA as-is, otherwise seller's cash flow (SDE) minus a manager salary
     let profit = 0, mgr = 0;
     if (r.ebitda) profit = r.ebitda;
     else if (r.cash_flow) { profit = r.cash_flow; mgr = c.managerSalary ?? 100000; }
@@ -605,7 +959,8 @@
     getActive() { try { return localStorage.getItem("dealscreen-active-box") || ""; } catch { return ""; } },
     setActive(id) { try { localStorage.setItem("dealscreen-active-box", id || ""); } catch {} },
   };
-  let boxes = boxStore.get(), activeBox = boxStore.getActive(), results = new Map(); // boxId -> Map(path -> result)
+  let boxes = boxStore.get(), activeBox = boxStore.getActive(), results = new Map();
+  let byPath = new Map();
 
   function runBoxes() {
     results = new Map();
@@ -619,26 +974,475 @@
   }
 
   function renderBoxes() {
-    const items = [`<button type="button" class="box" data-box="" aria-pressed="${!activeBox}"><span class="nm">All listings</span><span class="ct">${rows.length.toLocaleString()}</span></button>`];
+    const items = [`<button type="button" class="box" data-box="" aria-pressed="${!activeBox}"><span>All listings</span><span class="ct">${rows.length.toLocaleString()}</span></button>`];
     for (const b of boxes) {
       const m = results.get(b.id) || new Map();
       let nw = 0; for (const p of m.keys()) { const r = byPath.get(p); if (r && r.isNew) nw++; }
-      items.push(`<button type="button" class="box" data-box="${esc(b.id)}" aria-pressed="${activeBox === b.id}"><span class="nm">${esc(b.name)}</span><span class="ct">${m.size.toLocaleString()}</span>${nw ? `<span class="nw">${nw} new</span>` : ""}</button>`);
+      items.push(`<button type="button" class="box" data-box="${esc(b.id)}" aria-pressed="${activeBox === b.id}"><span>${esc(b.name)}</span><span class="ct">${m.size.toLocaleString()}</span>${nw ? `<span class="nw">${nw} new</span>` : ""}</button>`);
     }
+    items.push(`<button type="button" class="box-add" id="boxAdd">+ New Buy-Box</button>`);
     $("boxlist").innerHTML = items.join("");
+
     const ab = boxes.find(b => b.id === activeBox);
     $("activebox").hidden = !ab;
-    if (ab) $("activebox").innerHTML = `<span class="chip box-chip">Buy-box: <strong>${esc(ab.name)}</strong><button type="button" class="act" id="boxEdit">Edit</button><button type="button" id="boxClear" aria-label="Show all listings" title="Show all listings">×</button></span>`;
+    if (ab) {
+      $("activebox").innerHTML = `<span class="chip box-chip">Mandate: <strong>${esc(ab.name)}</strong><button type="button" class="act" id="boxEdit">Edit</button><button type="button" id="boxClear" aria-label="Show all listings" title="Show all listings">×</button></span>`;
+    }
+    updateTriageButtons();
   }
 
-  // ---- editor ----
+  function updateTriageButtons() {
+    $("starCount").textContent = triage.starred.size;
+    $("passedCount").textContent = triage.passed.size;
+    $("starFilterBtn").setAttribute("aria-pressed", String(starOnly));
+    $("hidePassedBtn").setAttribute("aria-pressed", String(hidePassed));
+  }
+
+  /* ---------- Filtering & Sorting ---------- */
+  function apply() {
+    const f = readFilters();
+    store.set(f);
+    const q = f.q.trim().toLowerCase();
+    const pmin = parseAmt(f.pmin), pmax = parseAmt(f.pmax);
+    const cfmin = parseAmt(f.cfmin), cfmax = parseAmt(f.cfmax);
+    const mmax = f.multmax ? +f.multmax : null;
+    const sinceDays = f.since && f.since !== "new" ? +f.since : null;
+
+    const boxRes = activeBox ? results.get(activeBox) : null;
+    filtered = rows.filter(r => {
+      if (boxRes && !boxRes.has(r.key)) return false;
+      if (starOnly && !triage.starred.has(r.key)) return false;
+      if (hidePassed && !starOnly && triage.passed.has(r.key)) return false;
+      if (f.kind !== "all" && String(r.kind) !== f.kind) return false;
+      if (f.src && r.src !== f.src) return false;
+      if (f.state && r.state !== f.state) return false;
+      if (q && !r.hay.includes(q)) return false;
+      if (pmin != null && !(r.price >= pmin)) return false;
+      if (pmax != null && !(r.price != null && r.price <= pmax)) return false;
+      if (cfmin != null && !(r.cash_flow >= cfmin)) return false;
+      if (cfmax != null && !(r.cash_flow != null && r.cash_flow <= cfmax)) return false;
+      if (f.hascf && !r.cash_flow) return false;
+      if (mmax != null && !(r.mult != null && r.mult <= mmax)) return false;
+      if (f.since === "new" && !r.isNew) return false;
+      if (sinceDays != null && daysAgo(r.first_seen) > sinceDays) return false;
+      return true;
+    });
+
+    let [key, dir] = (f.sort || "").split(":");
+    if (!SORT_DEFAULT[key]) { key = "first_seen"; dir = "desc"; }
+    const sign = dir === "asc" ? 1 : -1;
+    const by = (a, b) => {
+      const x = a[key], y = b[key];
+      const xe = x == null || x === "", ye = y == null || y === "";
+      if (xe || ye) return xe === ye ? a.ord - b.ord : xe ? 1 : -1;
+      const c = typeof x === "string" ? x.localeCompare(y) : x - y;
+      return c * sign || a.ord - b.ord;
+    };
+    sortState = { key, dir };
+    renderChips(f);
+    filtered.sort(by);
+    shown = PAGE;
+
+    if (!filtered.some(r => r.key === selectedKey)) {
+      selectedKey = filtered.length ? filtered[0].key : "";
+    }
+    render();
+    renderIC();
+  }
+
+  /* ---------- Active Filter Chips ---------- */
+  const SINCE_LABEL = { new: "New only", 1: "Last 24h", 7: "Last 7d", 30: "Last 30d" };
+  const KIND_LABEL = { 0: "Listings only", 1: "M&A Vault only" };
+  function range(label, lo, hi) {
+    const a = parseAmt(lo), b = parseAmt(hi);
+    if (a != null && b != null) return `${label} ${money(a)}–${money(b)}`;
+    if (a != null) return `${label} ≥ ${money(a)}`;
+    if (b != null) return `${label} ≤ ${money(b)}`;
+    return null;
+  }
+  function renderChips(f) {
+    const chips = [];
+    if (f.q.trim()) chips.push([`“${f.q.trim()}”`, ["q"]]);
+    if (f.src) chips.push([SRC[f.src]?.label || f.src, ["src"]]);
+    if (f.state) chips.push([f.state, ["state"]]);
+    if (f.kind !== "all") chips.push([KIND_LABEL[f.kind], ["kind"]]);
+    const pr = range("Ask", f.pmin, f.pmax); if (pr) chips.push([pr, ["pmin", "pmax"]]);
+    const cr = range("CF", f.cfmin, f.cfmax); if (cr) chips.push([cr, ["cfmin", "cfmax"]]);
+    if (f.multmax) chips.push([`≤ ${f.multmax}× mult`, ["multmax"]]);
+    if (f.since) chips.push([SINCE_LABEL[f.since], ["since"]]);
+    if (f.hascf) chips.push(["Has CF", ["hascf"]]);
+    if (starOnly) chips.push(["★ Shortlisted", ["__star"]]);
+    $("chips").innerHTML = chips.map(([label, ids]) =>
+      `<span class="chip">${esc(label)}<button type="button" data-clear="${ids.join(",")}" aria-label="Remove filter: ${esc(label)}">×</button></span>`).join("")
+      + (chips.length > 1 ? `<button type="button" class="linkish" data-clear="all">Clear all</button>` : "");
+    $("clearFiltersBtn").hidden = !chips.length;
+    $("context").hidden = !chips.length && !activeBox;
+  }
+
+  /* ---------- Summary Medians ---------- */
+  const median = a => { if (!a.length) return null; const v = a.slice().sort((x, y) => x - y), m = v.length >> 1; return v.length % 2 ? v[m] : (v[m - 1] + v[m]) / 2; };
+  function renderSummary() {
+    const price = [], cf = [], mult = []; let nw = 0;
+    for (const r of filtered) {
+      if (r.price) price.push(r.price);
+      if (r.cash_flow) cf.push(r.cash_flow);
+      if (r.mult != null) mult.push(r.mult);
+      if (r.isNew) nw++;
+    }
+    const bits = [];
+    const mp = median(price), mc = median(cf), mm = median(mult);
+    if (mp) bits.push(`Med. Ask <b>${money(mp)}</b>`);
+    if (mc) bits.push(`Med. CF <b>${money(mc)}</b>`);
+    if (mm) bits.push(`Med. Mult <b>${mm.toFixed(1)}×</b>`);
+    if (nw) bits.push(`<b>${nw.toLocaleString()}</b> new`);
+    $("summary").innerHTML = bits.join('<span class="sep">·</span>');
+  }
+
+  /* ---------- Origination Ledger Render ---------- */
+  const COLS = [
+    ["title", "Target Company"], ["price", "Asking"], ["revenue", "Revenue"],
+    ["cash_flow", "Cash Flow"], ["mult", "Multiple", "Asking price ÷ cash flow"], ["first_seen", "Seen"],
+  ];
+
+  function cell(v, label, cls = "") {
+    return `<td data-k="${label}"${cls ? ` class="${cls}"` : ""}>${v == null ? '<span class="nil">—</span>' : money(v)}</td>`;
+  }
+  function multCell(m) {
+    if (m == null) return `<td data-k="Multiple"><span class="nil">—</span></td>`;
+    const w = Math.min(m / 8, 1) * 100;
+    const cls = m <= 3 ? "good" : m <= 5 ? "mid" : "high";
+    return `<td data-k="Multiple"><div class="mult" title="Asking price ÷ cash flow"><span class="${cls}">${m.toFixed(1)}×</span><div class="gauge"><i class="${cls}" style="width:${w}%"></i></div></div></td>`;
+  }
+
+  function render() {
+    const total = rows.length;
+    $("count").innerHTML = `${filtered.length.toLocaleString()} ${filtered.length === 1 ? "business" : "businesses"}${filtered.length !== total ? `<span>of ${total.toLocaleString()} tracked</span>` : ""}`;
+    renderSummary();
+    $("shownInfo").textContent = "";
+
+    if (!filtered.length) {
+      const ab = boxes.find(b => b.id === activeBox);
+      if (ab && total && !(results.get(ab.id) || new Map()).size && !starOnly) {
+        $("out").innerHTML = `<div class="empty"><h2>No listings pass ${esc(ab.name)} yet</h2><p>The SBA screen deducts the manager salary (${money(ab.managerSalary ?? 100000) || "$0"}) from cash flow and requires 2.4× debt coverage (typically asking ≤ ~2.7× adjusted profit). Try adjusting criteria or allowing missing figures.</p><button type="button" class="primary" id="boxEdit2">Edit buy-box</button></div>`;
+        $("boxEdit2").addEventListener("click", () => openEditor(ab));
+        $("moreBtn").hidden = true;
+        return;
+      }
+      $("out").innerHTML = total
+        ? `<div class="empty"><h2>No listings match these filters</h2><p>Widen your price or cash flow range, toggle Shortlist/Passed, or clear filters to see everything.</p><button type="button" class="primary" id="emptyReset">Clear filters</button></div>`
+        : `<div class="empty"><h2>No listings loaded yet</h2><p>Check your connection and refresh once a sweep has published.</p></div>`;
+      $("emptyReset")?.addEventListener("click", () => { starOnly = false; updateTriageButtons(); $("clearFiltersBtn").click(); });
+      $("moreBtn").hidden = true;
+      return;
+    }
+
+    const res = activeBox ? results.get(activeBox) : null;
+    const body = filtered.slice(0, shown).map(r => {
+      const m = res && res.get(r.key);
+      const dec = m ? `<span class="dec ${m.cls}" title="${m.conf != null ? `Stress-test confidence ${m.conf.toFixed(0)}%` : "Check listing for missing figures"}">${m.decision}</span>` : "";
+      const why = m ? [m.kw && `Matched “${esc(m.kw)}”`, m.maxSupport && isFinite(m.maxSupport) && `supports ${money(m.maxSupport)}`, m.after != null && `${money(Math.max(0, m.after))} after debt`].filter(Boolean).join(" · ") : "";
+      const cfCell = r.cfSuspect
+        ? `<td data-k="Cash Flow"><span class="suspect" title="Looks like a seller typo (≥ revenue or equals asking price). Excluded from multiples.">${money(r.cfRaw)} ?</span></td>`
+        : cell(r.cash_flow, "Cash Flow", r.cash_flow ? "cf-strong" : "");
+      const isStar = triage.starred.has(r.key);
+      const isPass = triage.passed.has(r.key);
+      const hasNote = !!(triage.notes[r.key] || "").trim();
+      const rowCls = [r.key === selectedKey ? "selected" : "", isPass ? "is-passed" : ""].filter(Boolean).join(" ");
+      return `
+      <tr data-key="${esc(r.key)}" data-href="${esc(r.url)}" class="${rowCls}">
+        <td class="star-col"><button type="button" class="star-btn${isStar ? " on" : ""}" data-star="${esc(r.key)}" aria-label="${isStar ? "Remove from shortlist" : "Add to shortlist"}" title="Shortlist (S)">★</button></td>
+        <td class="biz">
+          <div class="t"><a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.title)}</a>${dec}</div>
+          <div class="meta">
+            <span>${esc(r.location || "Location not listed")}</span>
+            <span class="dotsep">${esc(SRC[r.src].short)}</span>
+            ${r.kind ? '<span class="tag vault">Vault</span>' : ""}
+            ${r.isNew ? '<span class="tag new">New</span>' : ""}
+            ${hasNote ? '<span class="note-ind" title="Has personal note">● Note</span>' : ""}
+          </div>
+          ${r.category ? `<div class="cat">${esc(r.category)}</div>` : ""}
+          ${why ? `<div class="why">${why}</div>` : ""}
+        </td>
+        ${cell(r.price, "Asking")}${cell(r.revenue, "Revenue")}${cfCell}${multCell(r.mult)}
+        <td data-k="Seen" class="seen">${ago(r.first_seen)}</td>
+      </tr>`;
+    }).join("");
+
+    $("out").innerHTML = `<table>
+      <thead><tr>
+        <th title="Shortlist">★</th>
+        ${COLS.map(([k, label, tip]) => {
+          const on = sortState.key === k;
+          const aria = on ? (sortState.dir === "asc" ? "ascending" : "descending") : "none";
+          const arrow = on ? (sortState.dir === "asc" ? "▲" : "▼") : "";
+          return `<th aria-sort="${aria}"${tip ? ` title="${tip}"` : ""}><button type="button" class="sorter${on ? " on" : ""}" data-key="${k}">${label}<span class="arrow" aria-hidden="true">${arrow}</span></button></th>`;
+        }).join("")}
+      </tr></thead>
+      <tbody>${body}</tbody></table>`;
+
+    const left = filtered.length - shown;
+    $("moreBtn").hidden = left <= 0;
+    $("moreBtn").textContent = `Show ${Math.min(PAGE, left)} more`;
+    $("shownInfo").textContent = `Showing ${Math.min(shown, filtered.length).toLocaleString()} of ${filtered.length.toLocaleString()}`;
+  }
+
+  /* ---------- Investment Committee (IC) One-Pager & Live 80/10/10 Model ---------- */
+  function getActiveMgrSalary(r) {
+    if (r.ebitda) return 0;
+    if (mgrOverride != null) return mgrOverride;
+    const ab = boxes.find(b => b.id === activeBox);
+    return ab ? (ab.managerSalary ?? 100000) : 100000;
+  }
+
+  function computeIcMetrics(r, offerPrice) {
+    const ab = boxes.find(b => b.id === activeBox);
+    const freeGoal = ab ? (ab.freeCash || 0) : 150000;
+    const profit = r.ebitda || r.cash_flow || 0;
+    const isEbitda = !!r.ebitda;
+    const mgr = isEbitda ? 0 : getActiveMgrSalary(r);
+    const adj = profit - mgr;
+    const sba = offerPrice * 0.80;
+    const seller = offerPrice * 0.10;
+    const equity = offerPrice * 0.10;
+    const ds = offerPrice * DS_FACTOR;
+    const dscr = ds > 0 ? adj / ds : null;
+    const after = adj - ds;
+    const coc = equity > 0 ? (after / equity) * 100 : null;
+    const maxByDscr = adj > 0 ? adj / (MIN_DSCR * DS_FACTOR) : 0;
+    const maxByFree = (adj - freeGoal) > 0 ? (adj - freeGoal) / DS_FACTOR : 0;
+    const maxSupport = Math.max(0, Math.min(maxByDscr, freeGoal > 0 ? maxByFree : maxByDscr));
+    return { profit, isEbitda, mgr, adj, sba, seller, equity, ds, dscr, after, coc, maxSupport, freeGoal };
+  }
+
+  function renderIC(openDrawer = false) {
+    const pane = $("icPane");
+    const r = byPath.get(selectedKey);
+    if (!r) {
+      pane.innerHTML = `<div class="ic-empty">Select any listing to inspect its 80/10/10 SBA capital stack, equity check, and Year-1 Cash-on-Cash ROI.</div>`;
+      return;
+    }
+
+    const ab = boxes.find(b => b.id === activeBox);
+    const bm = ab ? results.get(ab.id)?.get(r.key) : null;
+    const isStar = triage.starred.has(r.key);
+    const isPass = triage.passed.has(r.key);
+    const note = triage.notes[r.key] || "";
+
+    const basePrice = r.price || (bm?.maxSupport && isFinite(bm.maxSupport) ? Math.round(bm.maxSupport / 25000) * 25000 : 1000000);
+    const offer = offerOverrides.has(r.key) ? offerOverrides.get(r.key) : basePrice;
+    const m = computeIcMetrics(r, offer);
+
+    const sliderMin = Math.max(25000, Math.round(Math.min(basePrice, m.maxSupport || basePrice) * 0.45 / 25000) * 25000);
+    const sliderMax = Math.max(sliderMin + 50000, Math.round(Math.max(basePrice, m.maxSupport || basePrice) * 1.2 / 25000) * 25000);
+    const sliderStep = sliderMax > 5e6 ? 50000 : 25000;
+
+    let bannerHtml = "";
+    if (bm) {
+      const bCls = bm.cls === "tbd" ? "" : bm.cls;
+      bannerHtml = `<div class="ic-banner ${bCls}">
+        <strong>${esc(ab.name)} · ${esc(bm.decision)}${bm.conf != null ? ` (${bm.conf.toFixed(0)}% conf)` : ""}</strong><br>
+        <span>${[bm.kw && `Matched “${esc(bm.kw)}”`, bm.maxSupport && isFinite(bm.maxSupport) && `Max SBA price ${money(bm.maxSupport)}`, bm.after != null && `${money(Math.max(0, bm.after))} free cash`].filter(Boolean).join(" · ")}</span>
+      </div>`;
+    } else if (r.cfSuspect) {
+      bannerHtml = `<div class="ic-banner warn"><strong>Data-Quality Flag (?):</strong> Seller entered cash flow (${money(r.cfRaw)}) looks impossible relative to revenue/asking price. Request P&amp;L &amp; tax returns before underwriting.</div>`;
+    } else if (!r.cash_flow && !r.ebitda) {
+      bannerHtml = `<div class="ic-banner"><strong>Cash flow not listed on search card.</strong> Open the listing or request the CIM/P&amp;L to run SBA debt coverage.</div>`;
+    }
+
+    const canModel = !r.cfSuspect && (r.ebitda || r.cash_flow);
+    const modelHtml = canModel ? `
+      <div class="ic-box" id="icModelBox">
+        <div class="ic-box-h">
+          <span class="lbl">Target Offer Scenario</span>
+          <div>
+            <span class="offer-val" id="icOfferVal">${moneyFull(offer)}</span>
+            <span class="offer-diff" id="icOfferDiff">${r.price ? (offer === r.price ? "(Asking)" : `(${offer > r.price ? "+" : ""}${Math.round((offer / r.price - 1) * 100)}%)`) : "(Modeled)"}</span>
+          </div>
+        </div>
+        <input type="range" class="ic-slider" id="icSlider" min="${sliderMin}" max="${sliderMax}" step="${sliderStep}" value="${Math.min(sliderMax, Math.max(sliderMin, offer))}">
+        <div class="ic-quick-row">
+          <div class="mgr-toggle">
+            ${m.isEbitda ? `<span>Using reported EBITDA</span>` : `
+              <label for="icMgrSel">Mgr salary:</label>
+              <select id="icMgrSel">
+                <option value="0"${m.mgr === 0 ? " selected" : ""}>$0 (Owner-Op)</option>
+                <option value="75000"${m.mgr === 75000 ? " selected" : ""}>$75K</option>
+                <option value="100000"${m.mgr === 100000 ? " selected" : ""}>$100K</option>
+                <option value="150000"${m.mgr === 150000 ? " selected" : ""}>$150K</option>
+                ${![0, 75000, 100000, 150000].includes(m.mgr) ? `<option value="${m.mgr}" selected>${money(m.mgr)}</option>` : ""}
+              </select>
+            `}
+          </div>
+          <div style="display:flex; gap:10px;">
+            ${m.maxSupport > 0 && Math.abs(offer - m.maxSupport) > 25000 ? `<button type="button" class="linkish" id="icSnapSba" title="Set offer to exact 2.4× DSCR SBA ceiling">Snap to SBA Max</button>` : ""}
+            ${r.price && offer !== r.price ? `<button type="button" class="linkish" id="icResetOffer">Reset</button>` : ""}
+          </div>
+        </div>
+        <div class="kpi3" id="icKpi3">${renderKpi3Html(m)}</div>
+      </div>
+
+      <div class="ic-box">
+        <div class="ic-box-h" style="margin-bottom:8px;">
+          <span class="lbl">Capital Stack &amp; Cash Flow (80/10/10)</span>
+        </div>
+        <div class="stack-rows" id="icStackRows">${renderStackHtml(m)}</div>
+      </div>
+    ` : "";
+
+    pane.innerHTML = `
+      <div class="ic-head">
+        <div class="ic-eyebrow">
+          <span>IC Tearsheet · ${esc(SRC[r.src].label)}</span>
+          <button type="button" class="ic-close" id="icCloseBtn" aria-label="Close tearsheet">×</button>
+        </div>
+        <h2 class="ic-title">${esc(r.title)}</h2>
+        <div class="ic-sub">
+          <span>${esc(r.location || "Location not listed")}</span>
+          ${r.category ? `<span>· ${esc(r.category)}</span>` : ""}
+          <span>· Seen ${ago(r.first_seen)}</span>
+        </div>
+      </div>
+
+      <div class="ic-body">
+        ${bannerHtml}
+        ${r.teaser ? `<p class="ic-teaser">${esc(r.teaser)}</p>` : ""}
+
+        <div class="ic-box" style="padding:10px 13px;">
+          <div class="stack-rows">
+            <div class="srow"><span>Asking Price</span><strong>${moneyFull(r.price)}</strong></div>
+            <div class="srow"><span>Gross Revenue</span><strong>${moneyFull(r.revenue)}</strong></div>
+            <div class="srow"><span>${r.ebitda ? "Reported EBITDA" : "Reported Cash Flow / SDE"}</span><strong>${r.cfSuspect ? `${moneyFull(r.cfRaw)} (flagged ?)` : moneyFull(r.ebitda || r.cash_flow)}</strong></div>
+            ${r.mult != null ? `<div class="srow"><span>Asking Multiple</span><strong>${r.mult.toFixed(2)}×</strong></div>` : ""}
+          </div>
+        </div>
+
+        ${modelHtml}
+
+        <div>
+          <label class="ic-note-lbl" for="icNoteInput">
+            <span>Analyst Note (local only)</span>
+            <span id="icNoteSaved" style="font-weight:500; text-transform:none; letter-spacing:0; color:var(--pe);"></span>
+          </label>
+          <textarea id="icNoteInput" class="ic-note" placeholder="Broker contact, CIM status, next step…">${esc(note)}</textarea>
+        </div>
+      </div>
+
+      <div class="ic-foot">
+        <button type="button" id="icStarBtn" title="Shortlist (S)">${isStar ? "★ Shortlisted" : "☆ Shortlist"}</button>
+        <button type="button" id="icPassBtn" title="Mark passed (X)">${isPass ? "↺ Restore" : "✕ Pass"}</button>
+        <a class="btn-open" href="${esc(r.url)}" target="_blank" rel="noopener">Open Listing ↗</a>
+      </div>
+    `;
+
+    // Wire IC events
+    $("icCloseBtn")?.addEventListener("click", closeDrawer);
+    $("icStarBtn")?.addEventListener("click", () => toggleStar(r.key));
+    $("icPassBtn")?.addEventListener("click", () => togglePass(r.key));
+
+    $("icSlider")?.addEventListener("input", e => {
+      const val = +e.target.value;
+      offerOverrides.set(r.key, val);
+      const updated = computeIcMetrics(r, val);
+      $("icOfferVal").textContent = moneyFull(val);
+      $("icOfferDiff").textContent = r.price ? (val === r.price ? "(Asking)" : `(${val > r.price ? "+" : ""}${Math.round((val / r.price - 1) * 100)}%)`) : "(Modeled)";
+      $("icKpi3").innerHTML = renderKpi3Html(updated);
+      $("icStackRows").innerHTML = renderStackHtml(updated);
+    });
+    $("icSlider")?.addEventListener("change", () => renderIC());
+
+    $("icMgrSel")?.addEventListener("change", e => {
+      mgrOverride = +e.target.value;
+      renderIC();
+    });
+    $("icSnapSba")?.addEventListener("click", () => {
+      const snap = Math.max(25000, Math.round(m.maxSupport / 25000) * 25000);
+      offerOverrides.set(r.key, snap);
+      renderIC();
+    });
+    $("icResetOffer")?.addEventListener("click", () => {
+      offerOverrides.delete(r.key);
+      renderIC();
+    });
+
+    let noteTimer;
+    $("icNoteInput")?.addEventListener("input", e => {
+      const val = e.target.value;
+      if (val.trim()) triage.notes[r.key] = val; else delete triage.notes[r.key];
+      triageStore.set(triage);
+      $("icNoteSaved").textContent = "Saved";
+      clearTimeout(noteTimer);
+      noteTimer = setTimeout(() => { if ($("icNoteSaved")) $("icNoteSaved").textContent = ""; }, 1200);
+    });
+
+    if (openDrawer && window.innerWidth <= 1120) {
+      pane.classList.add("drawer-open");
+      $("icBackdrop").classList.add("open");
+    }
+  }
+
+  function renderKpi3Html(m) {
+    const dscrCls = m.dscr == null ? "" : m.dscr >= 2.4 ? "good" : m.dscr >= 1.5 ? "mid" : "bad";
+    const cocCls = m.coc == null ? "" : m.coc >= 80 ? "good" : m.coc > 0 ? "mid" : "bad";
+    return `
+      <div class="k"><div class="kl">10% Equity</div><div class="kv">${money(m.equity) || "—"}</div></div>
+      <div class="k"><div class="kl">Yr-1 CoC ROI</div><div class="kv ${cocCls}">${m.coc != null ? Math.round(m.coc) + "%" : "—"}</div></div>
+      <div class="k"><div class="kl">SBA DSCR</div><div class="kv ${dscrCls}">${m.dscr != null ? m.dscr.toFixed(2) + "×" : "—"}</div></div>
+    `;
+  }
+
+  function renderStackHtml(m) {
+    const afterCls = m.after >= m.freeGoal ? "color:var(--pe)" : m.after >= 0 ? "color:var(--gold)" : "color:var(--rust)";
+    return `
+      <div class="srow"><span>SBA 7(a) Senior (80% @ 10.5%/10y)</span><strong>${moneyFull(m.sba)}</strong></div>
+      <div class="srow"><span>Seller Note (10% @ 8%/5y)</span><strong>${moneyFull(m.seller)}</strong></div>
+      <div class="srow"><span>Buyer Equity Injection (10%)</span><strong style="color:var(--pe)">${moneyFull(m.equity)}</strong></div>
+      <div class="sdiv"></div>
+      <div class="srow"><span>Adjusted Profit${m.isEbitda ? " (EBITDA)" : ` (less ${money(m.mgr) || "$0"} mgr)`}</span><strong>${moneyFull(m.adj)}/yr</strong></div>
+      <div class="srow"><span>Est. Annual Debt Service</span><strong>−${moneyFull(m.ds)}/yr</strong></div>
+      <div class="srow total"><span>Free Cash to Equity</span><strong style="${afterCls}">${moneyFull(m.after)}/yr</strong></div>
+      <div class="srow" style="margin-top:3px;"><span>Max SBA Supportable Price (2.4×)</span><strong>${m.maxSupport > 0 ? moneyFull(m.maxSupport) : "Below floor"}</strong></div>
+    `;
+  }
+
+  function closeDrawer() {
+    $("icPane").classList.remove("drawer-open");
+    $("icBackdrop").classList.remove("open");
+  }
+  $("icBackdrop").addEventListener("click", closeDrawer);
+
+  function toggleStar(key) {
+    if (triage.starred.has(key)) triage.starred.delete(key);
+    else { triage.starred.add(key); triage.passed.delete(key); }
+    triageStore.set(triage);
+    updateTriageButtons();
+    if (starOnly) apply(); else { render(); renderIC(); }
+  }
+
+  function togglePass(key) {
+    const idx = filtered.findIndex(r => r.key === key);
+    if (triage.passed.has(key)) triage.passed.delete(key);
+    else { triage.passed.add(key); triage.starred.delete(key); }
+    triageStore.set(triage);
+    updateTriageButtons();
+    if (hidePassed && triage.passed.has(key)) {
+      const next = filtered[idx + 1] || filtered[idx - 1];
+      selectedKey = next ? next.key : "";
+      apply();
+    } else {
+      render();
+      renderIC();
+    }
+  }
+
+  /* ---------- Buy-Box Editor, Import, Backup ---------- */
   const list = s => String(s || "").split(/[,\n]/).map(x => x.trim()).filter(Boolean);
   const fmtAmt = n => n == null || n === "" || !isFinite(n) ? "" : n >= 1e6 ? (n / 1e6) + "m" : n >= 1e3 ? (n / 1e3) + "k" : String(n);
   let editing = null;
+
   function openEditor(b) {
     editing = b || null;
     const v = b || { managerSalary: 100000, skipFoodLegal: true };
-    $("boxDlgTitle").textContent = b ? "Edit buy-box" : "New buy-box";
+    $("boxDlgTitle").textContent = b ? "Edit Buy-Box" : "New Buy-Box";
     $("bxName").value = v.name || "";
     $("bxStates").value = (v.states || []).join(", ");
     $("bxPlaces").value = (v.places || []).join(", ");
@@ -656,6 +1460,7 @@
     $("boxDlg").showModal();
     $("bxName").focus();
   }
+
   function readEditor() {
     const bad = [];
     const states = list($("bxStates").value).map(x => { const c = toCode(x); if (!c) bad.push(x); return c; }).filter(Boolean);
@@ -669,7 +1474,7 @@
       id: editing ? editing.id : "bx" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
       name, states,
       places: list($("bxPlaces").value), industry: list($("bxInd").value), exclude: list($("bxEx").value),
-      minEbitda: amt("bxMinE", "Minimum cash flow") || 0,
+      minEbitda: amt("bxMinE", "Minimum adjusted profit") || 0,
       maxPrice: amt("bxMaxP", "Maximum asking price"),
       freeCash: amt("bxFree", "Cash left after debt") || 0,
       managerSalary: amt("bxMgr", "Manager salary") ?? 0,
@@ -677,9 +1482,9 @@
       allowTbd: $("bxTbd").checked, skipFoodLegal: $("bxFood").checked,
     };
   }
-  function saveBoxes() { boxStore.set(boxes); runBoxes(); apply(); }
 
-  // ---- import from the desktop app's buybox.json ----
+  function saveBoxes() { boxStore.set(boxes); mgrOverride = null; runBoxes(); apply(); }
+
   function fromDesktop(c) {
     const places = [...(c.location_keywords || [])];
     for (const city of c.target_cities || []) {
@@ -696,14 +1501,23 @@
       maxMultiple: +c.max_multiple || null, allowTbd: !!c.allow_tbd_financials, skipFoodLegal: true,
     };
   }
+
   async function importFile(file) {
     let data;
-    try { data = JSON.parse(await file.text()); } catch { alertMsg("That file isn't valid JSON. Pick buybox.json from the desktop app folder."); return; }
+    try { data = JSON.parse(await file.text()); } catch { alertMsg("That file isn't valid JSON. Pick buybox.json or a backup file."); return; }
     let incoming = [];
     if (Array.isArray(data)) incoming = data.map(x => x.places ? { ...x, id: x.id || "bx" + Math.random().toString(36).slice(2, 10) } : fromDesktop(x));
     else if (Array.isArray(data.clients)) incoming = data.clients.map(fromDesktop);
     else if (Array.isArray(data.buyboxes)) incoming = data.buyboxes;
-    if (!incoming.length) { alertMsg("No buy-boxes found in that file."); return; }
+
+    if (data.triage && typeof data.triage === "object") {
+      (data.triage.starred || []).forEach(k => triage.starred.add(k));
+      (data.triage.passed || []).forEach(k => triage.passed.add(k));
+      Object.assign(triage.notes, data.triage.notes || {});
+      triageStore.set(triage);
+    }
+
+    if (!incoming.length && !data.triage) { alertMsg("No buy-boxes found in that file."); return; }
     const names = new Set(boxes.map(b => b.name.toLowerCase()));
     let added = 0, replaced = 0;
     for (const b of incoming) {
@@ -713,179 +1527,31 @@
     saveBoxes();
     alertMsg(`Imported ${added} buy-box${added === 1 ? "" : "es"}${replaced ? `, updated ${replaced}` : ""}.`);
   }
+
   function alertMsg(t) { $("status").innerHTML = `<span class="fresh">${esc(t)}</span>`; setTimeout(statusLine, 6000); }
+
   function backup() {
-    const blob = new Blob([JSON.stringify({ buyboxes: boxes }, null, 2)], { type: "application/json" });
+    const payload = {
+      buyboxes: boxes,
+      triage: { starred: [...triage.starred], passed: [...triage.passed], notes: triage.notes },
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = `buyboxes-${new Date().toISOString().slice(0, 10)}.json`;
+    a.download = `dealscreen-backup-${new Date().toISOString().slice(0, 10)}.json`;
     a.click(); URL.revokeObjectURL(a.href);
   }
 
-  $("boxlist").addEventListener("click", e => {
-    const b = e.target.closest("button.box"); if (!b) return;
-    activeBox = b.dataset.box; boxStore.setActive(activeBox); renderBoxes(); apply();
-  });
-  $("activebox").addEventListener("click", e => {
-    if (e.target.id === "boxEdit") openEditor(boxes.find(b => b.id === activeBox));
-    if (e.target.id === "boxClear") { activeBox = ""; boxStore.setActive(""); renderBoxes(); apply(); }
-  });
-  $("boxAdd").addEventListener("click", () => openEditor(null));
-  $("boxImport").addEventListener("click", () => $("boxFile").click());
-  $("boxFile").addEventListener("change", e => { const f = e.target.files[0]; if (f) importFile(f); e.target.value = ""; });
-  $("boxBackup").addEventListener("click", backup);
-  $("bxCancel").addEventListener("click", () => $("boxDlg").close());
-  $("boxForm").addEventListener("submit", e => {
-    e.preventDefault();
-    try {
-      const b = readEditor();
-      boxes = editing ? boxes.map(x => x.id === b.id ? b : x) : boxes.concat(b);
-      if (!editing) { activeBox = b.id; boxStore.setActive(b.id); }
-      $("boxDlg").close(); saveBoxes();
-    } catch (err) { $("bxErr").textContent = err.message; }
-  });
-  $("bxDelete").addEventListener("click", () => {
-    if (!editing || !confirm(`Delete the buy-box "${editing.name}"? This can't be undone unless you have a backup.`)) return;
-    boxes = boxes.filter(b => b.id !== editing.id);
-    if (activeBox === editing.id) { activeBox = ""; boxStore.setActive(""); }
-    $("boxDlg").close(); saveBoxes();
-  });
-  let byPath = new Map();
-
-  /* ---- active filter chips ---- */
-  const SINCE_LABEL = { new: "New since tracking began", 1: "First seen in last 24 hours", 7: "First seen in last 7 days", 30: "First seen in last 30 days" };
-  const KIND_LABEL = { 0: "Listings only", 1: "M&A Vault only" };
-  function range(label, lo, hi) {
-    const a = parseAmt(lo), b = parseAmt(hi);
-    if (a != null && b != null) return `${label} ${money(a)} to ${money(b)}`;
-    if (a != null) return `${label} ${money(a)} or more`;
-    if (b != null) return `${label} up to ${money(b)}`;
-    return null;
-  }
-  function renderChips(f) {
-    const chips = [];
-    if (f.q.trim()) chips.push([`“${f.q.trim()}”`, ["q"]]);
-    if (f.src) chips.push([SRC[f.src]?.label || f.src, ["src"]]);
-    if (f.state) chips.push([f.state, ["state"]]);
-    if (f.kind !== "all") chips.push([KIND_LABEL[f.kind], ["kind"]]);
-    const pr = range("Asking", f.pmin, f.pmax); if (pr) chips.push([pr, ["pmin", "pmax"]]);
-    const cr = range("Cash flow", f.cfmin, f.cfmax); if (cr) chips.push([cr, ["cfmin", "cfmax"]]);
-    if (f.multmax) chips.push([`Multiple ${f.multmax}× or less`, ["multmax"]]);
-    if (f.since) chips.push([SINCE_LABEL[f.since], ["since"]]);
-    if (f.hascf) chips.push(["Has cash flow", ["hascf"]]);
-    $("chips").innerHTML = chips.map(([label, ids]) =>
-      `<span class="chip">${esc(label)}<button type="button" data-clear="${ids.join(",")}" aria-label="Remove filter: ${esc(label)}">×</button></span>`).join("")
-      + (chips.length > 1 ? `<button type="button" class="linkish clear-all" data-clear="all">Clear all</button>` : "");
-    $("reset").hidden = !chips.length;
-    $("context").hidden = !chips.length && !activeBox;
-  }
-  $("chips").addEventListener("click", e => {
-    const b = e.target.closest("[data-clear]"); if (!b) return;
-    if (b.dataset.clear === "all") { $("reset").click(); return; }
-    for (const id of b.dataset.clear.split(",")) {
-      if (id === "kind") document.querySelector('input[name=kind][value="all"]').checked = true;
-      else if (id === "hascf") $("hascf").checked = false;
-      else $(id).value = "";
-    }
-    apply();
-  });
-
-  /* ---- summary of the current results ---- */
-  const median = a => { if (!a.length) return null; const v = a.slice().sort((x, y) => x - y), m = v.length >> 1; return v.length % 2 ? v[m] : (v[m - 1] + v[m]) / 2; };
-  function renderSummary() {
-    const price = [], cf = [], mult = []; let nw = 0;
-    for (const r of filtered) {
-      if (r.price) price.push(r.price);
-      if (r.cash_flow) cf.push(r.cash_flow);
-      if (r.mult != null) mult.push(r.mult);
-      if (r.isNew) nw++;
-    }
-    const bits = [];
-    const mp = median(price), mc = median(cf), mm = median(mult);
-    if (mp) bits.push(`median asking <b>${money(mp)}</b>`);
-    if (mc) bits.push(`cash flow <b>${money(mc)}</b>`);
-    if (mm) bits.push(`multiple <b>${mm.toFixed(1)}×</b>`);
-    if (nw) bits.push(`<b>${nw.toLocaleString()}</b> new`);
-    const txt = bits.join(", ");
-    $("summary").innerHTML = txt ? txt.charAt(0).toUpperCase() + txt.slice(1) : "";
-  }
-
-  const COLS = [
-    ["title", "Business"], ["price", "Asking"], ["revenue", "Revenue"],
-    ["cash_flow", "Cash flow"], ["mult", "Multiple", "Asking price ÷ cash flow"], ["first_seen", "First seen"],
-  ];
-
-  function cell(v, label) {
-    return `<td data-k="${label}">${v == null ? '<span class="nil">—</span>' : money(v)}</td>`;
-  }
-  function multCell(m) {
-    if (m == null) return `<td data-k="Multiple"><span class="nil">—</span></td>`;
-    const w = Math.min(m / 8, 1) * 100;
-    const cls = m <= 3 ? "" : m <= 5 ? "mid" : "high";
-    return `<td data-k="Multiple"><div class="mult" title="Asking price ÷ cash flow"><span>${m.toFixed(1)}×</span><div class="gauge"><i class="${cls}" style="width:${w}%"></i></div></div></td>`;
-  }
-
-  function render() {
-    const total = rows.length;
-    $("count").innerHTML = `${filtered.length.toLocaleString()} ${filtered.length === 1 ? "business" : "businesses"}${filtered.length !== total ? `<span>of ${total.toLocaleString()} tracked</span>` : ""}`;
-    renderSummary();
-    $("shownInfo").textContent = "";
-    if (!filtered.length) {
-      const ab = boxes.find(b => b.id === activeBox);
-      if (ab && total && !(results.get(ab.id) || new Map()).size) {
-        $("out").innerHTML = `<div class="empty"><h2>No listings pass ${esc(ab.name)} yet</h2><p>The SBA screen subtracts the manager salary (${money(ab.managerSalary ?? 100000) || "$0"}) from the seller's cash flow, then needs the rest to cover loan payments 2.4 times. That usually means asking prices under about 2.7× the adjusted cash flow. Try a lower manager salary or minimum, a higher maximum price, more states, or include listings with missing figures.</p><button type="button" class="primary" id="boxEdit2">Edit buy-box</button></div>`;
-        $("boxEdit2").addEventListener("click", () => openEditor(ab));
-        $("moreBtn").hidden = true;
-        return;
-      }
-      $("out").innerHTML = total
-        ? `<div class="empty"><h2>No listings match these filters</h2><p>Widen the price or cash flow range, or clear the filters to see everything.</p><button type="button" class="primary" onclick="document.getElementById('reset').click()">Clear filters</button></div>`
-        : `<div class="empty"><h2>No listings yet</h2><p>The first crawl hasn't finished. Check back once the sweep has run.</p></div>`;
-      $("moreBtn").hidden = true;
-      return;
-    }
-    const res = activeBox ? results.get(activeBox) : null;
-    const body = filtered.slice(0, shown).map(r => {
-      const m = res && res.get(r.key);
-      const dec = m ? `<span class="dec ${m.cls}" title="${m.conf != null ? `Stress-test confidence ${m.conf.toFixed(0)}%` : "Check the listing for the missing figures"}">${m.decision}</span>` : "";
-      const why = m ? [m.kw && `Matched “${esc(m.kw)}”`, m.maxSupport && isFinite(m.maxSupport) && `supports up to ${money(m.maxSupport)}`, m.after != null && `${money(Math.max(0, m.after))} left after debt`].filter(Boolean).join(", ") : "";
-      const cfCell = r.cfSuspect
-        ? `<td data-k="Cash flow"><span class="suspect" title="Looks like a typo on the listing (higher than revenue or the asking price). Left out of sorting and the multiple.">${money(r.cfRaw)} ?</span></td>`
-        : cell(r.cash_flow, "Cash flow");
-      return `
-      <tr data-href="${esc(r.url)}">
-        <td class="biz">
-          <div class="t"><a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.title)}</a>${dec}</div>
-          <div class="meta"><span>${esc(r.location || "Location not listed")}</span><span class="srcname">${esc(SRC[r.src].label)}</span>${r.kind ? '<span class="tag vault">M&amp;A Vault</span>' : ""}${r.isNew ? '<span class="tag new">New</span>' : ""}</div>
-          ${r.category ? `<div class="cat">${esc(r.category)}</div>` : ""}
-          ${why ? `<div class="why">${why}</div>` : ""}
-          ${r.teaser ? `<div class="teaser">${esc(r.teaser)}</div>` : ""}
-        </td>
-        ${cell(r.price, "Asking")}${cell(r.revenue, "Revenue")}${cfCell}${multCell(r.mult)}
-        <td data-k="First seen" class="seen">${ago(r.first_seen)}</td>
-      </tr>`;
-    }).join("");
-    $("out").innerHTML = `<table>
-      <thead><tr>${COLS.map(([k, label, tip]) => {
-        const on = sortState.key === k;
-        const aria = on ? (sortState.dir === "asc" ? "ascending" : "descending") : "none";
-        const arrow = on ? (sortState.dir === "asc" ? "▲" : "▼") : "";
-        return `<th aria-sort="${aria}"${tip ? ` title="${tip}"` : ""}><button type="button" class="sorter${on ? " on" : ""}" data-key="${k}">${label}<span class="arrow" aria-hidden="true">${arrow}</span></button></th>`;
-      }).join("")}</tr></thead>
-      <tbody>${body}</tbody></table>`;
-    const left = filtered.length - shown;
-    $("moreBtn").hidden = left <= 0;
-    $("moreBtn").textContent = `Show ${Math.min(PAGE, left)} more`;
-    $("shownInfo").textContent = `Showing ${Math.min(shown, filtered.length).toLocaleString()} of ${filtered.length.toLocaleString()}`;
-  }
-
+  /* ---------- CSV Export ---------- */
   function exportCsv() {
     const ab = boxes.find(b => b.id === activeBox), bm = ab ? results.get(ab.id) : null;
-    const head = ["Title", "Source", "Industry", "Type", "Location", "State", "Asking price", "Revenue", "Cash flow", "Cash flow looks wrong", "EBITDA", "Multiple", "First seen", "Last seen", "Link"].concat(ab ? ["Buy-box", "Decision", "Max supportable price", "Cash left after debt", "Matched keyword"] : []);
+    const head = ["Title", "Source", "Industry", "Type", "Location", "State", "Asking price", "Revenue", "Cash flow", "Cash flow looks wrong", "EBITDA", "Multiple", "First seen", "Last seen", "Link", "Shortlisted", "Note"]
+      .concat(ab ? ["Buy-box", "Decision", "Max supportable price", "Cash left after debt", "Matched keyword"] : []);
     const q = v => v == null ? "" : /[",\n]/.test(String(v)) ? `"${String(v).replace(/"/g, '""')}"` : v;
     const lines = [head.join(",")].concat(filtered.map(r => [
       r.title, SRC[r.src].label, r.category, r.kind ? "M&A Vault" : "Listing", r.location, r.state, r.price, r.revenue, r.cfRaw, r.cfSuspect ? "yes" : "", r.ebitda,
-      r.mult != null ? r.mult.toFixed(2) : "", r.first_seen, r.last_seen, r.url
+      r.mult != null ? r.mult.toFixed(2) : "", r.first_seen, r.last_seen, r.url,
+      triage.starred.has(r.key) ? "yes" : "", triage.notes[r.key] || ""
     ].concat(ab ? (m => [ab.name, m?.decision || "", m?.maxSupport && isFinite(m.maxSupport) ? Math.round(m.maxSupport) : "", m?.after != null ? Math.round(m.after) : "", m?.kw || ""])(bm.get(r.key)) : []).map(q).join(",")));
     const blob = new Blob([lines.join("\n")], { type: "text/csv" });
     const a = document.createElement("a");
@@ -895,22 +1561,21 @@
     URL.revokeObjectURL(a.href);
   }
 
+  /* ---------- Multi-Source Status & Data Loader ---------- */
   function statusLine() {
     const list = Object.entries(metas);
     if (!list.length) return;
     const ages = list.map(([k, m]) => [k, m.updated_utc ? (Date.now() - new Date(m.updated_utc)) / 6e4 : Infinity]);
     const newest = Math.min(...ages.map(a => a[1])), oldest = Math.max(...ages.map(a => a[1]));
-    const fmt = mins => !isFinite(mins) ? "never" : mins < 2 ? "just now" : mins < 60 ? `${Math.round(mins)} min ago` : mins < 1440 ? `${Math.round(mins / 60)} h ago` : `${Math.round(mins / 1440)} days ago`;
-    const stale = oldest > 8 * 60;   // sweeps run every 4 hours
+    const fmt = mins => !isFinite(mins) ? "never" : mins < 2 ? "just now" : mins < 60 ? `${Math.round(mins)}m ago` : mins < 1440 ? `${Math.round(mins / 60)}h ago` : `${Math.round(mins / 1440)}d ago`;
+    const stale = oldest > 8 * 60;
     const detail = ages.map(([k, mins]) => `${SRC[k].label}: updated ${fmt(mins)}`).join("\n");
     const total = list.reduce((n, [, m]) => n + (m.site_total || m.tracked || 0), 0);
-    $("status").innerHTML = `<span class="fresh" title="${esc(detail)}${stale ? "\nOne source is older than expected: its last sweeps may have failed" : ""}"><span class="dot${stale ? " stale" : ""}"></span>Updated ${fmt(newest)}</span>`
-      + (total ? `<span class="total"><strong>${total.toLocaleString()}</strong> on ${list.length} ${list.length === 1 ? "site" : "sites"}</span>` : "");
+    $("status").innerHTML = `<span class="fresh" title="${esc(detail)}${stale ? "\nOne source is older than expected: check its latest Actions run" : ""}"><span class="dot${stale ? " stale" : ""}"></span>Updated ${fmt(newest)}</span>`
+      + (total ? `<span class="total"><strong>${total.toLocaleString()}</strong> across ${list.length} ${list.length === 1 ? "site" : "sites"}</span>` : "");
   }
 
   async function load() {
-    // Data lives in the GitHub repo; read it straight from there so the page shows each
-    // sweep without the host having to republish. Falls back to the copy next to this page.
     const RAW = "https://raw.githubusercontent.com/MrPaoloSarino/dealsourcing-cloud/refs/heads/main/docs/data/";
     async function getJson(file) {
       for (const url of [RAW + file, "data/" + file]) {
@@ -926,15 +1591,12 @@
       const meta = metas[src.key] = blob.meta || {};
       const idx = Object.fromEntries(blob.fields.map((f, i) => [f, i]));
       blob.rows.forEach((a, i) => {
-        const r = { ord: i, src: src.key };   // file order = the site's order, newest first
+        const r = { ord: i, src: src.key };
         for (const k in idx) r[k] = a[idx[k]];
         r.title = r.title || ""; r.location = r.location || ""; r.teaser = r.teaser || ""; r.category = r.category || "";
         r.key = src.key + ":" + r.path;
         r.url = (meta.base || src.base) + r.path;
         r.hay = (r.title + " " + r.location + " " + r.category + " " + r.teaser).toLowerCase();
-        // Seller-typed cash flow is sometimes impossible (above revenue, copied from
-        // revenue or price, or wildly above the asking price). Keep it visible but
-        // flag it, and leave it out of sorting and the multiple.
         const cf = r.cash_flow;
         r.cfSuspect = !!cf && (
           (r.revenue && cf >= r.revenue) ||
@@ -949,6 +1611,7 @@
         rows.push(r);
       });
     });
+
     if (!rows.length) $("status").textContent = "Listings couldn't be loaded. Check your connection and refresh.";
     const srcCounts = {};
     rows.forEach(r => { srcCounts[r.src] = (srcCounts[r.src] || 0) + 1; });
@@ -958,8 +1621,9 @@
     rows.forEach(r => { if (r.state) counts[r.state] = (counts[r.state] || 0) + 1; });
     $("state").insertAdjacentHTML("beforeend", Object.keys(counts).sort()
       .map(s => `<option value="${s}">${s} (${counts[s].toLocaleString()})</option>`).join(""));
+
     const saved = store.get();
-    if (saved.sort && !saved.sort.includes(":")) delete saved.sort;   // older saved format
+    if (saved.sort && !saved.sort.includes(":")) delete saved.sort;
     writeFilters(saved);
     byPath = new Map(rows.map(r => [r.key, r]));
     runBoxes();
@@ -967,36 +1631,130 @@
     apply();
   }
 
+  /* ---------- Event Wiring ---------- */
   let t;
   $("filters").addEventListener("input", () => { clearTimeout(t); t = setTimeout(apply, 120); });
   $("sort").addEventListener("change", apply);
-  $("reset").addEventListener("click", () => { $("filters").reset(); apply(); });
+  $("clearFiltersBtn").addEventListener("click", () => { $("filters").reset(); starOnly = false; updateTriageButtons(); apply(); });
   $("moreBtn").addEventListener("click", () => { shown += PAGE; render(); });
-  $("out").addEventListener("click", e => {
-    const tr = e.target.closest("tr[data-href]");
-    if (tr && !e.target.closest("a, button") && !String(getSelection())) { window.open(tr.dataset.href, "_blank", "noopener"); return; }
-    const b = e.target.closest("button.sorter");
-    if (!b) return;
-    const k = b.dataset.key;
-    const dir = sortState.key === k ? (sortState.dir === "asc" ? "desc" : "asc") : SORT_DEFAULT[k];
-    $("sort").value = `${k}:${dir}`;
-    apply();
-    document.querySelector(`button.sorter[data-key="${k}"]`)?.focus();
-  });
   $("export").addEventListener("click", exportCsv);
+
+  $("boxlist").addEventListener("click", e => {
+    if (e.target.id === "boxAdd") { openEditor(null); return; }
+    const b = e.target.closest("button.box"); if (!b) return;
+    activeBox = b.dataset.box; boxStore.setActive(activeBox); mgrOverride = null; renderBoxes(); apply();
+  });
+  $("activebox").addEventListener("click", e => {
+    if (e.target.id === "boxEdit") openEditor(boxes.find(b => b.id === activeBox));
+    if (e.target.id === "boxClear") { activeBox = ""; boxStore.setActive(""); mgrOverride = null; renderBoxes(); apply(); }
+  });
+  $("chips").addEventListener("click", e => {
+    const b = e.target.closest("[data-clear]"); if (!b) return;
+    if (b.dataset.clear === "all") { $("clearFiltersBtn").click(); return; }
+    for (const id of b.dataset.clear.split(",")) {
+      if (id === "kind") document.querySelector('input[name=kind][value="all"]').checked = true;
+      else if (id === "hascf") $("hascf").checked = false;
+      else if (id === "__star") { starOnly = false; updateTriageButtons(); }
+      else $(id).value = "";
+    }
+    apply();
+  });
+
+  $("starFilterBtn").addEventListener("click", () => { starOnly = !starOnly; updateTriageButtons(); apply(); });
+  $("hidePassedBtn").addEventListener("click", () => { hidePassed = !hidePassed; updateTriageButtons(); apply(); });
+  $("toggleIcBtn").addEventListener("click", () => {
+    icVisible = !icVisible;
+    $("splitWrap").classList.toggle("no-ic", !icVisible);
+    $("toggleIcBtn").textContent = icVisible ? "Hide IC Panel" : "Show IC Panel";
+  });
+
+  $("boxImport").addEventListener("click", () => $("boxFile").click());
+  $("boxFile").addEventListener("change", e => { const f = e.target.files[0]; if (f) importFile(f); e.target.value = ""; });
+  $("boxBackup").addEventListener("click", backup);
+  $("bxCancel").addEventListener("click", () => $("boxDlg").close());
+  $("boxForm").addEventListener("submit", e => {
+    e.preventDefault();
+    try {
+      const b = readEditor();
+      boxes = editing ? boxes.map(x => x.id === b.id ? b : x) : boxes.concat(b);
+      if (!editing) { activeBox = b.id; boxStore.setActive(b.id); }
+      $("boxDlg").close(); saveBoxes();
+    } catch (err) { $("bxErr").textContent = err.message; }
+  });
+  $("bxDelete").addEventListener("click", () => {
+    if (!editing || !confirm(`Delete the buy-box "${editing.name}"?`)) return;
+    boxes = boxes.filter(b => b.id !== editing.id);
+    if (activeBox === editing.id) { activeBox = ""; boxStore.setActive(""); }
+    $("boxDlg").close(); saveBoxes();
+  });
+
+  $("out").addEventListener("click", e => {
+    const starBtn = e.target.closest("button[data-star]");
+    if (starBtn) { e.stopPropagation(); toggleStar(starBtn.dataset.star); return; }
+
+    const sortBtn = e.target.closest("button.sorter");
+    if (sortBtn) {
+      const k = sortBtn.dataset.key;
+      const dir = sortState.key === k ? (sortState.dir === "asc" ? "desc" : "asc") : SORT_DEFAULT[k];
+      $("sort").value = `${k}:${dir}`;
+      apply();
+      document.querySelector(`button.sorter[data-key="${k}"]`)?.focus();
+      return;
+    }
+
+    const tr = e.target.closest("tr[data-key]");
+    if (tr && !e.target.closest("a, button") && !String(getSelection())) {
+      selectedKey = tr.dataset.key;
+      document.querySelectorAll("tbody tr.selected").forEach(el => el.classList.remove("selected"));
+      tr.classList.add("selected");
+      renderIC(true);
+    }
+  });
+  $("out").addEventListener("dblclick", e => {
+    const tr = e.target.closest("tr[data-href]");
+    if (tr && !e.target.closest("a, button")) window.open(tr.dataset.href, "_blank", "noopener");
+  });
+
+  // Keyboard power navigation (/, J/K, S, X, O, Esc)
   document.addEventListener("keydown", e => {
-    if (e.key === "/" && !/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName) && !$("boxDlg").open) {
+    if ($("boxDlg").open) return;
+    if (e.key === "Escape") { closeDrawer(); return; }
+    if (/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)) return;
+    if (e.key === "/") {
       e.preventDefault();
       if (narrow.matches) $("filtersBox").open = true;
       $("q").focus();
+      return;
+    }
+    if (!filtered.length) return;
+    const k = e.key.toLowerCase();
+    if (k === "j" || k === "arrowdown" || k === "k" || k === "arrowup") {
+      e.preventDefault();
+      const idx = filtered.findIndex(r => r.key === selectedKey);
+      const nextIdx = (k === "j" || k === "arrowdown")
+        ? Math.min(Math.min(shown, filtered.length) - 1, idx + 1)
+        : Math.max(0, idx - 1);
+      selectedKey = filtered[nextIdx].key;
+      document.querySelectorAll("tbody tr.selected").forEach(el => el.classList.remove("selected"));
+      const rowEl = document.querySelector(`tbody tr[data-key="${CSS.escape(selectedKey)}"]`);
+      if (rowEl) { rowEl.classList.add("selected"); rowEl.scrollIntoView({ block: "nearest" }); }
+      renderIC();
+    } else if (k === "s" && selectedKey) {
+      e.preventDefault(); toggleStar(selectedKey);
+    } else if (k === "x" && selectedKey) {
+      e.preventDefault(); togglePass(selectedKey);
+    } else if (k === "o" && selectedKey) {
+      const r = byPath.get(selectedKey);
+      if (r) window.open(r.url, "_blank", "noopener");
     }
   });
-  // Wide screens: the side panel is always open. Narrow screens: it starts collapsed.
-  const narrow = matchMedia("(max-width: 900px)");
+
+  const narrow = matchMedia("(max-width: 820px)");
   const syncPanel = () => { $("filtersBox").open = !narrow.matches; };
   syncPanel();
   narrow.addEventListener("change", syncPanel);
   $("filtersBox").addEventListener("toggle", () => { if (!narrow.matches && !$("filtersBox").open) $("filtersBox").open = true; });
+
   load();
 })();
 </script>

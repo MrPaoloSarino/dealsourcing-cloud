@@ -123,7 +123,19 @@ site's RSS feed `/us/search/businesses-for-sale.rss`, 25 newest items with pubDa
 
 - **Sources:** `SOURCES` list in the script (key, label, data file, base URL). All files load in parallel from GitHub raw (fallback `data/<file>`); rows get `src`, `key` (`src:path`, used for buy-box results), `url`, and a search haystack (title + location + industry + teaser). Source filter + chip; each row shows the source name, and the industry on its own line. App bar shows the most recent update (tooltip lists each source; dot turns gold if any source is >8 h old) and the combined site totals. CSV export includes Source and Industry.
 
-- **Layout (redesign 2026-11-19):** slim sticky app bar (name, source, freshness dot: green if updated within 8 h, gold if older, sites total); white side panel with Buy-boxes (New / Import / Back up) and Filters (Clear all appears when filters are active); results toolbar with count, a summary line of medians (asking, cash flow, multiple, new count) for the current results, Sort and Export; a row of removable chips for the active buy-box and each filter; table with sticky header, titles clamped to 2 lines, location + tags on one meta line, whole row clickable (opens the listing in a new tab); "Showing X of Y" + Show more; footer note that figures are seller-entered. `/` focuses search.
+- **Layout ("Private Equity Origination Desk", designed by the user 2026-11-19, phone fixes by Claude):**
+  dark racing-green masthead (`--pe #0B3D2E`, gold accent `--gold-bright #E4C162`, Newsreader serif + Public Sans)
+  with freshness dot, site totals, Import Buy-Boxes / Back up / Export CSV; a **Mandates** ribbon (buy-boxes as tabs,
+  "+ New Buy-Box", ★ Shortlist and Hide passed toggles with counts); one-line filter bar (search, source, state,
+  asking min/max, cash flow min/max, multiple, first seen, type, has cash flow; collapses to "Search & Filters" on
+  phones); results header with count and medians; filter chips incl. the active mandate (Edit / ×); table with star
+  column; **IC tearsheet panel** on the right (slide-over drawer below 1120px) for the selected row: mandate verdict
+  and confidence, description, figures, **target offer slider** ("Snap to SBA Max", manager-salary selector),
+  10% equity / year-1 cash-on-cash / SBA DSCR, the 80/10/10 capital stack and annual cash flow, a private analyst
+  note, Shortlist / Pass / Open listing. `/` focuses search. Below 820px: header scrolls away (not sticky), mandate
+  tabs and triage buttons on their own rows, rows become two-column cards, selected card highlighted evenly.
+- **Triage** (shortlist, passed, notes) is stored in the browser only: localStorage `dealscreen-triage`
+  (`{starred:[key], passed:[key], notes:{key:text}}`, keys are `source:path`). Back up includes it.
 
 - **Filters:** search (title, location, teaser), state, type (all / listings / M&A Vault), asking
   min/max, cash flow min/max (type `500k`, `2.5m`), highest multiple, first seen (new / 24h / 7d / 30d),
@@ -267,3 +279,4 @@ Rows show the decision tag and "Matched "keyword", supports up to $X, $Y left af
 | 2026-11-19 | Render Deploy Hook workflow added (inactive until the secret exists). |
 | 2026-11-19 | **Tupelo added** as second source (1,746 listings, industry on every card); generic publish/save scripts; Source filter; industry used in buy-box matching. |
 | 2026-11-19 | User linked Render to GitHub (Render's GitHub app now has the repo): auto-deploy on commit works. Deploy Hook workflow removed. |
+| 2026-11-19 | User's redesign published as `docs/app.html`: masthead, Mandates ribbon, one-line filters, IC tearsheet with offer slider and capital stack, shortlist/pass/notes triage. Claude fixed three phone issues (sticky header too tall, patchy selected-row highlight, triage buttons covering buy-box tabs). |
