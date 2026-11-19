@@ -143,6 +143,15 @@ site's RSS feed `/us/search/businesses-for-sale.rss`, 25 newest items with pubDa
   `{"<client name>": {"<source:path>": {"s": "accepted"|"axed", "d": "YYYY-MM-DD"}}}`, plus
   `dealscreen-decide-for`. Keyed by client name on purpose so it maps to the cloud inquiries table later
   (accepted → Inquired, axed → Axed). Back up / Import include it.
+- **Cloud sign-in (added 2026-11-19).** Masthead "Sign in" → email + password (the user types them; Claude never
+  does). Talks to Supabase directly with `fetch` (no library): `/auth/v1/token` (password + refresh), `/rest/v1/...`.
+  Session in localStorage `dealscreen-sb-session`. On sign-in: checks `app_admins`, loads active `clients` and all
+  `inquiries` with a `listing_key` (paged by 1,000), adds missing buy-boxes from `clients.buybox`, uploads any
+  browser-only decisions for cloud clients once (then deletes them locally), and shows "● Synced".
+  Signed in, Accept = upsert inquiry status **Inquired**, Axe = **Axed** (on conflict `client_id,link`); row tags show
+  the real status and date ("NDA sent Oct 1"). Undo only reverts what the screen did (`dealscreen-cloud-undo`:
+  delete a row it created, or restore the status it changed); older inquiries are never deleted from the screen.
+  Clients that aren't in the cloud keep browser-only decisions. Statuses Axed/Passed count as axed, all others as accepted.
 - **Notes** stay in localStorage `dealscreen-triage` (`{starred, passed, notes:{key:text}}`); the old
   starred/passed sets are no longer shown but are kept and still included in Back up.
 
@@ -252,13 +261,30 @@ Rows show the decision tag and "Matched "keyword", supports up to $X, $Y left af
 6. **More sources** — next by volume in the old app: Transworld, BBMS, BusinessBroker, Sunbelt. Probe each from
    Actions first (one-off probe workflow, then delete it), reuse `bfs/publish.py` + `scripts/save_data.sh`,
    add a `SOURCES` entry in `docs/app.html`.
-7. **Clients & inquiries in the cloud** — Supabase (free) with row-level security; see the to-do Sheet
-   "Deal Sourcing Cloud: Clients & Inquiries To-Do". Move `dealscreen-decisions` into the inquiries table,
-   then point the Deal Capture extension at it. Never in this public repo.
+7. **Clients & inquiries in the cloud** — DONE: database + import + deal-screen sign-in (see section 11). Next: point
+   the Deal Capture extension at it (per-profile client), inquiry tracker/pipeline view, nightly backup to a private
+   repo (also keeps the free project from pausing), switch-over from the desktop app.
 8. Housekeeping: alert when a sweep returns far fewer listings than usual (layout change); radius matching
    (needs a US cities lat/long table, the old app has `uscities.csv`); parse Tupelo's site total.
 
 ---
+
+## 11. Cloud database (Supabase, private)
+
+- Project `bfuczktomibpbzexkyah` (Singapore, free plan), URL `https://bfuczktomibpbzexkyah.supabase.co`,
+  publishable key in `docs/app.html` (public by design). The service/secret key and DB password are never in chat
+  or files; secrets go in GitHub Actions Secrets.
+- Tables: `app_admins(user_id)`, `clients(id, name unique, active, buybox jsonb)`, `inquiries(id, client_id, link,
+  listing_key, title, inquiry_date, price, sde, revenue, ebitda, location, status, notes, source_site, legacy_id,
+  created_at, updated_at; unique(client_id, link))`. Status check: Inquired, NDA sent, Info received, Reviewing, LOI,
+  Under contract, Passed, Axed, Closed.
+- Security: RLS on all tables; policies allow only users in `app_admins` (via `is_admin()`); anon revoked; public
+  sign-ups turned off. Only the user's account is an admin.
+- Clients: the user's five active clients (names kept out of this public repo). Imported
+  2026-11-19 from desktop `deals.db`: 2,324 inquiries (two duplicate Tupelo links merged); 784 have a deal-screen
+  `listing_key` (BFS + Tupelo). Setup SQL lives only on the user's PC in `dealsourcing/backups/cloud_setup/`
+  (git-ignored). The cloud workspace and the user's PC VM can't reach `*.supabase.co`; SQL is run by the user in the
+  Supabase SQL Editor, and the browser talks to Supabase directly.
 
 ## 9. Notes for an AI assistant
 
@@ -291,3 +317,4 @@ Rows show the decision tag and "Matched "keyword", supports up to $X, $Y left af
 | 2026-11-19 | User linked Render to GitHub (Render's GitHub app now has the repo): auto-deploy on commit works. Deploy Hook workflow removed. |
 | 2026-11-19 | User's redesign published as `docs/app.html`: masthead, Mandates ribbon, one-line filters, IC tearsheet with offer slider and capital stack, shortlist/pass/notes triage. Claude fixed three phone issues (sticky header too tall, patchy selected-row highlight, triage buttons covering buy-box tabs). |
 | 2026-11-19 | **Accept / Axe per client** replaces Shortlist / Pass on the deal screen (browser storage `dealscreen-decisions`, keyed by client name; A/X shortcuts; tearsheet shows decisions for every client; CSV and backup include them). |
+| 2026-11-19 | **Cloud database live** (Supabase, RLS, admin-only): 5 clients and their inquiries imported; deal screen sign-in syncs Accept/Axe as Inquired/Axed and shows each deal's inquiry status per client. |
