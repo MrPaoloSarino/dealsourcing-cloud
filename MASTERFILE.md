@@ -261,8 +261,8 @@ Rows show the decision tag and "Matched "keyword", supports up to $X, $Y left af
 6. **More sources** — next by volume in the old app: Transworld, BBMS, BusinessBroker, Sunbelt. Probe each from
    Actions first (one-off probe workflow, then delete it), reuse `bfs/publish.py` + `scripts/save_data.sh`,
    add a `SOURCES` entry in `docs/app.html`.
-7. **Clients & inquiries in the cloud** — DONE: database + import + deal-screen sign-in (see section 11). Next: point
-   the Deal Capture extension at it (per-profile client), inquiry tracker/pipeline view, nightly backup to a private
+7. **Clients & inquiries in the cloud** — DONE: database + import + deal-screen sign-in + Deal Capture extension
+   (see section 11). Next: inquiry tracker/pipeline view, nightly backup to a private
    repo (also keeps the free project from pausing), switch-over from the desktop app.
 8. Housekeeping: alert when a sweep returns far fewer listings than usual (layout change); radius matching
    (needs a US cities lat/long table, the old app has `uscities.csv`); parse Tupelo's site total.
@@ -285,6 +285,22 @@ Rows show the decision tag and "Matched "keyword", supports up to $X, $Y left af
   `listing_key` (BFS + Tupelo). Setup SQL lives only on the user's PC in `dealsourcing/backups/cloud_setup/`
   (git-ignored). The cloud workspace and the user's PC VM can't reach `*.supabase.co`; SQL is run by the user in the
   Supabase SQL Editor, and the browser talks to Supabase directly.
+
+### Deal Capture extension (switched to the cloud 2026-11-19)
+- Lives on the user's PC: `dealsourcing/capture_extension/` (not in this repo). Pre-cloud copy kept in
+  `dealsourcing/backups/capture_extension_pre_cloud/`.
+- v2.0: `background.js` is the only part that talks to the tracker. It now calls Supabase (same publishable key)
+  and returns the old local server's response shapes (`CHECK`, `CLIENTS`, `INQUIRIES`, `SAVE`, `AUTOFILL`), so
+  `content.js` (overlay + company-portal auto-submit) and `popup.js` barely changed. New messages: `AUTH_STATUS`,
+  `SIGNIN`, `SIGNOUT`, `SET_PROFILE_CLIENT`, `OPEN_TRACKER` (opens the deal screen).
+- Sign-in once per Chrome profile (session in `chrome.storage.local.sbSession`); popup shows "This profile is for
+  <client>" (`profileClient`, falls back to `lastClient`). Unknown client names are refused.
+- Save = upsert on (client, link): matches the raw or canonical link (port of `core/normalize.canonicalize_link`,
+  plus `inquirySuccess` stripped) and Transworld slugs (`transworld_dedupe_key`); updates only fields provided;
+  sets `listing_key` for BFS/Tupelo so the deal screen shows the status. "Already inquired" checks link, canonical
+  link, listing_key and Transworld slug, across all clients.
+- Each save is also mirrored best-effort to the desktop app (`127.0.0.1:8050/api/inquiries`) when it's running, so
+  `deals.db` and the Excel export keep up during the switch-over.
 
 ## 9. Notes for an AI assistant
 
@@ -318,3 +334,4 @@ Rows show the decision tag and "Matched "keyword", supports up to $X, $Y left af
 | 2026-11-19 | User's redesign published as `docs/app.html`: masthead, Mandates ribbon, one-line filters, IC tearsheet with offer slider and capital stack, shortlist/pass/notes triage. Claude fixed three phone issues (sticky header too tall, patchy selected-row highlight, triage buttons covering buy-box tabs). |
 | 2026-11-19 | **Accept / Axe per client** replaces Shortlist / Pass on the deal screen (browser storage `dealscreen-decisions`, keyed by client name; A/X shortcuts; tearsheet shows decisions for every client; CSV and backup include them). |
 | 2026-11-19 | **Cloud database live** (Supabase, RLS, admin-only): 5 clients and their inquiries imported; deal screen sign-in syncs Accept/Axe as Inquired/Axed and shows each deal's inquiry status per client. |
+| 2026-11-19 | **Deal Capture extension v2.0 writes to the cloud** (per-profile sign-in and client, duplicate check across link variants, best-effort mirror to the desktop app). |
