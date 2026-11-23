@@ -1,0 +1,49 @@
+{
+  "sitemap.xml": {
+    "url": "https://www.baton.com/market/sitemap.xml",
+    "status": 200,
+    "len": 261105
+  },
+  "sitemap_locs": 1902,
+  "sitemap_listings": 1615,
+  "search.html": {
+    "url": "https://www.baton.com/market/businesses-for-sale",
+    "status": 200,
+    "len": 38523
+  },
+  "cat_tx.html": {
+    "url": "https://www.baton.com/market/businesses-for-sale/category/businesses-in-texas",
+    "status": 200,
+    "len": 162034
+  },
+  "search_p2.html": {
+    "url": "https://www.baton.com/market/businesses-for-sale?page=2",
+    "status": 200,
+    "len": 38523
+  },
+  "listing0.html": {
+    "url": "https://www.baton.com/market/businesses-for-sale/construction-company-kona-hi/7cf8ee5f-7d8e-4421-a07e-34698bd0e4b6",
+    "status": 200,
+    "len": 176551
+  },
+  "listing1.html": {
+    "url": "https://www.baton.com/market/businesses-for-sale/boat-watercraft-rental-undisclosed-city-la/49a823e7-d2fd-4780-9842-35250dc95dfc",
+    "status": 200,
+    "len": 160420
+  },
+  "listing2.html": {
+    "url": "https://www.baton.com/market/businesses-for-sale/telecommunications-miami-fl/4d9eb438-05d1-4828-864f-ac73e73c9242",
+    "status": 200,
+    "len": 146874
+  },
+  "listing3.html": {
+    "url": "https://www.baton.com/market/businesses-for-sale/advertising-agency-consulting-services-ca/096cd5a6-5672-4dbe-a78d-c9f2fa61a2c9",
+    "status": 200,
+    "len": 126324
+  },
+  "listing4.html": {
+    "url": "https://www.baton.com/market/businesses-for-sale/other-amusement-recreation-me/77b3198f-c87e-4336-b8d9-19f973758014",
+    "status": 200,
+    "len": 126751
+  }
+}
