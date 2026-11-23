@@ -64,7 +64,7 @@ def to_int(v: str):
 def teaser_of(row: dict) -> str:
     """M&A Vault cards carry no dollar figures; keep their one-line pitch instead.
     Sources with a short description on every card (Tupelo) keep it for all rows."""
-    if row.get("source") == "Tupelo":
+    if row.get("source") in ("Tupelo", "Baton"):
         return " ".join((row.get("card_text") or "").split())[:240]
     if row.get("kind") != "mna_vault":
         return ""
@@ -141,7 +141,7 @@ def main() -> int:
     dropped = len(existing) - len(kept)
     kept.sort(key=lambda r: r["first_seen"], reverse=True)   # stable: keeps site order within a day
 
-    full = len(run.get("pages", [])) > 100
+    full = run.get("full", len(run.get("pages", [])) > 100)
     # Everything in the very first crawl is "already on the market", not new.
     meta.setdefault("baseline_date", today)
     meta.update({

@@ -2,7 +2,7 @@ name: Probe Baton (temporary)
 on:
   push:
     branches: [probe-baton]
-    paths: ["probe/probe.py", ".github/workflows/probe_baton.yml"]
+    paths: ["baton/**", ".github/workflows/probe_baton.yml"]
 permissions:
   contents: write
 jobs:
@@ -12,9 +12,11 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: {python-version: "3.11"}
-      - run: pip install curl_cffi
-      - run: python probe/probe.py
+      - run: pip install -r requirements.txt
+      - run: python baton/scrape_baton.py | tail -80
       - run: |
+          python bfs/publish.py out_baton/listings.csv --data probe/baton.json --prefix https://www.baton.com/market/businesses-for-sale/ --label Baton
+          cp out_baton/run.json probe/baton_run.json
           git config user.name dealsourcing-bot
           git config user.email dealsourcing-bot@users.noreply.github.com
-          git add probe && git commit -qm "Probe results" && git push -q
+          git add probe && git commit -qm "Baton probe results" && git pull -q --rebase && git push -q
