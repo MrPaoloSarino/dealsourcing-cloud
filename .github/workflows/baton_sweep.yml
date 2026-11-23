@@ -1,0 +1,59 @@
+name: Baton sweep
+
+on:
+  schedule:
+    - cron: "7 */6 * * *"     # every 6 hours (Manila 8:07am, 2:07pm, 8:07pm, 2:07am): full crawl, ~9 min
+  workflow_dispatch:
+    inputs:
+      states:
+        description: "States to crawl (quick test). 0 = full crawl"
+        required: false
+        default: "0"
+  push:
+    branches: [main]
+    paths: ["baton/**", ".github/workflows/baton_sweep.yml"]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: baton-sweep
+  cancel-in-progress: false
+
+jobs:
+  sweep:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      PUBLISH_ARGS: >-
+        out_baton/listings.csv --data docs/data/baton.json
+        --prefix https://www.baton.com/market/businesses-for-sale/ --label Baton
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Scrape Baton (saves progress every 50 pages)
+        run: >
+          python baton/scrape_baton.py --states "${{ github.event.inputs.states || '0' }}"
+          --checkpoint-every 50
+          --checkpoint-cmd "bash scripts/save_data.sh 'Baton data (crawl in progress)' $PUBLISH_ARGS"
+
+      - name: Save final data to the deal screen
+        if: always()
+        run: |
+          [ -f out_baton/listings.csv ] || { echo "No results file"; exit 0; }
+          bash scripts/save_data.sh "Update Baton data" $PUBLISH_ARGS
+
+      - name: Upload run files
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: baton-results
+          path: out_baton/
+          retention-days: 7

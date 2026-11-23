@@ -757,7 +757,7 @@
   <div class="split" id="splitWrap">
     <!-- LEFT: ORIGINATION LEDGER -->
     <section aria-label="Listings ledger">
-      <div class="tablewrap" id="out"><div class="loading">Loading listings from BusinessesForSale &amp; Tupelo…</div></div>
+      <div class="tablewrap" id="out"><div class="loading">Loading listings from BusinessesForSale, Tupelo &amp; Baton…</div></div>
       <div class="more">
         <span id="shownInfo"></span>
         <button type="button" id="moreBtn" hidden>Show 100 more</button>
@@ -844,6 +844,7 @@
   const SOURCES = [
     { key: "bfs", label: "BusinessesForSale", short: "BFS", file: "bfs.json", base: "https://us.businessesforsale.com/us/" },
     { key: "tupelo", label: "Tupelo", short: "Tupelo", file: "tupelo.json", base: "https://www.tupelosmb.com/marketplace/listings/" },
+    { key: "baton", label: "Baton", short: "Baton", file: "baton.json", base: "https://www.baton.com/market/businesses-for-sale/" },
   ];
   const SRC = Object.fromEntries(SOURCES.map(x => [x.key, x]));
   let metas = {};
@@ -1929,7 +1930,8 @@
         const r = { ord: i, src: src.key };
         for (const k in idx) r[k] = a[idx[k]];
         r.title = r.title || ""; r.location = r.location || ""; r.teaser = r.teaser || ""; r.category = r.category || "";
-        r.key = src.key + ":" + r.path;
+        // Baton deals are keyed by their ID alone: older inquiry links have no name part (…/businesses-for-sale/<id>).
+        r.key = src.key + ":" + (src.key === "baton" ? r.path.split("/").pop() : r.path);
         r.url = (meta.base || src.base) + r.path;
         r.hay = (r.title + " " + r.location + " " + r.category + " " + r.teaser).toLowerCase();
         const cf = r.cash_flow;
