@@ -1,7 +1,7 @@
 # DealSourcing Cloud — Master File
 
 Full context for any AI assistant or developer picking up this project. Read this first.
-Last updated: 2026-11-19 (after adding Tupelo).
+Last updated: 2026-11-23 (after adding Baton).
 
 > **Privacy rule (hard):** this repository is **public**. Never commit client names, buy-box
 > criteria, inquiry/pipeline data, or any credentials. Client buy-boxes live only in the
@@ -14,7 +14,7 @@ Last updated: 2026-11-19 (after adding Tupelo).
 A **$0, fully cloud deal-sourcing screen** for an M&A / PE analyst (Paolo, Philippines-based
 freelancer) who sources small and lower-middle-market businesses for buy-side clients.
 
-- **Sources:** BusinessesForSale.com, US site (`https://us.businessesforsale.com/us/`), and **Tupelo** (`https://www.tupelosmb.com/marketplace/listings`, added 2026-11-19). Each source has its own scraper, schedule and data file; the screen merges them.
+- **Sources:** BusinessesForSale.com, US site (`https://us.businessesforsale.com/us/`), **Tupelo** (`https://www.tupelosmb.com/marketplace/listings`, added 2026-11-19), and **Baton** (`https://www.baton.com/market/businesses-for-sale`, added 2026-11-23). Each source has its own scraper, schedule and data file; the screen merges them.
 - **What it does:** scrapes every listing on a schedule, publishes them to a web page where the
   user can search, filter, sort, export CSV, and see each client's matches ("buy-boxes") scored
   with the same SBA underwriting rules as the user's older desktop app.
@@ -81,13 +81,15 @@ file; the `refs/heads/main/...` form worked immediately. The loader uses `refs/h
 |---|---|
 | `bfs/scrape_bfs.py` | Scraper. Walks `/us/search/businesses-for-sale`, `-2`, `-3`… (25 cards/page). Parses each `div.result-header` card: title, URL, kind, location, asking price, revenue, cash flow, EBITDA. Skips franchise ads. Stops on Cloudflare block, or after 2 pages with no new listings / 404. `--pages N` (0 = all), `--checkpoint-every 50 --checkpoint-cmd "..."` saves progress mid-crawl. Writes `out/bfs_listings.csv`, `out/bfs_run.json`, `out/page1.html`. |
 | `tupelo/scrape_tupelo.py` | Tupelo scraper, plain HTTP. Walks `/marketplace/listings?page=1…N` (10 cards/page, ~175 pages; `page=0` and `page=1` are the same first page). Each card is an `<a href="/marketplace/listings/<cuid>">` with industry badges (`div.inline-flex`), `<h3>` title, two `span.line-clamp-1` location lines (long + short `City, County, ST, US`), a description `<p>`, and value/label span pairs (Asking Price, Revenue, Cash Flow; `-` = not given). robots.txt only disallows `/api/` and `/auth/`. Writes `out_tupelo/listings.csv` + `run.json`. |
+| `baton/scrape_baton.py` | Baton scraper, plain HTTP (robots.txt allows all). Pages are Remix server-rendered; listing data is read from the JSON in `window.__remixContext` (no HTML parsing). Reads `/market/sitemap.xml` (all listing URLs + state pages `category/businesses-in-<state>`), walks each state page `?page=N` (14 listings each, `searchBusinesses.results[].listing`: name, asking_price, financials.adjusted_free_cash_flow / gross_revenue, locations, industries, status, display_region), then opens listing pages for sitemap listings no state page showed (`--max-details`, default 150). Status LIVE / PRIVATE / UNDER_CONTRACT goes into `teaser` ("Private listing", "Under contract", else the region). Writes `out_baton/listings.csv` + `run.json` (`full: true` on a full crawl). |
 | `bfs/publish.py` | Generic publisher (default BusinessesForSale; Tupelo passes `--data docs/data/tupelo.json --prefix https://www.tupelosmb.com/marketplace/listings/ --label Tupelo`). Merges a run into the source's data file: keeps `first_seen` from earlier runs, sets `last_seen` to today, derives US state code from location, keeps a short teaser for M&A Vault cards, **drops listings not seen for 21 days**. Row order in the file = the site's order (newest first): this run's listings in site order, then the rest in their previous order, stable-sorted by `first_seen` desc. Sets `meta.baseline_date` on first ever run (listings first seen after it are "New"). |
 | `scripts/save_data.sh` | `save_data.sh "<commit msg>" [publish args…]`: runs publish, then commits and pushes `docs/data/*.json` as `dealsourcing-bot` (retries with `git pull --rebase`). |
 | `.github/workflows/tupelo_sweep.yml` | Tupelo schedule (below). |
+| `.github/workflows/baton_sweep.yml` | Baton schedule (below). |
 | `.github/workflows/bfs_sweep.yml` | Schedule + manual + push triggers (below). `permissions: contents: write`, `concurrency: bfs-sweep`. |
 | `docs/index.html` | Loader page that hosts serve. |
 | `docs/app.html` | The deal screen (single file: HTML + CSS + JS, no build step). |
-| `docs/data/bfs.json`, `docs/data/tupelo.json` | Published listings per source (compact: `{meta, fields, rows:[[...]]}`). |
+| `docs/data/bfs.json`, `docs/data/tupelo.json`, `docs/data/baton.json` | Published listings per source (compact: `{meta, fields, rows:[[...]]}`). |
 | `README.md` | Short user-facing summary. |
 | `MASTERFILE.md` | This file. |
 
@@ -113,6 +115,8 @@ file; the `refs/heads/main/...` form worked immediately. The loader uses `refs/h
 | Push to `bfs/**`, `scripts/**`, `.github/workflows/**` | 3 pages, or all if the commit message contains `[full]` | |
 
 **Tupelo** (`tupelo_sweep.yml`): every 4 h at :37 (12:37am/4:37/8:37 am/pm Manila) newest 10 pages; daily 03:53 Manila full crawl (~175 pages, ~10 min); push to `tupelo/**` runs a full crawl; manual dispatch with `pages`.
+
+**Baton** (`baton_sweep.yml`): full crawl every 6 h at :07 (8:07am/2:07pm/8:07pm/2:07am Manila), ~140 pages + a few listing pages, ~9 min; push to `baton/**` runs it; manual dispatch with `states` (0 = full, N = first N states for a quick test).
 
 GitHub may start scheduled runs 5–30 min late. Listing order on the site is newest first (matches the
 site's RSS feed `/us/search/businesses-for-sale.rss`, 25 newest items with pubDate; not used yet).
@@ -140,7 +144,7 @@ site's RSS feed `/us/search/businesses-for-sale.rss`, 25 newest items with pubDa
   Pressing the same button again undoes it. Rows show an Accepted/Axed tag for the current client and
   "Also: Client A ✓, Client B ✕" for other clients. CSV export adds Decision, Decided on, Other clients' decisions.
   Stored in the browser only: localStorage `dealscreen-decisions` =
-  `{"<client name>": {"<source:path>": {"s": "accepted"|"axed", "d": "YYYY-MM-DD"}}}`, plus
+  `{"<client name>": {"<source:path>" (Baton: "baton:<listing id>"): {"s": "accepted"|"axed", "d": "YYYY-MM-DD"}}}`, plus
   `dealscreen-decide-for`. Keyed by client name on purpose so it maps to the cloud inquiries table later
   (accepted → Inquired, axed → Axed). Back up / Import include it.
 - **Cloud sign-in (added 2026-11-19).** Masthead "Sign in" → email + password (the user types them; Claude never
@@ -209,7 +213,7 @@ Rows show the decision tag and "Matched "keyword", supports up to $X, $Y left af
 
 ---
 
-## 6. Current numbers (as of 2026-11-19, 3:53pm Manila)
+## 6. Current numbers (BFS/Tupelo as of 2026-11-19; Baton as of 2026-11-23)
 
 | | BusinessesForSale | Tupelo |
 |---|---|---|
@@ -225,7 +229,11 @@ Rows show the decision tag and "Matched "keyword", supports up to $X, $Y left af
 - Tupelo top industries: American Restaurants 110, Other Building & Construction 88, Auto Repair 69,
   HVAC Businesses 60; top states CA 433, FL 172, IL 141, TX 89.
 - Tupelo's site total isn't parsed (`meta.site_total` is null); the screen counts Tupelo by `tracked`.
-- Scheduled sweeps for both sources are running and succeeding. GitHub starts them a few to ~15 minutes
+- **Baton (2026-11-23):** 1,613 of 1,615 sitemap listings; 1,445 "Private listing", 143 live, 25 under contract; 99.8% with
+  asking price, 100% with cash flow (adjusted free cash flow) and revenue; industry on every row; first full crawl ~9 min, 0 blocked.
+  The user's 49 past Baton inquiry links (some in `…/businesses-for-sale/<id>` form, no name part) use the same listing ID;
+  32 were still on the site. Baton keys are therefore `baton:<listing id>`, not the full path.
+- Scheduled sweeps for all sources are running and succeeding. GitHub starts them a few to ~15 minutes
   after the cron time.
 
 ---
@@ -234,9 +242,9 @@ Rows show the decision tag and "Matched "keyword", supports up to $X, $Y left af
 
 - **See the screen:** https://dealsourcing-cloud.onrender.com (refresh; Ctrl+F5 if stale).
   https://mrpaolosarino.github.io/dealsourcing-cloud/ also works but is blocked on the user's network.
-- **Run a sweep now:** GitHub → Actions → *BusinessesForSale sweep* or *Tupelo sweep* → Run workflow → pages (0 = all).
+- **Run a sweep now:** GitHub → Actions → *BusinessesForSale sweep*, *Tupelo sweep* or *Baton sweep* → Run workflow → pages (0 = all).
 - **If the screen looks stale:** hover "Updated…" in the app bar to see each source's last update, then check that
-  source's latest Actions run; data files are `docs/data/bfs.json` and `docs/data/tupelo.json` (`meta.updated_utc`). Raw GitHub can cache up to ~5 min.
+  source's latest Actions run; data files are `docs/data/bfs.json`, `docs/data/tupelo.json` and `docs/data/baton.json` (`meta.updated_utc`). Raw GitHub can cache up to ~5 min.
 - **Render deploys automatically** on every push to `main` (Render's GitHub app has access to `dealsourcing-cloud`;
   linked 2026-11-19, first automatic deploy 4:07pm Manila). If it ever stops: Render → Manual Deploy → Deploy latest commit.
 - **Failure signals:** a failed run (GitHub emails the account), `blocked=True` lines in the run log,
@@ -286,7 +294,7 @@ Rows show the decision tag and "Matched "keyword", supports up to $X, $Y left af
   sign-ups turned off. Only the user's account is an admin.
 - Clients: the user's five active clients (names kept out of this public repo). Imported
   2026-11-19 from desktop `deals.db`: 2,324 inquiries (two duplicate Tupelo links merged); 784 have a deal-screen
-  `listing_key` (BFS + Tupelo). Setup SQL lives only on the user's PC in `dealsourcing/backups/cloud_setup/`
+  `listing_key` (BFS + Tupelo). `06_baton_listing_keys.sql` (2026-11-23) fills `baton:<id>` keys for past Baton inquiries. Setup SQL lives only on the user's PC in `dealsourcing/backups/cloud_setup/`
   (git-ignored). The cloud workspace and the user's PC VM can't reach `*.supabase.co`; SQL is run by the user in the
   Supabase SQL Editor, and the browser talks to Supabase directly.
 
@@ -301,7 +309,7 @@ Rows show the decision tag and "Matched "keyword", supports up to $X, $Y left af
   <client>" (`profileClient`, falls back to `lastClient`). Unknown client names are refused.
 - Save = upsert on (client, link): matches the raw or canonical link (port of `core/normalize.canonicalize_link`,
   plus `inquirySuccess` stripped) and Transworld slugs (`transworld_dedupe_key`); updates only fields provided;
-  sets `listing_key` for BFS/Tupelo so the deal screen shows the status. "Already inquired" checks link, canonical
+  sets `listing_key` for BFS/Tupelo/Baton (v2.2, 2026-11-23) so the deal screen shows the status. "Already inquired" checks link, canonical
   link, listing_key and Transworld slug, across all clients.
 - v2.1 lock: "Lock this profile to <client>" (`profileClient`) makes the client field read-only in the popup,
   overlay and portal tab, and `background.js` refuses saves for any other client. Changing it = type the name.
@@ -342,3 +350,4 @@ Rows show the decision tag and "Matched "keyword", supports up to $X, $Y left af
 | 2026-11-19 | **Cloud database live** (Supabase, RLS, admin-only): 5 clients and their inquiries imported; deal screen sign-in syncs Accept/Axe as Inquired/Axed and shows each deal's inquiry status per client. |
 | 2026-11-19 | **Deal Capture extension v2.0 writes to the cloud** (per-profile sign-in and client, duplicate check across link variants, best-effort mirror to the desktop app). |
 | 2026-11-19 | **Profile lock**: deal screen and Deal Capture extension (v2.1) can be locked to one client per Chrome profile; cross-inquiry confirmation on the deal screen. |
+| 2026-11-23 | **Baton added** as third source (1,613 listings, data read from page JSON; full crawl every 6 h). Deal Capture extension v2.2 keys Baton links by listing ID; SQL `06_baton_listing_keys.sql` links past Baton inquiries. |
