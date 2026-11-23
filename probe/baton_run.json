@@ -1,0 +1,999 @@
+{
+  "started_utc": "2026-11-23T02:49:27.652485+00:00",
+  "pages": [
+    {
+      "page": "category/businesses-in-alabama",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-alabama?page=2",
+      "status": 200,
+      "blocked": false,
+      "cards": 4,
+      "new": 4
+    },
+    {
+      "page": "category/businesses-in-alaska",
+      "status": 200,
+      "blocked": false,
+      "cards": 3,
+      "new": 3
+    },
+    {
+      "page": "category/businesses-in-american-samoa",
+      "status": 200,
+      "blocked": false,
+      "cards": 3,
+      "new": 3
+    },
+    {
+      "page": "category/businesses-in-arizona",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-arizona?page=2",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-arizona?page=3",
+      "status": 200,
+      "blocked": false,
+      "cards": 11,
+      "new": 11
+    },
+    {
+      "page": "category/businesses-in-arkansas",
+      "status": 200,
+      "blocked": false,
+      "cards": 4,
+      "new": 4
+    },
+    {
+      "page": "category/businesses-in-california",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-california?page=2",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-california?page=3",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-california?page=4",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-california?page=5",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-california?page=6",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-california?page=7",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-california?page=8",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-california?page=9",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-california?page=10",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-california?page=11",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-california?page=12",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-california?page=13",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-california?page=14",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-california?page=15",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-california?page=16",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-california?page=17",
+      "status": 200,
+      "blocked": false,
+      "cards": 6,
+      "new": 6
+    },
+    {
+      "page": "category/businesses-in-colorado",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-colorado?page=2",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-colorado?page=3",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-colorado?page=4",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-colorado?page=5",
+      "status": 200,
+      "blocked": false,
+      "cards": 8,
+      "new": 8
+    },
+    {
+      "page": "category/businesses-in-connecticut",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-connecticut?page=2",
+      "status": 200,
+      "blocked": false,
+      "cards": 7,
+      "new": 7
+    },
+    {
+      "page": "category/businesses-in-delaware",
+      "status": 200,
+      "blocked": false,
+      "cards": 12,
+      "new": 12
+    },
+    {
+      "page": "category/businesses-in-district-of-columbia",
+      "status": 200,
+      "blocked": false,
+      "cards": 4,
+      "new": 4
+    },
+    {
+      "page": "category/businesses-in-florida",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-florida?page=2",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-florida?page=3",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-florida?page=4",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-florida?page=5",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-florida?page=6",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-florida?page=7",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-florida?page=8",
+      "status": 200,
+      "blocked": false,
+      "cards": 4,
+      "new": 4
+    },
+    {
+      "page": "category/businesses-in-georgia",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-georgia?page=2",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-georgia?page=3",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-georgia?page=4",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-georgia?page=5",
+      "status": 200,
+      "blocked": false,
+      "cards": 3,
+      "new": 3
+    },
+    {
+      "page": "category/businesses-in-hawaii",
+      "status": 200,
+      "blocked": false,
+      "cards": 11,
+      "new": 11
+    },
+    {
+      "page": "category/businesses-in-idaho",
+      "status": 200,
+      "blocked": false,
+      "cards": 9,
+      "new": 9
+    },
+    {
+      "page": "category/businesses-in-illinois",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-illinois?page=2",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-illinois?page=3",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-illinois?page=4",
+      "status": 200,
+      "blocked": false,
+      "cards": 10,
+      "new": 10
+    },
+    {
+      "page": "category/businesses-in-indiana",
+      "status": 200,
+      "blocked": false,
+      "cards": 11,
+      "new": 11
+    },
+    {
+      "page": "category/businesses-in-iowa",
+      "status": 200,
+      "blocked": false,
+      "cards": 5,
+      "new": 5
+    },
+    {
+      "page": "category/businesses-in-kansas",
+      "status": 200,
+      "blocked": false,
+      "cards": 11,
+      "new": 11
+    },
+    {
+      "page": "category/businesses-in-kentucky",
+      "status": 200,
+      "blocked": false,
+      "cards": 9,
+      "new": 9
+    },
+    {
+      "page": "category/businesses-in-louisiana",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-louisiana?page=2",
+      "status": 200,
+      "blocked": false,
+      "cards": 3,
+      "new": 3
+    },
+    {
+      "page": "category/businesses-in-maine",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-maine?page=2",
+      "status": 200,
+      "blocked": false,
+      "cards": 3,
+      "new": 3
+    },
+    {
+      "page": "category/businesses-in-maryland",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-maryland?page=2",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-maryland?page=3",
+      "status": 200,
+      "blocked": false,
+      "cards": 2,
+      "new": 2
+    },
+    {
+      "page": "category/businesses-in-massachusetts",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-massachusetts?page=2",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-massachusetts?page=3",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-massachusetts?page=4",
+      "status": 200,
+      "blocked": false,
+      "cards": 4,
+      "new": 4
+    },
+    {
+      "page": "category/businesses-in-michigan",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-michigan?page=2",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-michigan?page=3",
+      "status": 200,
+      "blocked": false,
+      "cards": 13,
+      "new": 13
+    },
+    {
+      "page": "category/businesses-in-minnesota",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-minnesota?page=2",
+      "status": 200,
+      "blocked": false,
+      "cards": 4,
+      "new": 4
+    },
+    {
+      "page": "category/businesses-in-mississippi",
+      "status": 200,
+      "blocked": false,
+      "cards": 4,
+      "new": 4
+    },
+    {
+      "page": "category/businesses-in-missouri",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-missouri?page=2",
+      "status": 200,
+      "blocked": false,
+      "cards": 2,
+      "new": 2
+    },
+    {
+      "page": "category/businesses-in-montana",
+      "status": 200,
+      "blocked": false,
+      "cards": 12,
+      "new": 12
+    },
+    {
+      "page": "category/businesses-in-nebraska",
+      "status": 200,
+      "blocked": false,
+      "cards": 5,
+      "new": 5
+    },
+    {
+      "page": "category/businesses-in-nevada",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-nevada?page=2",
+      "status": 200,
+      "blocked": false,
+      "cards": 2,
+      "new": 2
+    },
+    {
+      "page": "category/businesses-in-new-hampshire",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-new-hampshire?page=2",
+      "status": 200,
+      "blocked": false,
+      "cards": 1,
+      "new": 1
+    },
+    {
+      "page": "category/businesses-in-new-jersey",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-new-jersey?page=2",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-new-jersey?page=3",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-new-jersey?page=4",
+      "status": 200,
+      "blocked": false,
+      "cards": 8,
+      "new": 8
+    },
+    {
+      "page": "category/businesses-in-new-mexico",
+      "status": 200,
+      "blocked": false,
+      "cards": 13,
+      "new": 13
+    },
+    {
+      "page": "category/businesses-in-new-york",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-new-york?page=2",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-new-york?page=3",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-new-york?page=4",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-new-york?page=5",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-new-york?page=6",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-new-york?page=7",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-new-york?page=8",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-new-york?page=9",
+      "status": 200,
+      "blocked": false,
+      "cards": 2,
+      "new": 2
+    },
+    {
+      "page": "category/businesses-in-north-carolina",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-north-carolina?page=2",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-north-carolina?page=3",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-north-carolina?page=4",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-north-dakota",
+      "status": 200,
+      "blocked": false,
+      "cards": 9,
+      "new": 9
+    },
+    {
+      "page": "category/businesses-in-ohio",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-ohio?page=2",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-ohio?page=3",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-ohio?page=4",
+      "status": 200,
+      "blocked": false,
+      "cards": 12,
+      "new": 12
+    },
+    {
+      "page": "category/businesses-in-oklahoma",
+      "status": 200,
+      "blocked": false,
+      "cards": 9,
+      "new": 9
+    },
+    {
+      "page": "category/businesses-in-oregon",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-oregon?page=2",
+      "status": 200,
+      "blocked": false,
+      "cards": 13,
+      "new": 13
+    },
+    {
+      "page": "category/businesses-in-pennsylvania",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-pennsylvania?page=2",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-pennsylvania?page=3",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-pennsylvania?page=4",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-pennsylvania?page=5",
+      "status": 200,
+      "blocked": false,
+      "cards": 2,
+      "new": 2
+    },
+    {
+      "page": "category/businesses-in-rhode-island",
+      "status": 200,
+      "blocked": false,
+      "cards": 5,
+      "new": 5
+    },
+    {
+      "page": "category/businesses-in-south-carolina",
+      "status": 200,
+      "blocked": false,
+      "cards": 13,
+      "new": 13
+    },
+    {
+      "page": "category/businesses-in-south-carolina?page=2",
+      "status": 200,
+      "blocked": false,
+      "cards": 9,
+      "new": 9
+    },
+    {
+      "page": "category/businesses-in-tennessee",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-tennessee?page=2",
+      "status": 200,
+      "blocked": false,
+      "cards": 10,
+      "new": 10
+    },
+    {
+      "page": "category/businesses-in-texas",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-texas?page=2",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-texas?page=3",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-texas?page=4",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-texas?page=5",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-texas?page=6",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-texas?page=7",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-texas?page=8",
+      "status": 200,
+      "blocked": false,
+      "cards": 9,
+      "new": 9
+    },
+    {
+      "page": "category/businesses-in-utah",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-utah?page=2",
+      "status": 200,
+      "blocked": false,
+      "cards": 11,
+      "new": 11
+    },
+    {
+      "page": "category/businesses-in-vermont",
+      "status": 200,
+      "blocked": false,
+      "cards": 9,
+      "new": 9
+    },
+    {
+      "page": "category/businesses-in-virginia",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-virginia?page=2",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-virginia?page=3",
+      "status": 200,
+      "blocked": false,
+      "cards": 11,
+      "new": 11
+    },
+    {
+      "page": "category/businesses-in-washington",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-washington?page=2",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-washington?page=3",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-washington?page=4",
+      "status": 200,
+      "blocked": false,
+      "cards": 1,
+      "new": 1
+    },
+    {
+      "page": "category/businesses-in-west-virginia",
+      "status": 200,
+      "blocked": false,
+      "cards": 3,
+      "new": 3
+    },
+    {
+      "page": "category/businesses-in-wisconsin",
+      "status": 200,
+      "blocked": false,
+      "cards": 14,
+      "new": 14
+    },
+    {
+      "page": "category/businesses-in-wisconsin?page=2",
+      "status": 200,
+      "blocked": false,
+      "cards": 12,
+      "new": 12
+    },
+    {
+      "page": "category/businesses-in-wyoming",
+      "status": 200,
+      "blocked": false,
+      "cards": 8,
+      "new": 8
+    }
+  ],
+  "blocked": false,
+  "site_total": 1615,
+  "full": true,
+  "missing_after_states": 10,
+  "details_opened": 10,
+  "finished_utc": "2026-11-23T02:58:26.199707+00:00",
+  "listings": 1613,
+  "with_price": 1610,
+  "with_cash_flow": 1613,
+  "by_status": {
+    "LIVE": 143,
+    "PRIVATE": 1445,
+    "UNDER_CONTRACT": 25
+  }
+}
