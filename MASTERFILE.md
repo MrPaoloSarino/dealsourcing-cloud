@@ -95,7 +95,9 @@ file; the `refs/heads/main/...` form worked immediately. The loader uses `refs/h
 
 ### Data file format (`docs/data/<source>.json`)
 
-- `fields`: `path, title, kind, location, state, price, revenue, cash_flow, ebitda, first_seen, last_seen, teaser, category`
+- `fields`: `path, title, kind, location, state, price, revenue, cash_flow, ebitda, first_seen, last_seen, teaser, category, status`
+  - `status` = deal stage (Baton only, added 2026-11-25): `for_sale` (LIVE), `loi` (LIVE + status tag ACCEPTED_OFFER),
+    `exploring` (PRIVATE: seller exploring interest, financials not released), `under_contract`; empty = for sale
   - `category` = industry (Tupelo badges, e.g. "Heavy Construction / Other Building & Construction"); empty for BusinessesForSale
   - `teaser` = M&A Vault pitch (BFS) or the card description (Tupelo, up to 240 chars)
   - `path` = listing URL minus the source's base URL (`meta.base`)
@@ -169,7 +171,8 @@ site's RSS feed `/us/search/businesses-for-sale.rss`, 25 newest items with pubDa
 - **Notes** stay in localStorage `dealscreen-triage` (`{starred, passed, notes:{key:text}}`); the old
   starred/passed sets are no longer shown but are kept and still included in Back up.
 
-- **Filters:** search (title, location, teaser), state, type (all / listings / M&A Vault), asking
+- **Filters:** search (title, location, teaser), state, **deal stage** (default "Active deals only" = for sale; or All, Under LOI,
+  Exploring interest, Under contract; Baton rows show a stage tag; mandate counts and the Client Buy Box tab follow it), type (all / listings / M&A Vault), asking
   min/max, cash flow min/max (type `500k`, `2.5m`), highest multiple, first seen (new / 24h / 7d / 30d),
   only with cash flow. Filters persist in localStorage (`bfs-filters`).
 - **Sorting:** click column headers (▲/▼, `aria-sort`) or the Sort menu; every column both ways;
@@ -358,3 +361,4 @@ Rows show the decision tag and "Matched "keyword", supports up to $X, $Y left af
 | 2026-11-19 | **Profile lock**: deal screen and Deal Capture extension (v2.1) can be locked to one client per Chrome profile; cross-inquiry confirmation on the deal screen. |
 | 2026-11-23 | **Baton added** as third source (1,613 listings, data read from page JSON; full crawl every 6 h). Deal Capture extension v2.2 keys Baton links by listing ID; SQL `06_baton_listing_keys.sql` links past Baton inquiries. |
 | 2026-11-25 | **Tabs on the deal screen:** 1 Deal Sourcing (as before) and 2 Client Buy Box (all buy-boxes as cards with match counts, criteria and View deals / Edit). Keys 1 / 2. |
+| 2026-11-25 | **Deal stage filter:** Baton scraper records For sale / Under LOI / Exploring interest / Under contract (`status` field); screen defaults to active deals only. |

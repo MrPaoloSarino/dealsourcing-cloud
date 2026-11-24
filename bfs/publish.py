@@ -24,7 +24,7 @@ PREFIX = "https://us.businessesforsale.com/us/"
 DATA = os.path.join("docs", "data", "bfs.json")
 DROP_AFTER_DAYS = 21
 FIELDS = ["path", "title", "kind", "location", "state", "price", "revenue",
-          "cash_flow", "ebitda", "first_seen", "last_seen", "teaser", "category"]
+          "cash_flow", "ebitda", "first_seen", "last_seen", "teaser", "category", "status"]
 
 STATES = {
     "alabama": "AL", "alaska": "AK", "arizona": "AZ", "arkansas": "AR", "california": "CA",
@@ -124,6 +124,8 @@ def main() -> int:
             "last_seen": today,
             "teaser": teaser_of(row),
             "category": (row.get("category") or "").strip(),
+            # deal stage (Baton): for_sale / loi / exploring / under_contract; empty = for sale
+            "status": (row.get("status") or "").strip(),
         }
         if not prev:
             added += 1

@@ -462,6 +462,9 @@
   }
   .tag.vault { background: var(--pe-soft); color: var(--pe); }
   .tag.new { background: var(--pe); color: #FFFFFF; }
+  .tag.stage-loi { background: var(--gold-soft); color: #7C580C; }
+  .tag.stage-exploring { background: var(--line-2); color: var(--muted); }
+  .tag.stage-under_contract, .tag.stage-sold, .tag.stage-paused { background: var(--rust-soft); color: var(--rust); }
   .dec {
     flex: none; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
     padding: 1px 6px; line-height: 17px; border-radius: 3px; margin-top: 1px;
@@ -768,6 +771,13 @@
     </div>
     <select id="src" class="f-sel" aria-label="Source"><option value="">All sources</option></select>
     <select id="state" class="f-sel" aria-label="State"><option value="">All states</option></select>
+    <select id="dstat" class="f-sel" aria-label="Deal stage" title="Baton tags each deal: For sale, Under LOI, Exploring interest (no financials released yet) or Under contract. Other sources are always for sale.">
+      <option value="active">Active deals only</option>
+      <option value="">All deal stages</option>
+      <option value="loi">Under LOI</option>
+      <option value="exploring">Exploring interest</option>
+      <option value="under_contract">Under contract</option>
+    </select>
     <div class="f-pair">
       <span>Ask</span>
       <input type="text" id="pmin" placeholder="Min" aria-label="Minimum asking price" title="Type amounts like 500k or 2.5m">
@@ -1035,7 +1045,7 @@
     return Object.entries(decisions).filter(([c, m]) => c !== client && m && m[key]).map(([c, m]) => ({ client: c, ...m[key] }));
   }
 
-  const inputs = ["q", "src", "state", "pmin", "pmax", "cfmin", "cfmax", "multmax", "since", "sort"];
+  const inputs = ["q", "src", "state", "dstat", "pmin", "pmax", "cfmin", "cfmax", "multmax", "since", "sort"];
   function readFilters() {
     const f = {};
     inputs.forEach(id => f[id] = $(id).value);
@@ -1157,11 +1167,12 @@
   function renderBoxes() {
     const lb = lockedBox();
     if (lb && activeBox && activeBox !== lb.id) { activeBox = lb.id; boxStore.setActive(lb.id); }
-    const items = [`<button type="button" class="box" data-box="" aria-pressed="${!activeBox}"><span>All listings</span><span class="ct">${rows.length.toLocaleString()}</span></button>`];
+    const sf = stageFilter();
+    const items = [`<button type="button" class="box" data-box="" aria-pressed="${!activeBox}"><span>All listings</span><span class="ct">${rows.filter(r => stageOk(r, sf)).length.toLocaleString()}</span></button>`];
     for (const b of (lb ? [lb] : boxes)) {
       const m = results.get(b.id) || new Map();
-      let nw = 0; for (const p of m.keys()) { const r = byPath.get(p); if (r && r.isNew) nw++; }
-      items.push(`<button type="button" class="box" data-box="${esc(b.id)}" aria-pressed="${activeBox === b.id}"><span>${esc(b.name)}</span><span class="ct">${m.size.toLocaleString()}</span>${nw ? `<span class="nw">${nw} new</span>` : ""}</button>`);
+      let nw = 0, ct = 0; for (const p of m.keys()) { const r = byPath.get(p); if (r && stageOk(r, sf)) { ct++; if (r.isNew) nw++; } }
+      items.push(`<button type="button" class="box" data-box="${esc(b.id)}" aria-pressed="${activeBox === b.id}"><span>${esc(b.name)}</span><span class="ct">${ct.toLocaleString()}</span>${nw ? `<span class="nw">${nw} new</span>` : ""}</button>`);
     }
     const ab = boxes.find(b => b.id === activeBox);
     if (lb) items.push(`<button type="button" class="box-lock on" id="boxLock" title="This browser profile only accepts / axes for ${esc(lb.name)}. Click to unlock.">🔒 Locked to ${esc(firstName(lb.name))}</button>`);
@@ -1222,18 +1233,20 @@
     const all = lb ? [lb] : boxes;
     const q = $("bbQ").value.trim().toLowerCase();
     const shownBoxes = q ? all.filter(b => [b.name, ...(b.states || []), ...(b.places || []), ...(b.industry || []), ...(b.exclude || [])].join(" ").toLowerCase().includes(q)) : all;
-    const totalMatches = all.reduce((n, b) => n + (results.get(b.id)?.size || 0), 0);
+    const sf = stageFilter();
+    const countOf = b => { let n = 0; for (const k of (results.get(b.id) || new Map()).keys()) { const r = byPath.get(k); if (r && stageOk(r, sf)) n++; } return n; };
+    const totalMatches = all.reduce((n, b) => n + countOf(b), 0);
     $("bbTitle").textContent = `Client Buy Boxes · ${all.length}`;
     $("bbSub").textContent = !all.length ? "No buy-boxes in this browser yet. Import buybox.json, sign in, or add one."
       : lb ? `This browser profile is locked to ${lb.name}, so only their buy-box shows. ${totalMatches.toLocaleString()} listings pass it.`
-      : `${totalMatches.toLocaleString()} listing matches across ${all.length} client${all.length === 1 ? "" : "s"} (a listing can match more than one).`;
+      : `${totalMatches.toLocaleString()} listing matches across ${all.length} client${all.length === 1 ? "" : "s"} (a listing can match more than one)${sf === "active" ? ", active deals only" : sf ? `, ${STAGE_LABEL[sf]} only` : ", all deal stages"}.`;
     $("bbAdd").hidden = !!lockName;
     $("bbQ").hidden = all.length < 2;
 
     const none = t => `<span class="none">${t}</span>`;
     const kws = (arr, cls = "") => arr.map(k => `<span class="kw${cls}">${esc(k)}</span>`).join("");
     const cards = shownBoxes.map(b => {
-      const m = results.get(b.id) || new Map();
+      const m = new Map([...(results.get(b.id) || new Map())].filter(([k]) => { const r = byPath.get(k); return r && stageOk(r, sf); }));
       let nw = 0; const mix = {};
       for (const [k, res] of m) { const r = byPath.get(k); if (r?.isNew) nw++; mix[res.decision] = (mix[res.decision] || 0) + 1; }
       const dm = Object.entries(decisionMap(b.name)).filter(([k]) => byPath.has(k)).map(([, v]) => v);
@@ -1287,6 +1300,11 @@
     $("bbGrid").innerHTML = cards.join("");
   }
 
+  /* ---------- Deal stage (Baton tags; other sources are always for sale) ---------- */
+  const STAGE_LABEL = { for_sale: "For sale", loi: "Under LOI", exploring: "Exploring interest", under_contract: "Under contract", sold: "Sold", paused: "Paused" };
+  const stageFilter = () => $("dstat").value;
+  const stageOk = (r, f = stageFilter()) => !f || (f === "active" ? r.dstat === "for_sale" : r.dstat === f);
+
   /* ---------- Filtering & Sorting ---------- */
   function apply() {
     const f = readFilters();
@@ -1306,6 +1324,7 @@
       if (f.kind !== "all" && String(r.kind) !== f.kind) return false;
       if (f.src && r.src !== f.src) return false;
       if (f.state && r.state !== f.state) return false;
+      if (!stageOk(r, f.dstat)) return false;
       if (q && !r.hay.includes(q)) return false;
       if (pmin != null && !(r.price >= pmin)) return false;
       if (pmax != null && !(r.price != null && r.price <= pmax)) return false;
@@ -1355,6 +1374,7 @@
     if (f.q.trim()) chips.push([`“${f.q.trim()}”`, ["q"]]);
     if (f.src) chips.push([SRC[f.src]?.label || f.src, ["src"]]);
     if (f.state) chips.push([f.state, ["state"]]);
+    if (f.dstat !== "active") chips.push([f.dstat ? STAGE_LABEL[f.dstat] : "All deal stages", ["dstat"]]);
     if (f.kind !== "all") chips.push([KIND_LABEL[f.kind], ["kind"]]);
     const pr = range("Ask", f.pmin, f.pmax); if (pr) chips.push([pr, ["pmin", "pmax"]]);
     const cr = range("CF", f.cfmin, f.cfmax); if (cr) chips.push([cr, ["cfmin", "cfmax"]]);
@@ -1454,6 +1474,7 @@
             <span class="dotsep">${esc(SRC[r.src].short)}</span>
             ${r.kind ? '<span class="tag vault">Vault</span>' : ""}
             ${r.isNew ? '<span class="tag new">New</span>' : ""}
+            ${r.dstat !== "for_sale" ? `<span class="tag stage-${esc(r.dstat)}">${esc(STAGE_LABEL[r.dstat] || r.dstat)}</span>` : ""}
             ${dcur ? `<span class="tag ${dcur === "accepted" ? "acc" : "axed"}" title="${esc(client)}${dobj.d ? " · " + esc(dobj.d) : ""}">${esc(decLabel(dobj))}${dobj.d ? " " + esc(shortDate(dobj.d)) : ""}</span>` : ""}
             ${others.length ? `<span class="others" title="${esc(others.map(o => `${o.client}: ${o.s === "accepted" ? "Accepted" : "Axed"} ${shortDate(o.d)}`).join("\n"))}">Also: ${others.map(o => `${esc(firstName(o.client))} ${o.s === "accepted" ? "✓" : "✕"}`).join(", ")}</span>` : ""}
             ${hasNote ? '<span class="note-ind" title="Has personal note">● Note</span>' : ""}
@@ -2065,11 +2086,11 @@
   /* ---------- CSV Export ---------- */
   function exportCsv() {
     const ab = boxes.find(b => b.id === activeBox), bm = ab ? results.get(ab.id) : null;
-    const head = ["Title", "Source", "Industry", "Type", "Location", "State", "Asking price", "Revenue", "Cash flow", "Cash flow looks wrong", "EBITDA", "Multiple", "First seen", "Last seen", "Link", `Decision (${currentClient() || "no client"})`, "Decided on", "Other clients' decisions", "Note"]
+    const head = ["Title", "Source", "Deal stage", "Industry", "Type", "Location", "State", "Asking price", "Revenue", "Cash flow", "Cash flow looks wrong", "EBITDA", "Multiple", "First seen", "Last seen", "Link", `Decision (${currentClient() || "no client"})`, "Decided on", "Other clients' decisions", "Note"]
       .concat(ab ? ["Buy-box", "Decision", "Max supportable price", "Cash left after debt", "Matched keyword"] : []);
     const q = v => v == null ? "" : /[",\n]/.test(String(v)) ? `"${String(v).replace(/"/g, '""')}"` : v;
     const lines = [head.join(",")].concat(filtered.map(r => [
-      r.title, SRC[r.src].label, r.category, r.kind ? "M&A Vault" : "Listing", r.location, r.state, r.price, r.revenue, r.cfRaw, r.cfSuspect ? "yes" : "", r.ebitda,
+      r.title, SRC[r.src].label, STAGE_LABEL[r.dstat] || r.dstat, r.category, r.kind ? "M&A Vault" : "Listing", r.location, r.state, r.price, r.revenue, r.cfRaw, r.cfSuspect ? "yes" : "", r.ebitda,
       r.mult != null ? r.mult.toFixed(2) : "", r.first_seen, r.last_seen, r.url,
       ...(d => [d ? decLabel(d) : "", d?.d || ""])(decisionMap()[r.key]),
       othersFor(r.key).map(o => `${o.client}: ${o.s === "accepted" ? "Accepted" : "Axed"} ${o.d}`).join("; "),
@@ -2119,6 +2140,11 @@
         // Baton deals are keyed by their ID alone: older inquiry links have no name part (…/businesses-for-sale/<id>).
         r.key = src.key + ":" + (src.key === "baton" ? r.path.split("/").pop() : r.path);
         r.url = (meta.base || src.base) + r.path;
+        // Deal stage: Baton publishes it (status); older Baton rows only have it in the teaser.
+        r.dstat = r.status || (src.key !== "baton" ? "for_sale"
+          : /^Private listing|^Exploring interest/.test(r.teaser) ? "exploring"
+          : /^Under contract/.test(r.teaser) ? "under_contract"
+          : /^Under LOI/.test(r.teaser) ? "loi" : "for_sale");
         r.hay = (r.title + " " + r.location + " " + r.category + " " + r.teaser).toLowerCase();
         const cf = r.cash_flow;
         r.cfSuspect = !!cf && (
@@ -2159,7 +2185,8 @@
   let t;
   $("filters").addEventListener("input", () => { clearTimeout(t); t = setTimeout(apply, 120); });
   $("sort").addEventListener("change", apply);
-  $("clearFiltersBtn").addEventListener("click", () => { $("filters").reset(); starOnly = false; updateTriageButtons(); apply(); });
+  $("dstat").addEventListener("change", () => renderBoxes());
+  $("clearFiltersBtn").addEventListener("click", () => { $("filters").reset(); starOnly = false; renderBoxes(); apply(); });
   $("moreBtn").addEventListener("click", () => { shown += PAGE; render(); });
   $("export").addEventListener("click", exportCsv);
 
@@ -2195,6 +2222,7 @@
       if (id === "kind") document.querySelector('input[name=kind][value="all"]').checked = true;
       else if (id === "hascf") $("hascf").checked = false;
       else if (id === "__star") { starOnly = false; updateTriageButtons(); }
+      else if (id === "dstat") { $("dstat").value = "active"; renderBoxes(); }
       else $(id).value = "";
     }
     apply();

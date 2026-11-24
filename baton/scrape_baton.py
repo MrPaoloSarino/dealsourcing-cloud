@@ -43,12 +43,26 @@ SITEMAP = "https://www.baton.com/market/sitemap.xml"
 HEADERS = {"Accept-Language": "en-US,en;q=0.9"}
 BLOCK_MARKERS = ("just a moment", "cf-chl", "attention required", "access denied", "captcha")
 FIELDS = ["source", "kind", "url", "title", "asking_price", "cash_flow", "ebitda", "revenue",
-          "location", "category", "page", "card_text"]
+          "location", "category", "page", "card_text", "status"]
 LISTING_URL = re.compile(r"/market/businesses-for-sale/([a-z0-9-]+)/([0-9a-f-]{36})$")
 STATE_URL = re.compile(r"/market/businesses-for-sale/category/(businesses-in-[a-z-]+)$")
 CTX = re.compile(r"window\.__remixContext = (\{.*?\});\s*(?:__remixContext|</script>)", re.S)
-STATUS_LABEL = {"LIVE": "", "UNDER_CONTRACT": "Under contract", "PRIVATE": "Private listing",
-                "SOLD": "Sold", "PAUSED": "Paused"}
+# Deal stage, as Baton's cards show it. LIVE + an accepted-offer tag = under LOI;
+# PRIVATE = the seller is only exploring interest (financials not released yet).
+STAGE = {"LIVE": "for_sale", "PRIVATE": "exploring", "UNDER_CONTRACT": "under_contract",
+         "SOLD": "sold", "PAUSED": "paused"}
+STAGE_LABEL = {"for_sale": "", "loi": "Under LOI", "exploring": "Exploring interest",
+               "under_contract": "Under contract", "sold": "Sold", "paused": "Paused"}
+LOI_TAGS = {"ACCEPTED_OFFER", "UNDER_LOI", "LOI", "LOI_SIGNED", "OFFER_ACCEPTED"}
+TAG_KEYS = ("status_tags", "statusTags", "listing_status_tags", "tags")
+
+
+def tags_of(L: dict) -> list[str]:
+    for k in TAG_KEYS:
+        v = L.get(k)
+        if isinstance(v, list):
+            return [str(t.get("name") or t.get("value") or t) if isinstance(t, dict) else str(t) for t in v]
+    return []
 
 
 def is_blocked(status: int, html: str) -> bool:
@@ -101,7 +115,11 @@ def to_row(L: dict, page: int) -> dict | None:
         if c and c not in cats:
             cats.append(c)
     status = (L.get("status") or "").upper()
-    note = STATUS_LABEL.get(status, status.replace("_", " ").title())
+    tags = [t.upper() for t in tags_of(L)]
+    stage = STAGE.get(status, status.lower())
+    if stage == "for_sale" and any(t in LOI_TAGS for t in tags):
+        stage = "loi"
+    note = STAGE_LABEL.get(stage, status.replace("_", " ").title())
     region = (L.get("display_region") or "").strip()
     return {
         "source": "Baton",
@@ -116,7 +134,10 @@ def to_row(L: dict, page: int) -> dict | None:
         "category": " / ".join(cats[:3]),
         "page": page,
         "card_text": " · ".join(p for p in (note, region) if p),
+        "status": stage,
         "_status": status,
+        "_tags": tags,
+        "_keys": sorted(L.keys()),
     }
 
 
@@ -152,6 +173,9 @@ def write_outputs(out_dir: str, rows: dict, summary: dict) -> None:
         "with_price": sum(1 for r in vals if r["asking_price"]),
         "with_cash_flow": sum(1 for r in vals if r["cash_flow"]),
         "by_status": {s: sum(1 for r in vals if r["_status"] == s) for s in sorted({r["_status"] for r in vals})},
+        "by_stage": {s: sum(1 for r in vals if r["status"] == s) for s in sorted({r["status"] for r in vals})},
+        "tags_seen": sorted({t for r in vals for t in r["_tags"]}),
+        "listing_keys": vals[0]["_keys"] if vals else [],
     })
     with open(os.path.join(out_dir, "listings.csv"), "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=FIELDS, extrasaction="ignore")
@@ -254,6 +278,8 @@ def main() -> int:
             f.write(f"- Listings: **{summary['listings']}** of {summary['site_total']} in the sitemap "
                     f"(price: {summary['with_price']}, cash flow: {summary['with_cash_flow']})\n")
             f.write(f"- By status: {summary['by_status']}\n")
+            f.write(f"- By deal stage: {summary['by_stage']}\n- Status tags seen: {summary['tags_seen']}\n")
+            f.write(f"- Listing fields: {', '.join(summary['listing_keys'])}\n")
     return 1 if summary["blocked"] or not rows else 0
 
 
