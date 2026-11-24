@@ -180,6 +180,73 @@
   .box-lock:hover { background: var(--pe-tint); }
   .box-lock.on { background: var(--gold-soft, #F6EBCF); border-color: var(--gold, #A87A1E); color: #6B4E0E; }
 
+  /* ---------- View tabs (1 Deal Sourcing / 2 Client Buy Box) ---------- */
+  .view-tabs {
+    display: flex; gap: 2px; padding: 0 24px;
+    background: var(--panel); border-bottom: 1px solid var(--line);
+  }
+  .view-tab {
+    height: 42px; padding: 0 14px; border: 0; border-radius: 0; background: none;
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 13px; font-weight: 600; color: var(--muted);
+    border-bottom: 3px solid transparent; margin-bottom: -1px;
+  }
+  .view-tab:hover { background: var(--pe-tint); color: var(--ink); }
+  .view-tab[aria-selected="true"] { color: var(--pe); border-bottom-color: var(--pe); }
+  .view-tab .num {
+    width: 19px; height: 19px; border-radius: 4px; display: inline-grid; place-items: center;
+    font-size: 11px; font-weight: 700; background: var(--line-2); color: var(--ink-2);
+  }
+  .view-tab[aria-selected="true"] .num { background: var(--pe); color: #FFFFFF; }
+  .view-tab .ct { font-size: 11.5px; font-weight: 500; color: var(--faint); }
+
+  /* ---------- Client Buy Box view (cards) ---------- */
+  .bb-view { padding: 18px 24px 36px; }
+  .bb-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 10px 16px; margin-bottom: 14px; }
+  .bb-head h1 { font: 700 22px/1.2 var(--serif); margin: 0; }
+  .bb-head p { margin: 2px 0 0; color: var(--muted); font-size: 12.5px; }
+  .bb-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .bb-actions input { width: 200px; }
+  .bb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 14px; align-items: start; }
+  .bb-card {
+    background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-m);
+    border-top: 3px solid var(--pe); display: flex; flex-direction: column;
+  }
+  .bb-card.locked { border-top-color: var(--gold); }
+  .bb-card-head { padding: 13px 16px 10px; display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+  .bb-card-head h2 { font: 700 18px/1.25 var(--serif); margin: 0; }
+  .bb-badges { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+  .bb-badge { font-size: 10.5px; font-weight: 600; padding: 1px 6px; border-radius: 3px; background: var(--line-2); color: var(--ink-2); }
+  .bb-badge.cloud { background: var(--pe-soft); color: var(--pe); }
+  .bb-badge.lock { background: var(--gold-soft); color: #6B4E0E; }
+  .bb-stats { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--line-2); border-bottom: 1px solid var(--line-2); }
+  .bb-stat { padding: 9px 10px; text-align: center; }
+  .bb-stat + .bb-stat { border-left: 1px solid var(--line-2); }
+  .bb-stat b { display: block; font: 700 18px/1.1 var(--serif); color: var(--ink); }
+  .bb-stat span { font-size: 10.5px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 600; }
+  .bb-stat.new b { color: var(--gold); }
+  .bb-stat.acc b { color: var(--pe); }
+  .bb-stat.axed b { color: var(--rust); }
+  .bb-mix { padding: 10px 16px 0; }
+  .bb-bar { display: flex; height: 7px; border-radius: 4px; overflow: hidden; background: var(--line-2); }
+  .bb-bar i { display: block; height: 100%; }
+  .bb-legend { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 6px; font-size: 11.5px; color: var(--ink-2); }
+  .bb-legend span::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 5px; background: var(--c); }
+  .bb-crit { margin: 0; padding: 10px 16px 6px; display: grid; grid-template-columns: 128px 1fr; gap: 7px 12px; font-size: 12.5px; }
+  .bb-crit dt { color: var(--muted); font-weight: 500; }
+  .bb-crit dd { margin: 0; color: var(--ink); min-width: 0; overflow-wrap: anywhere; }
+  .bb-crit .none { color: var(--faint); }
+  .kw { display: inline-block; margin: 0 3px 3px 0; padding: 1px 7px; border-radius: 10px; font-size: 11.5px; background: var(--pe-tint); border: 1px solid #CFE0D6; color: var(--pe-3); }
+  .kw.ex { background: var(--rust-soft); border-color: #EBC9C4; color: var(--rust); }
+  .bb-rule { margin: 4px 16px 12px; padding: 8px 10px; border-radius: var(--r-s); background: var(--wash); border: 1px solid var(--line-2); font-size: 12px; color: var(--ink-2); }
+  .bb-foot { margin-top: auto; padding: 10px 16px 14px; display: flex; gap: 8px; border-top: 1px solid var(--line-2); }
+  .bb-foot .primary { flex: 1; }
+  .bb-new {
+    min-height: 200px; border: 1px dashed #B4C4BB; border-radius: var(--r-m); background: transparent;
+    color: var(--pe); font: 600 14px var(--body); height: auto;
+  }
+  .bb-new:hover { background: var(--pe-tint); border-style: solid; }
+
   .triage-group {
     margin-left: auto;
     display: flex; align-items: center; gap: 6px;
@@ -600,6 +667,12 @@
     .masthead { padding: 10px 14px; }
     .brand .sub, .status .total { display: none; }
     .mandate-bar { padding: 8px 14px; }
+    .view-tabs { padding: 0 8px; }
+    .view-tab { flex: 1; justify-content: center; padding: 0 8px; }
+    .bb-view { padding: 14px 14px 28px; }
+    .bb-grid { grid-template-columns: minmax(0, 1fr); }
+    .bb-actions, .bb-actions input { width: 100%; }
+    .bb-crit { grid-template-columns: 110px 1fr; }
     .filter-shell { padding: 0 14px; }
     .filter-shell summary {
       display: flex; align-items: center; justify-content: space-between;
@@ -668,6 +741,12 @@
   </div>
 </header>
 
+<!-- VIEW TABS: 1 = deal sourcing (listings + IC tearsheet), 2 = every client's buy-box as cards -->
+<nav class="view-tabs" role="tablist" aria-label="Screen">
+  <button type="button" class="view-tab" role="tab" id="tabDeals" data-view="deals" aria-selected="true" aria-controls="dealsView" title="Deal sourcing (key 1)"><span class="num">1</span>Deal Sourcing</button>
+  <button type="button" class="view-tab" role="tab" id="tabBuybox" data-view="bb" aria-selected="false" aria-controls="bbView" title="Client buy boxes (key 2)"><span class="num">2</span>Client Buy Box <span class="ct" id="tabBbCount"></span></button>
+</nav>
+
 <!-- 2. CLIENT MANDATE RIBBON (BUY-BOXES + BROWSER-ONLY TRIAGE) -->
 <section class="mandate-bar" aria-label="Client buy-boxes and triage">
   <span class="mandate-label">Mandates</span>
@@ -724,7 +803,7 @@
 </details>
 
 <!-- 4. MAIN ORIGINATION WORKSPACE -->
-<main class="workspace">
+<main class="workspace" id="dealsView" role="tabpanel" aria-labelledby="tabDeals">
   <div class="results-bar">
     <div class="headline-group">
       <h1 class="count" id="count" aria-live="polite">Loading…</h1>
@@ -765,6 +844,7 @@
       <div class="foot">
         <span>Figures are seller-entered on source marketplaces and unverified. Notes stay in this browser. Signed in, Accept / Axe saves to your private cloud database; signed out, it stays in this browser.</span>
         <span class="kbd-hints">
+          <span><kbd>1</kbd>/<kbd>2</kbd> tabs</span>
           <span><kbd>/</kbd> search</span>
           <span><kbd>J</kbd>/<kbd>K</kbd> navigate</span>
           <span><kbd>A</kbd> accept</span>
@@ -780,6 +860,21 @@
       <div class="ic-empty">Select any listing to model 80/10/10 SBA debt service, equity check, and Year-1 Cash-on-Cash ROI.</div>
     </aside>
   </div>
+</main>
+
+<!-- TAB 2: CLIENT BUY BOX (all buy-boxes as cards) -->
+<main class="bb-view" id="bbView" role="tabpanel" aria-labelledby="tabBuybox" hidden>
+  <div class="bb-head">
+    <div>
+      <h1 id="bbTitle">Client Buy Boxes</h1>
+      <p id="bbSub">Every client's criteria and how many live listings pass them.</p>
+    </div>
+    <div class="bb-actions">
+      <input type="search" id="bbQ" placeholder="Find a client, state or keyword…" aria-label="Find a buy-box">
+      <button type="button" class="primary" id="bbAdd">+ New Buy-Box</button>
+    </div>
+  </div>
+  <div class="bb-grid" id="bbGrid"></div>
 </main>
 
 <!-- 5. BUY-BOX MODAL DIALOG -->
@@ -1099,6 +1194,97 @@
     $("passedCount").textContent = cm.filter(x => x.s === "axed").length;
     $("starFilterBtn").setAttribute("aria-pressed", String(starOnly));
     $("hidePassedBtn").setAttribute("aria-pressed", String(hidePassed));
+    const nBoxes = lockedBox() ? 1 : boxes.length;
+    $("tabBbCount").textContent = nBoxes ? `(${nBoxes})` : "";
+    if (view === "bb") renderBuyBoxView();
+  }
+
+  /* ---------- Tab 2: Client Buy Box (every buy-box as a card) ---------- */
+  let view = (() => { try { return localStorage.getItem("dealscreen-view") === "bb" ? "bb" : "deals"; } catch { return "deals"; } })();
+  const DEC_MIX = [
+    ["Fast-track", "var(--pe)"], ["Pursue", "#4E8A6E"], ["Conditional", "var(--gold-bright)"],
+    ["Price not listed", "#B9C6BF"], ["Figures missing", "#DCE3DF"],
+  ];
+  function setView(v) {
+    view = v === "bb" ? "bb" : "deals";
+    try { localStorage.setItem("dealscreen-view", view); } catch {}
+    const bb = view === "bb";
+    document.querySelector(".mandate-bar").hidden = bb;
+    $("filtersBox").hidden = bb;
+    $("dealsView").hidden = bb;
+    $("bbView").hidden = !bb;
+    $("tabDeals").setAttribute("aria-selected", String(!bb));
+    $("tabBuybox").setAttribute("aria-selected", String(bb));
+    if (bb) { closeDrawer(); renderBuyBoxView(); }
+  }
+  function renderBuyBoxView() {
+    const lb = lockedBox();
+    const all = lb ? [lb] : boxes;
+    const q = $("bbQ").value.trim().toLowerCase();
+    const shownBoxes = q ? all.filter(b => [b.name, ...(b.states || []), ...(b.places || []), ...(b.industry || []), ...(b.exclude || [])].join(" ").toLowerCase().includes(q)) : all;
+    const totalMatches = all.reduce((n, b) => n + (results.get(b.id)?.size || 0), 0);
+    $("bbTitle").textContent = `Client Buy Boxes · ${all.length}`;
+    $("bbSub").textContent = !all.length ? "No buy-boxes in this browser yet. Import buybox.json, sign in, or add one."
+      : lb ? `This browser profile is locked to ${lb.name}, so only their buy-box shows. ${totalMatches.toLocaleString()} listings pass it.`
+      : `${totalMatches.toLocaleString()} listing matches across ${all.length} client${all.length === 1 ? "" : "s"} (a listing can match more than one).`;
+    $("bbAdd").hidden = !!lockName;
+    $("bbQ").hidden = all.length < 2;
+
+    const none = t => `<span class="none">${t}</span>`;
+    const kws = (arr, cls = "") => arr.map(k => `<span class="kw${cls}">${esc(k)}</span>`).join("");
+    const cards = shownBoxes.map(b => {
+      const m = results.get(b.id) || new Map();
+      let nw = 0; const mix = {};
+      for (const [k, res] of m) { const r = byPath.get(k); if (r?.isNew) nw++; mix[res.decision] = (mix[res.decision] || 0) + 1; }
+      const dm = Object.entries(decisionMap(b.name)).filter(([k]) => byPath.has(k)).map(([, v]) => v);
+      const acc = dm.filter(x => x.s === "accepted").length, axed = dm.filter(x => x.s === "axed").length;
+      const mixParts = DEC_MIX.filter(([d]) => mix[d]);
+      const bar = m.size ? `<div class="bb-mix"><div class="bb-bar" role="img" aria-label="${esc(mixParts.map(([d]) => `${d} ${mix[d]}`).join(", "))}">${mixParts.map(([d, c]) => `<i style="width:${(mix[d] / m.size * 100).toFixed(2)}%;background:${c}"></i>`).join("")}</div>
+        <div class="bb-legend">${mixParts.map(([d, c]) => `<span style="--c:${c}">${d} ${mix[d].toLocaleString()}</span>`).join("")}</div></div>` : "";
+
+      const where = [...(b.states || []), ...(b.places || [])];
+      const skips = [...(b.exclude || []), ...(b.skipFoodLegal !== false ? ["restaurants, food & law firms"] : [])];
+      const mgr = b.managerSalary ?? 100000, minE = b.minEbitda || 0, free = b.freeCash || 0;
+      let rule = "";
+      if (minE > 0) {
+        const sup = Math.min(b.maxPrice || Infinity, minE / (MIN_DSCR * DS_FACTOR), (minE - free) / DS_FACTOR, b.maxMultiple ? minE * b.maxMultiple : Infinity);
+        rule = sup > 0 ? `A business at the minimum ${moneyFull(minE)} adjusted profit supports an asking price up to about <strong>${moneyFull(Math.round(sup / 1000) * 1000)}</strong> under the SBA 80/10/10 test.`
+          : `At the minimum profit, the cash-left-after-debt target can't be met. Raise minimum profit or lower the target.`;
+      }
+      const cc = typeof cloud !== "undefined" && cloudClient(b.name);
+      return `<article class="bb-card${lb ? " locked" : ""}">
+        <div class="bb-card-head"><div>
+          <h2>${esc(b.name)}</h2>
+          <div class="bb-badges">${cc ? `<span class="bb-badge cloud">Cloud client</span>` : `<span class="bb-badge">This browser only</span>`}${lb ? `<span class="bb-badge lock">🔒 This profile</span>` : ""}</div>
+        </div></div>
+        <div class="bb-stats">
+          <div class="bb-stat"><b>${m.size.toLocaleString()}</b><span>Matches</span></div>
+          <div class="bb-stat new"><b>${nw}</b><span>New</span></div>
+          <div class="bb-stat acc"><b>${acc}</b><span>Accepted</span></div>
+          <div class="bb-stat axed"><b>${axed}</b><span>Axed</span></div>
+        </div>
+        ${bar}
+        <dl class="bb-crit">
+          <dt>Where</dt><dd>${where.length ? kws(where) : none("Anywhere in the US")}</dd>
+          <dt>Industries</dt><dd>${(b.industry || []).length ? kws(b.industry) : none("Any industry")}</dd>
+          <dt>Skips</dt><dd>${skips.length ? kws(skips, " ex") : none("Nothing")}</dd>
+          <dt>Min adj. profit</dt><dd>${minE ? moneyFull(minE) : none("No minimum")}</dd>
+          <dt>Max asking</dt><dd>${b.maxPrice ? moneyFull(b.maxPrice) : none("No cap")}</dd>
+          <dt>Cash after debt</dt><dd>${free ? moneyFull(free) + " a year" : none("No target")}</dd>
+          <dt>Manager salary</dt><dd>${moneyFull(mgr)} <span class="none">deducted from cash flow</span></dd>
+          <dt>Highest multiple</dt><dd>${b.maxMultiple ? b.maxMultiple + "×" : none("Any")}</dd>
+          <dt>Missing figures</dt><dd>${b.allowTbd ? "Included" : none("Left out")}</dd>
+        </dl>
+        ${rule ? `<div class="bb-rule">${rule}</div>` : ""}
+        <div class="bb-foot">
+          <button type="button" class="primary" data-bb-view="${esc(b.id)}">View ${m.size.toLocaleString()} deal${m.size === 1 ? "" : "s"} →</button>
+          <button type="button" data-bb-edit="${esc(b.id)}">Edit</button>
+        </div>
+      </article>`;
+    });
+    if (!lockName) cards.push(`<button type="button" class="bb-new" id="bbAddCard">+ New Buy-Box</button>`);
+    if (q && !shownBoxes.length) cards.unshift(`<div class="empty" style="grid-column:1/-1"><h2>No buy-box mentions “${esc(q)}”</h2></div>`);
+    $("bbGrid").innerHTML = cards.join("");
   }
 
   /* ---------- Filtering & Sorting ---------- */
@@ -2077,11 +2263,31 @@
     if (tr && !e.target.closest("a, button")) window.open(tr.dataset.href, "_blank", "noopener");
   });
 
-  // Keyboard power navigation (/, J/K, S, X, O, Esc)
+  // View tabs: 1 = Deal Sourcing, 2 = Client Buy Box
+  document.querySelector(".view-tabs").addEventListener("click", e => {
+    const b = e.target.closest("[data-view]"); if (b) setView(b.dataset.view);
+  });
+  $("bbQ").addEventListener("input", renderBuyBoxView);
+  $("bbAdd").addEventListener("click", () => openEditor(null));
+  $("bbGrid").addEventListener("click", e => {
+    if (e.target.closest("#bbAddCard")) { openEditor(null); return; }
+    const ed = e.target.closest("[data-bb-edit]");
+    if (ed) { openEditor(boxes.find(b => b.id === ed.dataset.bbEdit)); return; }
+    const vw = e.target.closest("[data-bb-view]");
+    if (vw) {
+      activeBox = vw.dataset.bbView; boxStore.setActive(activeBox); mgrOverride = null;
+      setView("deals"); renderBoxes(); apply(); window.scrollTo(0, 0);
+    }
+  });
+
+  // Keyboard power navigation (1/2 tabs, /, J/K, S, X, O, Esc)
   document.addEventListener("keydown", e => {
-    if ($("boxDlg").open) return;
+    if ($("boxDlg").open || $("signDlg").open) return;
     if (e.key === "Escape") { closeDrawer(); return; }
     if (/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)) return;
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    if (e.key === "1" || e.key === "2") { e.preventDefault(); setView(e.key === "2" ? "bb" : "deals"); return; }
+    if (view === "bb") return;
     if (e.key === "/") {
       e.preventDefault();
       if (narrow.matches) $("filtersBox").open = true;
@@ -2115,6 +2321,7 @@
   const syncPanel = () => { $("filtersBox").open = !narrow.matches; };
   syncPanel();
   narrow.addEventListener("change", syncPanel);
+  setView(view);
   $("filtersBox").addEventListener("toggle", () => { if (!narrow.matches && !$("filtersBox").open) $("filtersBox").open = true; });
 
   load();

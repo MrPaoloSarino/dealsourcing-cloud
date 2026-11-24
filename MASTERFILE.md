@@ -127,6 +127,12 @@ site's RSS feed `/us/search/businesses-for-sale.rss`, 25 newest items with pubDa
 
 - **Sources:** `SOURCES` list in the script (key, label, data file, base URL). All files load in parallel from GitHub raw (fallback `data/<file>`); rows get `src`, `key` (`src:path`, used for buy-box results), `url`, and a search haystack (title + location + industry + teaser). Source filter + chip; each row shows the source name, and the industry on its own line. App bar shows the most recent update (tooltip lists each source; dot turns gold if any source is >8 h old) and the combined site totals. CSV export includes Source and Industry.
 
+- **Two tabs under the masthead (added 2026-11-25):** **1 Deal Sourcing** (mandates ribbon, filters, listings on the left,
+  IC tearsheet on the right; unchanged) and **2 Client Buy Box**: every buy-box as a card with matches, new, accepted and
+  axed counts, a Fast-track / Pursue / Conditional / Price not listed / Figures missing bar, the criteria in plain words,
+  the SBA max price at the minimum profit, "View N deals" (opens that mandate in tab 1) and Edit. Search box, + New Buy-Box.
+  Keys 1 / 2 switch tabs; the open tab is remembered (localStorage `dealscreen-view`). With a profile lock only that
+  client's card shows.
 - **Layout ("Private Equity Origination Desk", designed by the user 2026-11-19, phone fixes by Claude):**
   dark racing-green masthead (`--pe #0B3D2E`, gold accent `--gold-bright #E4C162`, Newsreader serif + Public Sans)
   with freshness dot, site totals, Import Buy-Boxes / Back up / Export CSV; a **Mandates** ribbon (buy-boxes as tabs,
@@ -351,3 +357,4 @@ Rows show the decision tag and "Matched "keyword", supports up to $X, $Y left af
 | 2026-11-19 | **Deal Capture extension v2.0 writes to the cloud** (per-profile sign-in and client, duplicate check across link variants, best-effort mirror to the desktop app). |
 | 2026-11-19 | **Profile lock**: deal screen and Deal Capture extension (v2.1) can be locked to one client per Chrome profile; cross-inquiry confirmation on the deal screen. |
 | 2026-11-23 | **Baton added** as third source (1,613 listings, data read from page JSON; full crawl every 6 h). Deal Capture extension v2.2 keys Baton links by listing ID; SQL `06_baton_listing_keys.sql` links past Baton inquiries. |
+| 2026-11-25 | **Tabs on the deal screen:** 1 Deal Sourcing (as before) and 2 Client Buy Box (all buy-boxes as cards with match counts, criteria and View deals / Edit). Keys 1 / 2. |
